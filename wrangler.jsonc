@@ -1,0 +1,21 @@
+{
+  "name": "ai-credit-repair",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat_v2"],
+  "main": ".open-next/worker.js",
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "FIREBASE_PROJECT_ID": "credit-800",
+    "FIREBASE_CLIENT_EMAIL": "firebase-adminsdk-fbsvc@credit-800.iam.gserviceaccount.com",
+    "GEMINI_API_KEY": "AIzaSyASjaEnXztOMEUzjh1qBMkcBG6hWg5PBRQ"
+  },
+  "r2_buckets": [
+    {
+      "binding": "CREDIT_REPORTS_BUCKET",
+      "bucket_name": "credit-reports"
+    }
+  ]
+}

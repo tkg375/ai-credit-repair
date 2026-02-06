@@ -1,0 +1,452 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
+import { Logo } from "@/components/Logo";
+import { upload } from "@vercel/blob/client";
+
+const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
+const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+
+function jsToFirestoreValue(val: unknown): Record<string, unknown> {
+  if (val === null || val === undefined) return { nullValue: null };
+  if (typeof val === "string") return { stringValue: val };
+  if (typeof val === "number") {
+    if (Number.isInteger(val)) return { integerValue: val.toString() };
+    return { doubleValue: val };
+  }
+  if (typeof val === "boolean") return { booleanValue: val };
+  if (val instanceof Date) return { timestampValue: val.toISOString() };
+  if (Array.isArray(val)) {
+    return { arrayValue: { values: val.map(jsToFirestoreValue) } };
+  }
+  if (typeof val === "object") {
+    const fields: Record<string, Record<string, unknown>> = {};
+    for (const [k, v] of Object.entries(val as Record<string, unknown>)) {
+      fields[k] = jsToFirestoreValue(v);
+    }
+    return { mapValue: { fields } };
+  }
+  return { stringValue: String(val) };
+}
+
+async function addDocument(
+  idToken: string,
+  collection: string,
+  data: Record<string, unknown>
+) {
+  const fields: Record<string, Record<string, unknown>> = {};
+  for (const [k, v] of Object.entries(data)) {
+    fields[k] = jsToFirestoreValue(v);
+  }
+
+  const res = await fetch(`${FIRESTORE_BASE}/${collection}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({ fields }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const message = errorData.error?.message || errorData.error?.status || `HTTP ${res.status}`;
+    throw new Error(`Failed to create document: ${message}`);
+  }
+
+  const doc = await res.json();
+  return doc.name.split("/").pop();
+}
+
+export default function UploadPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [dragActive, setDragActive] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [error, setError] = useState("");
+  const [progress, setProgress] = useState("");
+  const [resetting, setResetting] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
+
+  // Redirect if not logged in
+  if (!authLoading && !user) {
+    router.push("/login");
+    return null;
+  }
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    setError("");
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.type === "application/pdf" || droppedFile.name.endsWith(".pdf")) {
+        setFile(droppedFile);
+      } else {
+        setError("Please upload a PDF file");
+      }
+    }
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError("");
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      if (selectedFile.type === "application/pdf" || selectedFile.name.endsWith(".pdf")) {
+        setFile(selectedFile);
+      } else {
+        setError("Please upload a PDF file");
+      }
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file || !user) return;
+
+    setUploading(true);
+    setError("");
+    setProgress("Uploading credit report...");
+
+    try {
+      // Upload directly to Vercel Blob (bypasses API size limits)
+      const timestamp = Date.now();
+      const blob = await upload(`${user.uid}/${timestamp}-${file.name}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/reports/blob-upload",
+      });
+
+      setProgress("Creating report record...");
+
+      // Create report record with blob URL
+      const createRes = await fetch("/api/reports/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.idToken}`,
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileSize: file.size,
+          bureau: detectBureau(file.name),
+          blobUrl: blob.url,
+        }),
+      });
+
+      if (!createRes.ok) {
+        const errorData = await createRes.json().catch(() => ({}));
+        const reason = errorData.reason ? ` (${errorData.reason})` : "";
+        throw new Error((errorData.details || errorData.error || "Failed to create report") + reason);
+      }
+
+      const { reportId } = await createRes.json();
+
+      setProgress("Analyzing credit report with AI... (this may take a minute for large reports)");
+      setAnalyzing(true);
+
+      // Call analyze API with real PDF analysis
+      const analyzeRes = await fetch("/api/reports/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.idToken}`,
+        },
+        body: JSON.stringify({
+          reportId,
+          simulateData: false, // Use real Claude analysis
+        }),
+      });
+
+      if (!analyzeRes.ok) {
+        const errorData = await analyzeRes.json().catch(() => ({}));
+        throw new Error(errorData.details || errorData.error || "Failed to analyze report");
+      }
+
+      const analysisResult = await analyzeRes.json();
+      setProgress(`Found ${analysisResult.itemsCreated} accounts, ${analysisResult.disputableItems} disputable. Generating action plan...`);
+
+      // Call plan generation API
+      const planRes = await fetch("/api/plans/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.idToken}`,
+        },
+        body: JSON.stringify({ reportId }),
+      });
+
+      if (!planRes.ok) {
+        const errorData = await planRes.json().catch(() => ({}));
+        throw new Error(errorData.details || errorData.error || "Failed to generate action plan");
+      }
+
+      setProgress("Complete! Redirecting to dashboard...");
+
+      // Redirect to dashboard
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1500);
+    } catch (err) {
+      console.error("Upload error:", err);
+      const message = err instanceof Error ? err.message : String(err);
+      setError(`Failed to process report: ${message}`);
+      setUploading(false);
+      setAnalyzing(false);
+    }
+  };
+
+  const detectBureau = (fileName: string): string => {
+    const lower = fileName.toLowerCase();
+    if (lower.includes("equifax")) return "EQUIFAX";
+    if (lower.includes("experian")) return "EXPERIAN";
+    if (lower.includes("transunion")) return "TRANSUNION";
+    return "UNKNOWN";
+  };
+
+  const handleReset = async () => {
+    if (!user) return;
+
+    setResetting(true);
+    setResetMessage("");
+    setError("");
+
+    try {
+      const res = await fetch("/api/reports/reset", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.idToken}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to reset data");
+      }
+
+      setResetMessage(data.message);
+
+      // If there's more to delete, show message to click again
+      if (data.remaining > 0) {
+        setResetting(false);
+      } else {
+        setTimeout(() => {
+          setResetting(false);
+          setResetMessage("");
+        }, 3000);
+      }
+    } catch (err) {
+      console.error("Reset error:", err);
+      setError(err instanceof Error ? err.message : "Failed to reset data");
+      setResetting(false);
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white text-slate-900">
+      <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto border-b border-slate-200">
+        <Link href="/">
+          <Logo className="h-8 w-auto" />
+        </Link>
+        <div className="flex gap-4 text-sm items-center">
+          <Link href="/dashboard" className="text-slate-600 hover:text-blue-600 transition">
+            Dashboard
+          </Link>
+          <Link href="/tools" className="text-slate-600 hover:text-blue-600 transition">
+            Credit Tools
+          </Link>
+          <Link href="/disputes" className="text-slate-600 hover:text-blue-600 transition">
+            Disputes
+          </Link>
+          <Link href="/plan" className="text-slate-600 hover:text-blue-600 transition">
+            Action Plan
+          </Link>
+        </div>
+      </nav>
+
+      <main className="max-w-3xl mx-auto px-6 py-12">
+        <h1 className="text-3xl font-bold mb-2">Upload Credit Report</h1>
+        <p className="text-slate-600 mb-8">
+          Upload your credit report PDF from Equifax, Experian, or TransUnion. Our AI will analyze it and identify disputable items.
+        </p>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+
+        {!uploading ? (
+          <>
+            <div
+              className={`border-2 border-dashed rounded-2xl p-12 text-center transition ${
+                dragActive
+                  ? "border-blue-500 bg-blue-50"
+                  : file
+                  ? "border-green-500 bg-green-50"
+                  : "border-slate-300 hover:border-slate-400"
+              }`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              {file ? (
+                <div>
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="font-medium text-green-700">{file.name}</p>
+                  <p className="text-sm text-green-600 mt-1">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                  <button
+                    onClick={() => setFile(null)}
+                    className="mt-4 text-sm text-slate-500 hover:text-slate-700"
+                  >
+                    Remove and choose another
+                  </button>
+                </div>
+              ) : (
+                <label className="block cursor-pointer">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                  </div>
+                  <p className="font-medium">Drag and drop your credit report PDF</p>
+                  <p className="text-sm text-slate-500 mt-1">or click to browse</p>
+                  <input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    onChange={handleFileChange}
+                    className="sr-only"
+                  />
+                </label>
+              )}
+            </div>
+
+            {file && (
+              <button
+                onClick={handleUpload}
+                className="w-full mt-6 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 text-white rounded-xl font-medium transition text-lg"
+              >
+                Analyze Report
+              </button>
+            )}
+
+            <div className="mt-8 p-6 bg-slate-50 rounded-xl">
+              <h3 className="font-semibold mb-3">Supported Reports</h3>
+              <ul className="space-y-2 text-sm text-slate-600">
+                <li className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Equifax Credit Report
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Experian Credit Report
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  TransUnion Credit Report
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  AnnualCreditReport.com Reports
+                </li>
+              </ul>
+            </div>
+
+            {/* Reset Data Section */}
+            <div className="mt-6 p-6 bg-red-50 border border-red-200 rounded-xl">
+              <h3 className="font-semibold mb-2 text-red-800">Reset All Data</h3>
+              <p className="text-sm text-red-600 mb-4">
+                Clear all your credit reports, disputes, and analysis data to start fresh.
+              </p>
+              {resetMessage && (
+                <div className="mb-4 p-3 bg-white border border-red-200 rounded-lg text-sm text-red-700">
+                  {resetMessage}
+                </div>
+              )}
+              <button
+                onClick={handleReset}
+                disabled={resetting}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-2"
+              >
+                {resetting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Reset All Data
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-16">
+            <div className="w-20 h-20 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+            <h2 className="text-xl font-semibold mb-2">
+              {analyzing ? "Analyzing Your Report" : "Uploading..."}
+            </h2>
+            <p className="text-slate-600">{progress}</p>
+
+            <div className="mt-8 max-w-md mx-auto">
+              <div className="flex justify-between text-sm text-slate-500 mb-2">
+                <span>Progress</span>
+                <span>{analyzing ? "75%" : "25%"}</span>
+              </div>
+              <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-1000"
+                  style={{ width: analyzing ? "75%" : "25%" }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

@@ -1,0 +1,459 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getAuthUser, getLastAuthError } from "@/lib/auth";
+import { firestore, COLLECTIONS } from "@/lib/db";
+import { analyzeWithGemini } from "@/lib/gemini-analyzer";
+
+// Allow up to 5 minutes for AI analysis
+export const runtime = "nodejs";
+export const maxDuration = 300;
+
+export async function POST(req: NextRequest) {
+  let user;
+  try {
+    user = await getAuthUser();
+  } catch (authErr) {
+    console.error("Auth error:", authErr);
+    return NextResponse.json({ error: "Auth failed", details: String(authErr) }, { status: 401 });
+  }
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized", details: getLastAuthError() }, { status: 401 });
+  }
+
+  try {
+    const { reportId, simulateData } = await req.json();
+
+    // If simulating, create sample report items with full removal analysis
+    if (simulateData) {
+      const sampleItems = [
+        {
+          userId: user.uid,
+          creditReportId: reportId,
+          creditorName: "Midland Credit Management",
+          originalCreditor: "Chase Bank",
+          accountNumber: "****7832",
+          accountType: "Collection",
+          balance: 1250,
+          originalBalance: 980,
+          creditLimit: null,
+          status: "COLLECTION",
+          dateOpened: "2019-03-15",
+          dateOfFirstDelinquency: "2019-08-01",
+          lastActivityDate: "2020-02-15",
+          isDisputable: true,
+          removalStrategies: [
+            {
+              method: "Statute of Limitations",
+              description: "Debt may be past the statute of limitations in your state. Collectors cannot sue to collect time-barred debt.",
+              priority: "HIGH",
+              successRate: "85%",
+            },
+            {
+              method: "Debt Validation",
+              description: "Request validation under FDCPA. Collection agencies often lack original documentation.",
+              priority: "HIGH",
+              successRate: "70%",
+            },
+            {
+              method: "Pay-for-Delete",
+              description: "Negotiate to pay 40-50% of balance in exchange for complete removal from credit reports.",
+              priority: "MEDIUM",
+              successRate: "60%",
+            },
+          ],
+          disputeReason: "Collection account from debt buyer - demand validation of original signed agreement and chain of assignment",
+          bureau: "EQUIFAX",
+        },
+        {
+          userId: user.uid,
+          creditReportId: reportId,
+          creditorName: "Portfolio Recovery Associates",
+          originalCreditor: "Synchrony Bank",
+          accountNumber: "****5566",
+          accountType: "Collection",
+          balance: 890,
+          originalBalance: 650,
+          creditLimit: null,
+          status: "COLLECTION",
+          dateOpened: "2018-06-20",
+          dateOfFirstDelinquency: "2018-11-01",
+          lastActivityDate: "2019-04-10",
+          isDisputable: true,
+          removalStrategies: [
+            {
+              method: "Credit Report Age-Off",
+              description: "Account is approaching 7-year removal date. First delinquency was over 6 years ago.",
+              priority: "HIGH",
+              successRate: "100%",
+            },
+            {
+              method: "Statute of Limitations Expired",
+              description: "Debt is past SOL in most states. Send cease & desist and dispute with bureaus.",
+              priority: "HIGH",
+              successRate: "90%",
+            },
+            {
+              method: "Debt Validation",
+              description: "Debt has been sold multiple times. Original documentation likely unavailable.",
+              priority: "HIGH",
+              successRate: "75%",
+            },
+          ],
+          disputeReason: "Debt is time-barred and approaching 7-year credit report removal - dispute for early deletion",
+          bureau: "EQUIFAX",
+        },
+        {
+          userId: user.uid,
+          creditReportId: reportId,
+          creditorName: "LVNV Funding LLC",
+          originalCreditor: "Capital One",
+          accountNumber: "****2211",
+          accountType: "Collection",
+          balance: 3200,
+          originalBalance: 2100,
+          creditLimit: null,
+          status: "COLLECTION",
+          dateOpened: "2021-01-15",
+          dateOfFirstDelinquency: "2020-09-01",
+          lastActivityDate: "2021-06-20",
+          isDisputable: true,
+          removalStrategies: [
+            {
+              method: "Debt Validation",
+              description: "LVNV is a debt buyer. Demand original signed contract - they rarely have it.",
+              priority: "HIGH",
+              successRate: "70%",
+            },
+            {
+              method: "Balance Discrepancy",
+              description: "Current balance ($3,200) is 52% higher than original ($2,100). Dispute inflated fees/interest.",
+              priority: "MEDIUM",
+              successRate: "55%",
+            },
+            {
+              method: "Pay-for-Delete",
+              description: "Offer 35-45% settlement with deletion agreement before payment.",
+              priority: "MEDIUM",
+              successRate: "60%",
+            },
+          ],
+          disputeReason: "Debt buyer account with inflated balance - demand validation and itemized statement of all fees",
+          bureau: "TRANSUNION",
+        },
+        {
+          userId: user.uid,
+          creditReportId: reportId,
+          creditorName: "Discover",
+          originalCreditor: null,
+          accountNumber: "****3344",
+          accountType: "Credit Card",
+          balance: 4800,
+          originalBalance: null,
+          creditLimit: 5000,
+          status: "DELINQUENT",
+          dateOpened: "2017-05-10",
+          dateOfFirstDelinquency: null,
+          lastActivityDate: "2024-01-15",
+          latePayments: ["2023-06", "2023-07"],
+          isDisputable: true,
+          removalStrategies: [
+            {
+              method: "Goodwill Letter",
+              description: "Request removal of late payments due to circumstances. Account is otherwise in good standing.",
+              priority: "HIGH",
+              successRate: "50%",
+            },
+            {
+              method: "Re-age Account",
+              description: "After bringing current, request creditor re-age the account to remove late payment history.",
+              priority: "MEDIUM",
+              successRate: "40%",
+            },
+            {
+              method: "Pay Down Utilization",
+              description: "Account at 96% utilization. Pay down to 30% for 50+ point score increase.",
+              priority: "HIGH",
+              successRate: "100%",
+            },
+          ],
+          disputeReason: "Late payments reported incorrectly - payment was processed on time but credited late by creditor",
+          bureau: "TRANSUNION",
+        },
+        {
+          userId: user.uid,
+          creditReportId: reportId,
+          creditorName: "Medical Data Systems",
+          originalCreditor: "Valley Hospital",
+          accountNumber: "****8899",
+          accountType: "Medical Collection",
+          balance: 450,
+          originalBalance: 450,
+          creditLimit: null,
+          status: "COLLECTION",
+          dateOpened: "2022-08-10",
+          dateOfFirstDelinquency: "2022-03-01",
+          lastActivityDate: "2022-09-15",
+          isDisputable: true,
+          removalStrategies: [
+            {
+              method: "HIPAA Violation Check",
+              description: "Medical collectors often violate HIPAA. Request proof of authorization to collect.",
+              priority: "HIGH",
+              successRate: "65%",
+            },
+            {
+              method: "Insurance Verification",
+              description: "Verify insurance didn't cover this. Many medical collections are billing errors.",
+              priority: "HIGH",
+              successRate: "70%",
+            },
+            {
+              method: "Pay-for-Delete",
+              description: "Medical collectors often accept 50% or less with deletion. Small balance = easy win.",
+              priority: "MEDIUM",
+              successRate: "75%",
+            },
+            {
+              method: "Paid Medical Removal",
+              description: "Under newer FCRA rules, paid medical collections under $500 must be removed.",
+              priority: "HIGH",
+              successRate: "100%",
+            },
+          ],
+          disputeReason: "Medical collection - verify HIPAA compliance and insurance coverage before paying",
+          bureau: "EXPERIAN",
+        },
+        {
+          userId: user.uid,
+          creditReportId: reportId,
+          creditorName: "Capital One",
+          originalCreditor: null,
+          accountNumber: "****4521",
+          accountType: "Credit Card",
+          balance: 2500,
+          originalBalance: null,
+          creditLimit: 5000,
+          status: "CURRENT",
+          dateOpened: "2019-02-15",
+          dateOfFirstDelinquency: null,
+          lastActivityDate: "2024-12-01",
+          isDisputable: true,
+          removalStrategies: [
+            {
+              method: "Credit Limit Increase",
+              description: "Request CLI to lower utilization (currently 50%). Lower util = higher score.",
+              priority: "MEDIUM",
+              successRate: "65%",
+            },
+          ],
+          disputeReason: null,
+          bureau: "EQUIFAX",
+        },
+        {
+          userId: user.uid,
+          creditReportId: reportId,
+          creditorName: "Bank of America",
+          originalCreditor: null,
+          accountNumber: "****9012",
+          accountType: "Auto Loan",
+          balance: 15000,
+          originalBalance: 22000,
+          creditLimit: null,
+          status: "CURRENT",
+          dateOpened: "2022-04-10",
+          dateOfFirstDelinquency: null,
+          lastActivityDate: "2024-12-15",
+          isDisputable: false,
+          removalStrategies: [],
+          disputeReason: null,
+          bureau: "EXPERIAN",
+        },
+      ];
+
+      // Check if items already exist for this user - skip if so to avoid duplicates
+      const existingItems = await firestore.query(COLLECTIONS.reportItems, [
+        { field: "userId", op: "EQUAL", value: user.uid },
+      ]);
+
+      if (existingItems.length > 0) {
+        // Items already exist, just update report status and return
+        await firestore.updateDoc(COLLECTIONS.creditReports, reportId, {
+          status: "ANALYZED",
+          analyzedAt: new Date().toISOString(),
+        });
+
+        return NextResponse.json({
+          success: true,
+          itemsCreated: 0,
+          disputableItems: existingItems.filter(i => i.data.isDisputable).length,
+          message: "Report already analyzed. Existing items preserved.",
+        });
+      }
+
+      // Add sample items to Firestore (only if none exist)
+      for (const item of sampleItems) {
+        await firestore.addDoc(COLLECTIONS.reportItems, item);
+      }
+
+      // Add a sample credit score
+      await firestore.addDoc(COLLECTIONS.creditScores, {
+        userId: user.uid,
+        score: 673,
+        bureau: "EQUIFAX",
+        recordedAt: new Date().toISOString(),
+      });
+
+      // Update report status
+      await firestore.updateDoc(COLLECTIONS.creditReports, reportId, {
+        status: "ANALYZED",
+        analyzedAt: new Date().toISOString(),
+      });
+
+      return NextResponse.json({
+        success: true,
+        itemsCreated: sampleItems.length,
+        disputableItems: sampleItems.filter(i => i.isDisputable).length,
+      });
+    }
+
+    // Real PDF analysis with Gemini
+    const geminiKey = process.env.GEMINI_API_KEY;
+
+    if (!geminiKey) {
+      return NextResponse.json(
+        { error: "AI analysis not configured. Add GEMINI_API_KEY to environment." },
+        { status: 500 }
+      );
+    }
+
+    // Get the report record to find the blob URL
+    const report = await firestore.getDoc(COLLECTIONS.creditReports, reportId);
+    if (!report.exists) {
+      return NextResponse.json(
+        { error: "Report not found" },
+        { status: 404 }
+      );
+    }
+
+    const blobUrl = report.data.blobUrl as string;
+    if (!blobUrl) {
+      return NextResponse.json(
+        { error: "PDF file not found for this report" },
+        { status: 404 }
+      );
+    }
+
+    // Fetch PDF from Vercel Blob
+    const pdfResponse = await fetch(blobUrl);
+    if (!pdfResponse.ok) {
+      return NextResponse.json(
+        { error: "Failed to fetch PDF from storage" },
+        { status: 500 }
+      );
+    }
+
+    // Convert to base64 (chunk-based to handle large files)
+    const pdfBuffer = await pdfResponse.arrayBuffer();
+    const fileSizeMB = pdfBuffer.byteLength / (1024 * 1024);
+    console.log(`PDF size: ${fileSizeMB.toFixed(2)} MB`);
+
+    // Check file size - Gemini has limits
+    if (fileSizeMB > 20) {
+      return NextResponse.json(
+        { error: `PDF too large (${fileSizeMB.toFixed(1)}MB). Max 20MB supported.` },
+        { status: 400 }
+      );
+    }
+
+    const bytes = new Uint8Array(pdfBuffer);
+
+    // Process in chunks to avoid stack overflow
+    let pdfBase64 = "";
+    const chunkSize = 32768; // 32KB chunks
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.slice(i, i + chunkSize);
+      pdfBase64 += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+    pdfBase64 = btoa(pdfBase64);
+
+    console.log(`Base64 size: ${(pdfBase64.length / (1024 * 1024)).toFixed(2)} MB`);
+
+    // Analyze with Gemini
+    const bureau = (report.data.bureau as string) || "UNKNOWN";
+    let analysis;
+    try {
+      console.log("Starting Gemini analysis...");
+      analysis = await analyzeWithGemini(pdfBase64, geminiKey, bureau);
+      console.log(`Analysis complete. Found ${analysis.items.length} items.`);
+    } catch (analysisError) {
+      console.error("Gemini analysis failed:", analysisError);
+      return NextResponse.json(
+        { error: `AI analysis failed: ${analysisError instanceof Error ? analysisError.message : String(analysisError)}` },
+        { status: 500 }
+      );
+    }
+
+    // Check for existing items and skip if already analyzed
+    const existingItems = await firestore.query(COLLECTIONS.reportItems, [
+      { field: "userId", op: "EQUAL", value: user.uid },
+    ]);
+
+    if (existingItems.length > 0) {
+      await firestore.updateDoc(COLLECTIONS.creditReports, reportId, {
+        status: "ANALYZED",
+        analyzedAt: new Date().toISOString(),
+      });
+
+      return NextResponse.json({
+        success: true,
+        itemsCreated: 0,
+        disputableItems: existingItems.filter(i => i.data.isDisputable).length,
+        message: "Report already analyzed. Existing items preserved.",
+      });
+    }
+
+    // Save items to Firestore (limit to 30 to avoid subrequest limit)
+    const itemsToSave = analysis.items.slice(0, 30);
+    for (const item of itemsToSave) {
+      await firestore.addDoc(COLLECTIONS.reportItems, {
+        userId: user.uid,
+        creditReportId: reportId,
+        ...item,
+      });
+    }
+
+    if (analysis.items.length > 30) {
+      console.log(`Saved ${itemsToSave.length} of ${analysis.items.length} items (limited to avoid timeout)`);
+    }
+
+    // Save credit score if found
+    if (analysis.creditScore) {
+      await firestore.addDoc(COLLECTIONS.creditScores, {
+        userId: user.uid,
+        score: analysis.creditScore,
+        bureau,
+        recordedAt: new Date().toISOString(),
+      });
+    }
+
+    // Update report status with summary
+    await firestore.updateDoc(COLLECTIONS.creditReports, reportId, {
+      status: "ANALYZED",
+      analyzedAt: new Date().toISOString(),
+      summary: analysis.summary,
+    });
+
+    return NextResponse.json({
+      success: true,
+      itemsCreated: analysis.items.length,
+      disputableItems: analysis.items.filter(i => i.isDisputable).length,
+      summary: analysis.summary,
+    });
+  } catch (err) {
+    console.error("Analyze error:", err);
+    return NextResponse.json(
+      { error: "Internal server error", details: String(err) },
+      { status: 500 }
+    );
+  }
+}
