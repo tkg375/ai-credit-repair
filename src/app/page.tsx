@@ -6,18 +6,18 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
-        <Logo className="h-14 w-auto" />
-        <div className="flex gap-4">
+      <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
+        <Logo className="h-10 sm:h-14 w-auto" />
+        <div className="flex gap-2 sm:gap-4">
           <Link
             href="/login"
-            className="px-4 py-2 text-sm text-slate-600 hover:text-slate-900 transition"
+            className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap"
           >
             Log In
           </Link>
           <Link
             href="/register"
-            className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition"
+            className="px-3 sm:px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition whitespace-nowrap"
           >
             Get Started
           </Link>
@@ -25,29 +25,29 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="max-w-7xl mx-auto px-6 pt-16 pb-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-16 pb-12 sm:pb-16">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-5xl font-bold leading-tight tracking-tight sm:text-6xl">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
               Fix Your Credit
               <br />
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">With AI</span>
             </h1>
-            <p className="mt-6 text-lg text-slate-600 max-w-xl leading-relaxed">
+            <p className="mt-4 sm:mt-6 text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed">
               Upload your credit report. Our AI analyzes every line item, finds
               disputable inaccuracies, generates FCRA-compliant dispute letters,
               and builds a personalized plan to raise your score.
             </p>
-            <div className="mt-10 flex gap-4">
+            <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Link
                 href="/register"
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-lg font-medium transition"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-lg font-medium transition text-center"
               >
                 Start Free Analysis
               </Link>
               <a
                 href="#how-it-works"
-                className="px-6 py-3 border border-slate-300 hover:border-slate-400 rounded-lg font-medium transition"
+                className="px-6 py-3 border border-slate-300 hover:border-slate-400 rounded-lg font-medium transition text-center"
               >
                 How It Works
               </a>
@@ -60,8 +60,8 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="max-w-7xl mx-auto px-6 py-20">
-        <h2 className="text-3xl font-bold text-center mb-16">How It Works</h2>
+      <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-16">How It Works</h2>
         <div className="grid md:grid-cols-3 gap-8">
           {[
             {
@@ -100,9 +100,9 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section className="bg-slate-50 py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center mb-16">
+      <section className="bg-slate-50 py-12 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-16">
             What We Help With
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -153,18 +153,18 @@ export default function Home() {
       </section>
 
       {/* Free Tools CTA */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-12 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
             Free Credit Repair Tools
           </h2>
-          <p className="text-slate-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-slate-300 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
             Access our complete toolkit: debt validation letters, pay-for-delete templates,
             statute of limitations calculator, goodwill letters, and more — all free.
           </p>
           <Link
             href="/tools"
-            className="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white rounded-lg font-medium transition"
+            className="inline-block px-6 sm:px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white rounded-lg font-medium transition"
           >
             Access Free Tools
           </Link>
@@ -172,15 +172,15 @@ export default function Home() {
       </section>
 
       {/* FICO Breakdown */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <h2 className="text-3xl font-bold text-center mb-4">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4">
           Understanding Your Score
         </h2>
-        <p className="text-slate-600 text-center mb-12 max-w-2xl mx-auto">
+        <p className="text-slate-600 text-center mb-8 sm:mb-12 max-w-2xl mx-auto text-sm sm:text-base">
           Your FICO score is built from five factors. We target each one with
           specific strategies.
         </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           {[
             { label: "Payment History", weight: "35%", color: "bg-blue-500" },
             { label: "Credit Utilization", weight: "30%", color: "bg-emerald-500" },
@@ -190,32 +190,32 @@ export default function Home() {
           ].map((factor) => (
             <div
               key={factor.label}
-              className="text-center border border-slate-200 rounded-xl p-4 hover:shadow-lg transition"
+              className="text-center border border-slate-200 rounded-xl p-3 sm:p-4 hover:shadow-lg transition"
             >
               <div
-                className={`w-12 h-12 ${factor.color} text-white rounded-full flex items-center justify-center text-sm font-bold mx-auto mb-3`}
+                className={`w-10 h-10 sm:w-12 sm:h-12 ${factor.color} text-white rounded-full flex items-center justify-center text-xs sm:text-sm font-bold mx-auto mb-2 sm:mb-3`}
               >
                 {factor.weight}
               </div>
-              <p className="text-sm font-medium">{factor.label}</p>
+              <p className="text-xs sm:text-sm font-medium">{factor.label}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 py-20">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-white">
+      <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 py-12 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-white">
             Ready to Take Control of Your Credit?
           </h2>
-          <p className="text-blue-100 mb-8 max-w-xl mx-auto">
+          <p className="text-blue-100 mb-6 sm:mb-8 max-w-xl mx-auto text-sm sm:text-base">
             Upload your credit report and get an AI analysis in minutes. No credit
             card required to start.
           </p>
           <Link
             href="/register"
-            className="inline-block px-8 py-3 bg-white text-blue-600 hover:bg-slate-100 rounded-lg font-medium transition"
+            className="inline-block px-6 sm:px-8 py-3 bg-white text-blue-600 hover:bg-slate-100 rounded-lg font-medium transition"
           >
             Get Started Free
           </Link>
@@ -224,9 +224,24 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 py-8 flex justify-between items-center text-sm text-slate-500">
-          <Logo className="h-6 w-auto" />
-          <span>Not a credit repair organization. Educational tool only.</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+            <Logo className="h-6 w-auto" />
+            <div className="flex items-center gap-4">
+              <Link href="/terms" className="hover:text-slate-700 transition">Terms</Link>
+              <Link href="/privacy" className="hover:text-slate-700 transition">Privacy</Link>
+            </div>
+          </div>
+          <p className="text-center text-xs text-slate-400 mt-4">
+            Not a credit repair organization. Educational tool only.
+          </p>
+          <div className="mt-6 pt-6 border-t border-slate-100 text-center">
+            <a href="https://theweekendweb.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-400 transition no-underline">
+              <span>Built by</span>
+              <span className="font-mono text-sm"><span className="text-gray-600">&lt;</span><span className="text-violet-400">tww</span><span className="text-cyan-400">/</span><span className="text-gray-600">&gt;</span></span>
+              <span className="text-gray-400">The Weekend Web</span>
+            </a>
+          </div>
         </div>
       </footer>
     </div>

@@ -123,76 +123,121 @@ IMPORTANT:
 - Identify the bureau from the report header (Equifax, Experian, or TransUnion)
 - Return ONLY the JSON, no other text`;
 
+const MAX_RETRIES = 4;
+const BASE_DELAY_MS = 2000;
+const MAX_DELAY_MS = 60000;
+
+function isRetryableStatus(status: number): boolean {
+  return status === 429 || status === 503 || status === 500 || status === 502 || status === 529;
+}
+
+function getRetryDelay(attempt: number, retryAfterHeader: string | null): number {
+  if (retryAfterHeader) {
+    const seconds = parseInt(retryAfterHeader, 10);
+    if (!isNaN(seconds)) {
+      return Math.min(seconds * 1000, MAX_DELAY_MS);
+    }
+  }
+  const exponentialDelay = BASE_DELAY_MS * Math.pow(2, attempt);
+  const jitter = Math.random() * 1000;
+  return Math.min(exponentialDelay + jitter, MAX_DELAY_MS);
+}
+
 export async function analyzeWithClaude(
   pdfBase64: string,
   apiKey: string,
   bureau: string = "UNKNOWN"
 ): Promise<AnalysisResult> {
-  const response = await fetch(ANTHROPIC_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2024-01-01",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 16000,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "document",
-              source: {
-                type: "base64",
-                media_type: "application/pdf",
-                data: pdfBase64,
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      const delay = getRetryDelay(attempt - 1, lastError?.cause as string | null);
+      console.log(`Claude API retry ${attempt}/${MAX_RETRIES} after ${Math.round(delay)}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+
+    const response = await fetch(ANTHROPIC_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2024-01-01",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 16000,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "document",
+                source: {
+                  type: "base64",
+                  media_type: "application/pdf",
+                  data: pdfBase64,
+                },
               },
-            },
-            {
-              type: "text",
-              text: ANALYSIS_PROMPT,
-            },
-          ],
-        },
-      ],
-    }),
-  });
+              {
+                type: "text",
+                text: ANALYSIS_PROMPT,
+              },
+            ],
+          },
+        ],
+      }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(
-      `Claude API error: ${response.status} - ${JSON.stringify(errorData)}`
-    );
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const retryAfter = response.headers.get("retry-after");
+
+      if (isRetryableStatus(response.status) && attempt < MAX_RETRIES) {
+        console.warn(
+          `Claude API returned ${response.status} (attempt ${attempt + 1}/${MAX_RETRIES + 1}): ${JSON.stringify(errorData)}`
+        );
+        lastError = new Error(
+          `Claude API error: ${response.status} - ${JSON.stringify(errorData)}`,
+          { cause: retryAfter }
+        );
+        continue;
+      }
+
+      throw new Error(
+        `Claude API error: ${response.status} - ${JSON.stringify(errorData)}`
+      );
+    }
+
+    const data = await response.json();
+    const content = data.content?.[0]?.text;
+
+    if (!content) {
+      throw new Error("No response from Claude");
+    }
+
+    // Parse JSON from response (Claude might wrap it in markdown code blocks)
+    let jsonStr = content;
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1];
+    }
+
+    try {
+      const result = JSON.parse(jsonStr.trim()) as AnalysisResult;
+
+      // Add bureau to all items if not already set
+      result.items = result.items.map(item => ({
+        ...item,
+        bureau: item.bureau || bureau,
+      }));
+
+      return result;
+    } catch (parseError) {
+      console.error("Failed to parse Claude response:", content);
+      throw new Error("Failed to parse analysis results");
+    }
   }
 
-  const data = await response.json();
-  const content = data.content?.[0]?.text;
-
-  if (!content) {
-    throw new Error("No response from Claude");
-  }
-
-  // Parse JSON from response (Claude might wrap it in markdown code blocks)
-  let jsonStr = content;
-  const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (jsonMatch) {
-    jsonStr = jsonMatch[1];
-  }
-
-  try {
-    const result = JSON.parse(jsonStr.trim()) as AnalysisResult;
-
-    // Add bureau to all items if not already set
-    result.items = result.items.map(item => ({
-      ...item,
-      bureau: item.bureau || bureau,
-    }));
-
-    return result;
-  } catch (parseError) {
-    console.error("Failed to parse Claude response:", content);
-    throw new Error("Failed to parse analysis results");
-  }
+  throw lastError || new Error("Claude API failed after all retries");
 }

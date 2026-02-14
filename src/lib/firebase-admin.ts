@@ -85,7 +85,7 @@ export async function verifyIdToken(
     }
 
     // Check issuer
-    const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+    const projectId = (process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "").trim();
     if (payload.iss !== `https://securetoken.google.com/${projectId}`) {
       lastVerifyError = `issuer mismatch (expected: securetoken.google.com/${projectId}, got: ${payload.iss})`;
       return null;
@@ -130,14 +130,14 @@ export async function verifyIdToken(
 
 // Firestore REST API helpers
 const FIRESTORE_BASE = () =>
-  `https://firestore.googleapis.com/v1/projects/${process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+  `https://firestore.googleapis.com/v1/projects/${(process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "").trim()}/databases/(default)/documents`;
 
 async function getAccessToken(): Promise<string> {
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL?.trim();
   const privateKeyPem = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
 
   if (!clientEmail || !privateKeyPem) {
-    throw new Error("Firebase admin credentials not configured");
+    throw new Error(`Firebase admin credentials not configured (email: ${clientEmail ? "set" : "missing"}, key: ${privateKeyPem ? "set" : "missing"})`);
   }
 
   const now = Math.floor(Date.now() / 1000);
@@ -170,13 +170,18 @@ async function getAccessToken(): Promise<string> {
     pemBody.replace(/\+/g, "-").replace(/\//g, "_")
   );
 
-  const cryptoKey = await crypto.subtle.importKey(
-    "pkcs8",
-    keyData,
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
+  let cryptoKey: CryptoKey;
+  try {
+    cryptoKey = await crypto.subtle.importKey(
+      "pkcs8",
+      keyData,
+      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+  } catch (err) {
+    throw new Error(`Failed to import private key: ${err instanceof Error ? err.message : String(err)}`);
+  }
 
   const signature = await crypto.subtle.sign(
     "RSASSA-PKCS1-v1_5",
@@ -200,6 +205,11 @@ async function getAccessToken(): Promise<string> {
   });
 
   const tokenData = await tokenRes.json();
+
+  if (!tokenData.access_token) {
+    throw new Error(`Failed to get access token: ${tokenData.error_description || tokenData.error || JSON.stringify(tokenData)}`);
+  }
+
   return tokenData.access_token;
 }
 
@@ -285,7 +295,7 @@ export const firestore = {
     limitCount?: number
   ): Promise<Array<{ id: string; data: Record<string, unknown> }>> {
     const token = await getAccessToken();
-    const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+    const projectId = (process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "").trim();
 
     const structuredQuery: Record<string, unknown> = {
       from: [{ collectionId: collectionName }],
@@ -365,6 +375,12 @@ export const firestore = {
     });
 
     const doc = await res.json();
+
+    if (!res.ok || !doc.name) {
+      const errorMsg = doc.error?.message || doc.error?.status || JSON.stringify(doc);
+      throw new Error(`Firestore addDoc failed: ${errorMsg}`);
+    }
+
     const name = doc.name as string;
     return name.split("/").pop()!;
   },

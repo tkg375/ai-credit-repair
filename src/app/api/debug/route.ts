@@ -10,6 +10,6 @@ export async function GET() {
       GEMINI_API_KEY: process.env.GEMINI_API_KEY ? "set" : "missing",
       BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN ? "set" : "missing",
     },
-    projectId: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "NONE",
+    projectId: (process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "NONE").trim(),
   });
 }

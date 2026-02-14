@@ -26,10 +26,13 @@ export async function POST(req: NextRequest) {
       { field: "userId", op: "EQUAL", value: user.uid },
     ]);
 
-    // Delete up to 10 of each to stay within subrequest limits
-    // User may need to click multiple times if they have lots of data
+    const plans = await firestore.query(COLLECTIONS.actionPlans, [
+      { field: "userId", op: "EQUAL", value: user.uid },
+    ]);
+
+    // Delete items in batches - Vercel has generous limits
     let deleted = 0;
-    const maxDeletes = 10;
+    const maxDeletes = 100;
 
     for (const item of items.slice(0, maxDeletes)) {
       await firestore.deleteDoc(COLLECTIONS.reportItems, item.id);
@@ -51,11 +54,17 @@ export async function POST(req: NextRequest) {
       deleted++;
     }
 
+    for (const plan of plans.slice(0, maxDeletes)) {
+      await firestore.deleteDoc(COLLECTIONS.actionPlans, plan.id);
+      deleted++;
+    }
+
     const remaining =
       Math.max(0, items.length - maxDeletes) +
       Math.max(0, scores.length - maxDeletes) +
       Math.max(0, disputes.length - maxDeletes) +
-      Math.max(0, reports.length - maxDeletes);
+      Math.max(0, reports.length - maxDeletes) +
+      Math.max(0, plans.length - maxDeletes);
 
     return NextResponse.json({
       success: true,

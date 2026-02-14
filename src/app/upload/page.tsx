@@ -72,6 +72,7 @@ export default function UploadPage() {
   const [progress, setProgress] = useState("");
   const [resetting, setResetting] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Redirect if not logged in
   if (!authLoading && !user) {
@@ -269,11 +270,12 @@ export default function UploadPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white text-slate-900">
-      <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto border-b border-slate-200">
+      <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto border-b border-slate-200">
         <Link href="/">
-          <Logo className="h-8 w-auto" />
+          <Logo className="h-7 sm:h-8 w-auto" />
         </Link>
-        <div className="flex gap-4 text-sm items-center">
+        {/* Desktop nav */}
+        <div className="hidden md:flex gap-4 text-sm items-center">
           <Link href="/dashboard" className="text-slate-600 hover:text-blue-600 transition">
             Dashboard
           </Link>
@@ -287,11 +289,43 @@ export default function UploadPage() {
             Action Plan
           </Link>
         </div>
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="md:hidden p-2 text-slate-600"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {menuOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
       </nav>
+      {/* Mobile menu */}
+      {menuOpen && (
+        <div className="md:hidden border-b border-slate-200 bg-white">
+          <div className="px-4 py-3 space-y-3">
+            <Link href="/dashboard" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+              Dashboard
+            </Link>
+            <Link href="/tools" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+              Credit Tools
+            </Link>
+            <Link href="/disputes" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+              Disputes
+            </Link>
+            <Link href="/plan" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+              Action Plan
+            </Link>
+          </div>
+        </div>
+      )}
 
-      <main className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold mb-2">Upload Credit Report</h1>
-        <p className="text-slate-600 mb-8">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Upload Credit Report</h1>
+        <p className="text-slate-600 mb-6 sm:mb-8 text-sm sm:text-base">
           Upload your credit report PDF from Equifax, Experian, or TransUnion. Our AI will analyze it and identify disputable items.
         </p>
 
@@ -304,7 +338,7 @@ export default function UploadPage() {
         {!uploading ? (
           <>
             <div
-              className={`border-2 border-dashed rounded-2xl p-12 text-center transition ${
+              className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition ${
                 dragActive
                   ? "border-blue-500 bg-blue-50"
                   : file
@@ -356,13 +390,13 @@ export default function UploadPage() {
             {file && (
               <button
                 onClick={handleUpload}
-                className="w-full mt-6 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 text-white rounded-xl font-medium transition text-lg"
+                className="w-full mt-6 py-3.5 sm:py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 text-white rounded-xl font-medium transition text-base sm:text-lg"
               >
                 Analyze Report
               </button>
             )}
 
-            <div className="mt-8 p-6 bg-slate-50 rounded-xl">
+            <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-slate-50 rounded-xl">
               <h3 className="font-semibold mb-3">Supported Reports</h3>
               <ul className="space-y-2 text-sm text-slate-600">
                 <li className="flex items-center gap-2">
@@ -393,7 +427,7 @@ export default function UploadPage() {
             </div>
 
             {/* Reset Data Section */}
-            <div className="mt-6 p-6 bg-red-50 border border-red-200 rounded-xl">
+            <div className="mt-6 p-4 sm:p-6 bg-red-50 border border-red-200 rounded-xl">
               <h3 className="font-semibold mb-2 text-red-800">Reset All Data</h3>
               <p className="text-sm text-red-600 mb-4">
                 Clear all your credit reports, disputes, and analysis data to start fresh.
@@ -425,9 +459,9 @@ export default function UploadPage() {
             </div>
           </>
         ) : (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-            <h2 className="text-xl font-semibold mb-2">
+          <div className="text-center py-10 sm:py-16">
+            <div className="w-16 sm:w-20 h-16 sm:h-20 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">
               {analyzing ? "Analyzing Your Report" : "Uploading..."}
             </h2>
             <p className="text-slate-600">{progress}</p>

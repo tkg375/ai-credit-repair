@@ -124,6 +124,7 @@ export default function Dashboard() {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [plan, setPlan] = useState<ActionPlan | null>(null);
   const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -194,11 +195,12 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white text-slate-900">
-      <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto border-b border-slate-200">
+      <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto border-b border-slate-200">
         <Link href="/">
-          <Logo className="h-8 w-auto" />
+          <Logo className="h-7 sm:h-8 w-auto" />
         </Link>
-        <div className="flex gap-4 text-sm items-center">
+        {/* Desktop nav */}
+        <div className="hidden md:flex gap-4 text-sm items-center">
           <Link href="/upload" className="text-slate-600 hover:text-blue-600 transition">
             Upload Report
           </Link>
@@ -218,12 +220,50 @@ export default function Dashboard() {
             Sign Out
           </button>
         </div>
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="md:hidden p-2 text-slate-600"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {menuOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
       </nav>
+      {/* Mobile menu */}
+      {menuOpen && (
+        <div className="md:hidden border-b border-slate-200 bg-white">
+          <div className="px-4 py-3 space-y-3">
+            <Link href="/upload" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+              Upload Report
+            </Link>
+            <Link href="/tools" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+              Credit Tools
+            </Link>
+            <Link href="/disputes" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+              Disputes
+            </Link>
+            <Link href="/plan" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+              Action Plan
+            </Link>
+            <button
+              onClick={() => { signOut(); setMenuOpen(false); }}
+              className="block text-slate-400 hover:text-red-500 transition"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      )}
 
-      <main className="max-w-7xl mx-auto px-6 py-10">
-        <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Dashboard</h1>
 
-        <div className="grid sm:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition">
             <p className="text-sm text-slate-500 mb-1">Latest Score</p>
             <p className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">

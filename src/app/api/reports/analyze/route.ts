@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser, getLastAuthError } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
 import { analyzeWithGemini } from "@/lib/gemini-analyzer";
+import { analyzeWithClaude } from "@/lib/claude-analyzer";
 
 // Allow up to 5 minutes for AI analysis
 export const runtime = "nodejs";
@@ -270,9 +271,10 @@ export async function POST(req: NextRequest) {
         },
       ];
 
-      // Check if items already exist for this user - skip if so to avoid duplicates
+      // Check if items already exist for this specific report to avoid duplicates
       const existingItems = await firestore.query(COLLECTIONS.reportItems, [
         { field: "userId", op: "EQUAL", value: user.uid },
+        { field: "creditReportId", op: "EQUAL", value: reportId },
       ]);
 
       if (existingItems.length > 0) {
@@ -378,24 +380,44 @@ export async function POST(req: NextRequest) {
 
     console.log(`Base64 size: ${(pdfBase64.length / (1024 * 1024)).toFixed(2)} MB`);
 
-    // Analyze with Gemini
+    // Analyze with Gemini, fall back to Claude if Gemini is unavailable
     const bureau = (report.data.bureau as string) || "UNKNOWN";
     let analysis;
+    let provider = "gemini";
     try {
       console.log("Starting Gemini analysis...");
       analysis = await analyzeWithGemini(pdfBase64, geminiKey, bureau);
-      console.log(`Analysis complete. Found ${analysis.items.length} items.`);
-    } catch (analysisError) {
-      console.error("Gemini analysis failed:", analysisError);
-      return NextResponse.json(
-        { error: `AI analysis failed: ${analysisError instanceof Error ? analysisError.message : String(analysisError)}` },
-        { status: 500 }
-      );
+      console.log(`Gemini analysis complete. Found ${analysis.items.length} items.`);
+    } catch (geminiError) {
+      console.error("Gemini analysis failed after retries:", geminiError);
+
+      // Fall back to Claude if available
+      const claudeKey = process.env.ANTHROPIC_API_KEY;
+      if (claudeKey) {
+        try {
+          console.log("Falling back to Claude for analysis...");
+          provider = "claude";
+          analysis = await analyzeWithClaude(pdfBase64, claudeKey, bureau);
+          console.log(`Claude fallback analysis complete. Found ${analysis.items.length} items.`);
+        } catch (claudeError) {
+          console.error("Claude fallback also failed:", claudeError);
+          return NextResponse.json(
+            { error: `AI analysis failed: All providers exhausted. Gemini: ${geminiError instanceof Error ? geminiError.message : String(geminiError)}. Claude: ${claudeError instanceof Error ? claudeError.message : String(claudeError)}` },
+            { status: 503 }
+          );
+        }
+      } else {
+        return NextResponse.json(
+          { error: `AI analysis failed: ${geminiError instanceof Error ? geminiError.message : String(geminiError)}` },
+          { status: 503 }
+        );
+      }
     }
 
-    // Check for existing items and skip if already analyzed
+    // Check for existing items for THIS specific report to avoid duplicates on re-analysis
     const existingItems = await firestore.query(COLLECTIONS.reportItems, [
       { field: "userId", op: "EQUAL", value: user.uid },
+      { field: "creditReportId", op: "EQUAL", value: reportId },
     ]);
 
     if (existingItems.length > 0) {

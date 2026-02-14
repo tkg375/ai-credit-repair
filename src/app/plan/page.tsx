@@ -64,8 +64,6 @@ async function queryCollection(
   idToken: string,
   collection: string,
   userId: string,
-  orderByField?: string,
-  limitCount?: number
 ) {
   const query: Record<string, unknown> = {
     structuredQuery: {
@@ -77,8 +75,6 @@ async function queryCollection(
           value: { stringValue: userId },
         },
       },
-      ...(orderByField ? { orderBy: [{ field: { fieldPath: orderByField }, direction: "DESCENDING" }] } : {}),
-      ...(limitCount ? { limit: limitCount } : {}),
     },
   };
 
@@ -104,7 +100,9 @@ export default function PlanPage() {
   const router = useRouter();
   const [plan, setPlan] = useState<ActionPlan | null>(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -115,9 +113,15 @@ export default function PlanPage() {
 
     async function loadPlan() {
       try {
-        const plans = await queryCollection(user!.idToken, "actionPlans", user!.uid, "createdAt", 1);
+        const plans = await queryCollection(user!.idToken, "actionPlans", user!.uid);
         if (plans.length > 0) {
-          const planData = plans[0];
+          // Sort by createdAt descending to get the latest plan
+          const sorted = plans.sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+            const aDate = String(a.createdAt || "");
+            const bDate = String(b.createdAt || "");
+            return bDate.localeCompare(aDate);
+          });
+          const planData = sorted[0];
           const steps = (planData.steps as ActionStep[]) || [];
           setPlan({
             id: planData.id,
@@ -156,6 +160,49 @@ export default function PlanPage() {
       }
       return newSet;
     });
+  };
+
+  const handleGeneratePlan = async () => {
+    if (!user) return;
+    setGenerating(true);
+    try {
+      const res = await fetch("/api/plans/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.idToken}`,
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!res.ok) throw new Error("Failed to generate plan");
+
+      // Reload the plan
+      const plans = await queryCollection(user.idToken, "actionPlans", user.uid);
+      if (plans.length > 0) {
+        // Use the most recently created plan
+        const sorted = plans.sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+          const aDate = String(a.createdAt || "");
+          const bDate = String(b.createdAt || "");
+          return bDate.localeCompare(aDate);
+        });
+        const planData = sorted[0];
+        const steps = (planData.steps as ActionStep[]) || [];
+        setPlan({
+          id: planData.id,
+          title: (planData.title as string) || "Your Credit Improvement Plan",
+          summary: (planData.summary as string) || "",
+          steps,
+          createdAt: planData.createdAt as Date,
+        });
+        setCompletedSteps(new Set());
+      }
+    } catch (err) {
+      console.error("Failed to generate plan:", err);
+      alert("Failed to generate action plan. Please try again.");
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const getImpactColor = (impact: string) => {
@@ -236,11 +283,11 @@ export default function PlanPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white text-slate-900">
-      <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto border-b border-slate-200">
+      <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto border-b border-slate-200">
         <Link href="/">
-          <Logo className="h-8 w-auto" />
+          <Logo className="h-7 sm:h-8 w-auto" />
         </Link>
-        <div className="flex gap-4 text-sm items-center">
+        <div className="hidden md:flex gap-4 text-sm items-center">
           <Link href="/dashboard" className="text-slate-600 hover:text-blue-600 transition">
             Dashboard
           </Link>
@@ -254,42 +301,87 @@ export default function PlanPage() {
             Disputes
           </Link>
         </div>
+        <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 text-slate-600">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {menuOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
+          </svg>
+        </button>
       </nav>
+      {menuOpen && (
+        <div className="md:hidden border-b border-slate-200 bg-white">
+          <div className="px-4 py-3 space-y-3">
+            <Link href="/dashboard" className="block text-slate-600" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+            <Link href="/upload" className="block text-slate-600" onClick={() => setMenuOpen(false)}>Upload Report</Link>
+            <Link href="/tools" className="block text-slate-600" onClick={() => setMenuOpen(false)}>Credit Tools</Link>
+            <Link href="/disputes" className="block text-slate-600" onClick={() => setMenuOpen(false)}>Disputes</Link>
+          </div>
+        </div>
+      )}
 
-      <main className="max-w-4xl mx-auto px-6 py-10">
-        <h1 className="text-3xl font-bold mb-2">Action Plan</h1>
-        <p className="text-slate-600 mb-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Action Plan</h1>
+        <p className="text-slate-600 mb-6 sm:mb-8 text-sm sm:text-base">
           Follow these steps to improve your credit score. Items are ordered by impact.
         </p>
 
         {!plan ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-12 text-center">
+            <div className="w-16 sm:w-20 h-16 sm:h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 sm:w-10 h-8 sm:h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold mb-3">No Action Plan Yet</h2>
-            <p className="text-slate-500 mb-6 max-w-md mx-auto">
-              Upload your credit report and we&apos;ll generate a personalized action plan to help you reach an 800 credit score.
+            <h2 className="text-lg sm:text-xl font-semibold mb-3">No Action Plan Yet</h2>
+            <p className="text-slate-500 mb-6 max-w-md mx-auto text-sm sm:text-base">
+              Generate a personalized action plan based on your credit report to help you reach an 800 credit score.
             </p>
-            <Link
-              href="/upload"
-              className="inline-block px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-500 hover:to-purple-500 transition"
-            >
-              Upload Credit Report
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={handleGeneratePlan}
+                disabled={generating}
+                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-500 hover:to-purple-500 transition disabled:opacity-50"
+              >
+                {generating ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Generating...
+                  </>
+                ) : (
+                  "Generate Action Plan"
+                )}
+              </button>
+              <Link
+                href="/upload"
+                className="inline-block px-8 py-3 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition"
+              >
+                Upload Report First
+              </Link>
+            </div>
           </div>
         ) : (
           <>
             {/* Progress Card */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="font-semibold text-lg">{plan.title}</h2>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div className="flex-1">
+                  <h2 className="font-semibold text-base sm:text-lg">{plan.title}</h2>
                   <p className="text-sm text-slate-500">{completedCount} of {totalSteps} steps completed</p>
                 </div>
-                <div className="text-right">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleGeneratePlan}
+                    disabled={generating}
+                    className="text-sm px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {generating ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-slate-600 border-t-transparent rounded-full animate-spin"></div>
+                        Regenerating...
+                      </>
+                    ) : (
+                      "Regenerate Plan"
+                    )}
+                  </button>
                   <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     {progressPercent}%
                   </span>
@@ -316,16 +408,16 @@ export default function PlanPage() {
                 return (
                   <div
                     key={step.order}
-                    className={`bg-white border rounded-xl p-6 transition ${
+                    className={`bg-white border rounded-xl p-4 sm:p-6 transition ${
                       isCompleted
                         ? "border-green-200 bg-green-50/50"
                         : "border-slate-200 hover:shadow-lg"
                     }`}
                   >
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-3 sm:gap-4">
                       {/* Step number */}
                       <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 ${
+                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0 ${
                           isCompleted
                             ? "bg-green-500"
                             : `bg-gradient-to-br ${getImpactColor(step.impact)}`
@@ -343,7 +435,7 @@ export default function PlanPage() {
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <h3 className={`font-semibold text-lg ${isCompleted ? "line-through text-slate-400" : ""}`}>
+                          <h3 className={`font-semibold text-base sm:text-lg ${isCompleted ? "line-through text-slate-400" : ""}`}>
                             {step.title}
                           </h3>
                           <span className={`text-xs px-2 py-1 rounded-full font-medium ${getImpactBadge(step.impact)}`}>
@@ -357,13 +449,13 @@ export default function PlanPage() {
                         <p className={`text-slate-600 mb-3 ${isCompleted ? "line-through text-slate-400" : ""}`}>
                           {step.description}
                         </p>
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                           <span className="text-xs text-slate-400">
                             Timeframe: {step.timeframe}
                           </span>
                           <button
                             onClick={() => toggleStepComplete(step.order)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                            className={`w-full sm:w-auto px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition text-center ${
                               isCompleted
                                 ? "bg-slate-200 text-slate-600 hover:bg-slate-300"
                                 : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500"
@@ -380,8 +472,8 @@ export default function PlanPage() {
             </div>
 
             {/* Tips */}
-            <div className="mt-12 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white">
-              <h3 className="text-xl font-semibold mb-4">Pro Tips for Credit Improvement</h3>
+            <div className="mt-8 sm:mt-12 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-5 sm:p-8 text-white">
+              <h3 className="text-lg sm:text-xl font-semibold mb-4">Pro Tips for Credit Improvement</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

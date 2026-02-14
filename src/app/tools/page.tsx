@@ -56,6 +56,7 @@ export default function ToolsPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"letters" | "sol" | "calculator">("letters");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Letter generator state
   const [letterType, setLetterType] = useState<LetterType>("debt_validation");
@@ -128,13 +129,16 @@ export default function ToolsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white text-slate-900">
-      <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto border-b border-slate-200">
+      <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto border-b border-slate-200">
         <Link href="/">
-          <Logo className="h-8 w-auto" />
+          <Logo className="h-7 sm:h-8 w-auto" />
         </Link>
-        <div className="flex gap-4 text-sm items-center">
+        <div className="hidden md:flex gap-4 text-sm items-center">
           <Link href="/dashboard" className="text-slate-600 hover:text-blue-600 transition">
             Dashboard
+          </Link>
+          <Link href="/upload" className="text-slate-600 hover:text-blue-600 transition">
+            Upload Report
           </Link>
           <Link href="/disputes" className="text-slate-600 hover:text-blue-600 transition">
             Disputes
@@ -143,11 +147,26 @@ export default function ToolsPage() {
             Action Plan
           </Link>
         </div>
+        <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 text-slate-600">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {menuOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
+          </svg>
+        </button>
       </nav>
+      {menuOpen && (
+        <div className="md:hidden border-b border-slate-200 bg-white">
+          <div className="px-4 py-3 space-y-3">
+            <Link href="/dashboard" className="block text-slate-600" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+            <Link href="/upload" className="block text-slate-600" onClick={() => setMenuOpen(false)}>Upload Report</Link>
+            <Link href="/disputes" className="block text-slate-600" onClick={() => setMenuOpen(false)}>Disputes</Link>
+            <Link href="/plan" className="block text-slate-600" onClick={() => setMenuOpen(false)}>Action Plan</Link>
+          </div>
+        </div>
+      )}
 
-      <main className="max-w-6xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold mb-2">Credit Repair Tools</h1>
-        <p className="text-slate-600 mb-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Credit Repair Tools</h1>
+        <p className="text-slate-600 mb-6 sm:mb-8 text-sm sm:text-base">
           Powerful tools to help you dispute debts, negotiate settlements, and understand your rights.
         </p>
 
