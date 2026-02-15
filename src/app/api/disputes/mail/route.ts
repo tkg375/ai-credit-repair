@@ -63,12 +63,16 @@ export async function POST(request: NextRequest) {
     // Example: await verifyPayment(user.uid, disputeId);
 
     // Step 1: Generate PDF from letter text
+    console.log("[mail] Step 1: Generating PDF...");
     const pdfBuffer = await generateLetterPdf(letterContent);
+    console.log(`[mail] PDF generated: ${pdfBuffer.length} bytes`);
 
     // Step 2: Upload PDF to Click2Mail
     const creditorName = (dispute.data.creditorName as string) || "Dispute";
     const documentName = `dispute-${creditorName.replace(/[^a-zA-Z0-9]/g, "-").slice(0, 30)}-${Date.now()}`;
+    console.log(`[mail] Step 2: Uploading document "${documentName}"...`);
     const documentId = await uploadDocument(pdfBuffer, documentName);
+    console.log(`[mail] Document uploaded: ${documentId}`);
 
     // Step 3: Upload recipient address
     const mailAddress: Click2MailAddress = {
@@ -79,11 +83,16 @@ export async function POST(request: NextRequest) {
       state: creditorAddress.state as string,
       zip: creditorAddress.zip as string,
     };
+    console.log(`[mail] Step 3: Uploading address for "${mailAddress.organization}"...`);
     const addressId = await uploadAddressList(mailAddress);
+    console.log(`[mail] Address uploaded: ${addressId}`);
 
     // Step 4: Create and submit the mail job
+    console.log("[mail] Step 4: Creating job...");
     const jobId = await createJob(documentId, addressId);
+    console.log(`[mail] Job created: ${jobId}, submitting...`);
     await submitJob(jobId);
+    console.log("[mail] Job submitted successfully");
 
     // Step 5: Update Firestore with mail metadata
     const now = new Date().toISOString();
@@ -103,7 +112,8 @@ export async function POST(request: NextRequest) {
       mailStatus: "SUBMITTED",
     });
   } catch (error) {
-    console.error("Mail dispatch failed:", error);
+    const errorMsg = error instanceof Error ? `${error.message}\n${error.stack}` : String(error);
+    console.error("Mail dispatch failed:", errorMsg);
 
     // Record the error in Firestore so the user can see what went wrong
     try {

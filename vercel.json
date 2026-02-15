@@ -5,6 +5,9 @@
     },
     "src/app/api/reports/analyze/route.ts": {
       "maxDuration": 300
+    },
+    "src/app/api/disputes/mail/route.ts": {
+      "maxDuration": 60
     }
   }
 }
