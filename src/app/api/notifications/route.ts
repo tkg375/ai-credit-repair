@@ -12,12 +12,14 @@ export async function GET(req: NextRequest) {
     ]);
 
     const sorted = notifications.sort((a, b) => {
-      const aDate = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
-      const bDate = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
+      const aDate = a.data.createdAt ? new Date(a.data.createdAt as string).getTime() : 0;
+      const bDate = b.data.createdAt ? new Date(b.data.createdAt as string).getTime() : 0;
       return bDate - aDate;
     });
 
-    return NextResponse.json({ notifications: sorted.slice(0, 50) });
+    return NextResponse.json({
+      notifications: sorted.slice(0, 50).map((n) => ({ id: n.id, ...n.data })),
+    });
   } catch (error) {
     console.error("Failed to fetch notifications:", error);
     return NextResponse.json({ error: "Failed to fetch notifications" }, { status: 500 });
