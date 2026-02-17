@@ -1,0 +1,297 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import dynamic from "next/dynamic";
+
+const LineChart = dynamic(() => import("recharts").then((m) => m.LineChart), { ssr: false });
+const Line = dynamic(() => import("recharts").then((m) => m.Line), { ssr: false });
+const XAxis = dynamic(() => import("recharts").then((m) => m.XAxis), { ssr: false });
+const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), { ssr: false });
+const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
+const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), { ssr: false });
+
+interface ScoreEntry {
+  id: string;
+  score: number;
+  source: string;
+  bureau: string | null;
+  recordedAt: string;
+}
+
+export default function ScoresPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [scores, setScores] = useState<ScoreEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+
+  // Form state
+  const [newScore, setNewScore] = useState(700);
+  const [newSource, setNewSource] = useState("Credit Karma");
+  const [newBureau, setNewBureau] = useState("");
+  const [newDate, setNewDate] = useState(new Date().toISOString().split("T")[0]);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+      return;
+    }
+    if (!user) return;
+
+    fetch("/api/scores", {
+      headers: { Authorization: `Bearer ${user.idToken}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setScores(
+          (data.scores || []).map((s: Record<string, unknown>) => ({
+            id: s.id as string,
+            score: s.score as number,
+            source: (s.source as string) || "Unknown",
+            bureau: (s.bureau as string) || null,
+            recordedAt: (s.recordedAt as string) || "",
+          }))
+        );
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [user, authLoading, router]);
+
+  const handleAddScore = async () => {
+    if (!user) return;
+    setAdding(true);
+    try {
+      const res = await fetch("/api/scores", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.idToken}`,
+        },
+        body: JSON.stringify({
+          score: newScore,
+          source: newSource,
+          bureau: newBureau || null,
+          recordedAt: new Date(newDate).toISOString(),
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to add score");
+      const data = await res.json();
+      setScores((prev) => [
+        ...prev,
+        {
+          id: data.id,
+          score: newScore,
+          source: newSource,
+          bureau: newBureau || null,
+          recordedAt: new Date(newDate).toISOString(),
+        },
+      ].sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime()));
+      setShowForm(false);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add score entry.");
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const chartData = scores.map((s) => ({
+    date: new Date(s.recordedAt).toLocaleDateString("en-US", { month: "short", year: "2-digit" }),
+    score: s.score,
+  }));
+
+  const latestScore = scores.length > 0 ? scores[scores.length - 1].score : null;
+  const oldestScore = scores.length > 1 ? scores[0].score : null;
+  const change = latestScore && oldestScore ? latestScore - oldestScore : null;
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  return (
+    <AuthenticatedLayout activeNav="scores">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 bg-clip-text text-transparent">
+              Score Tracking
+            </h1>
+            <p className="text-slate-500 mt-1">Track your credit score over time</p>
+          </div>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="px-4 py-2 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition"
+          >
+            + Add Score
+          </button>
+        </div>
+
+        {/* Stats Cards */}
+        {latestScore && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+              <p className="text-sm text-slate-500">Current Score</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">{latestScore}</p>
+            </div>
+            {change !== null && (
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <p className="text-sm text-slate-500">Total Change</p>
+                <p className={`text-3xl font-bold ${change >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  {change >= 0 ? "+" : ""}{change}
+                </p>
+              </div>
+            )}
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+              <p className="text-sm text-slate-500">Entries</p>
+              <p className="text-3xl font-bold text-slate-900">{scores.length}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Add Score Form */}
+        {showForm && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
+            <h2 className="font-semibold mb-4">Add Score Entry</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Score</label>
+                <input
+                  type="number"
+                  min={300}
+                  max={850}
+                  value={newScore}
+                  onChange={(e) => setNewScore(Number(e.target.value))}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Source</label>
+                <select
+                  value={newSource}
+                  onChange={(e) => setNewSource(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                >
+                  <option>Credit Karma</option>
+                  <option>Experian</option>
+                  <option>MyFICO</option>
+                  <option>TransUnion</option>
+                  <option>Bank/Card Issuer</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Bureau (optional)</label>
+                <select
+                  value={newBureau}
+                  onChange={(e) => setNewBureau(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                >
+                  <option value="">Not specified</option>
+                  <option>Equifax</option>
+                  <option>Experian</option>
+                  <option>TransUnion</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
+                <input
+                  type="date"
+                  value={newDate}
+                  onChange={(e) => setNewDate(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={handleAddScore}
+                disabled={adding}
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition disabled:opacity-50"
+              >
+                {adding ? "Saving..." : "Save Entry"}
+              </button>
+              <button
+                onClick={() => setShowForm(false)}
+                className="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm hover:bg-slate-50 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Chart */}
+        {scores.length > 1 ? (
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
+            <h2 className="font-semibold mb-4">Score History</h2>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#94a3b8" />
+                  <YAxis domain={[300, 850]} tick={{ fontSize: 12 }} stroke="#94a3b8" />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="score" stroke="#14b8a6" strokeWidth={3} dot={{ fill: "#14b8a6", r: 5 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        ) : scores.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center mb-6">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No Score Data Yet</h3>
+            <p className="text-slate-500 mb-4">Add your first score entry to start tracking progress.</p>
+            <button
+              onClick={() => setShowForm(true)}
+              className="px-6 py-3 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl font-medium hover:opacity-90 transition"
+            >
+              Add Your First Score
+            </button>
+          </div>
+        ) : null}
+
+        {/* Score History Table */}
+        {scores.length > 0 && (
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100">
+              <h2 className="font-semibold">All Entries</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left font-medium text-slate-500">Date</th>
+                    <th className="px-6 py-3 text-left font-medium text-slate-500">Score</th>
+                    <th className="px-6 py-3 text-left font-medium text-slate-500">Source</th>
+                    <th className="px-6 py-3 text-left font-medium text-slate-500">Bureau</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {[...scores].reverse().map((s) => (
+                    <tr key={s.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-3">{new Date(s.recordedAt).toLocaleDateString()}</td>
+                      <td className="px-6 py-3 font-bold">{s.score}</td>
+                      <td className="px-6 py-3 text-slate-600">{s.source}</td>
+                      <td className="px-6 py-3 text-slate-600">{s.bureau || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </main>
+    </AuthenticatedLayout>
+  );
+}

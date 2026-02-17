@@ -182,7 +182,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-500">Loading...</p>
         </div>
       </div>
@@ -201,16 +201,16 @@ export default function Dashboard() {
         </Link>
         {/* Desktop nav */}
         <div className="hidden md:flex gap-4 text-sm items-center">
-          <Link href="/upload" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/upload" className="text-slate-600 hover:text-teal-600 transition">
             Upload Report
           </Link>
-          <Link href="/tools" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/tools" className="text-slate-600 hover:text-teal-600 transition">
             Credit Tools
           </Link>
-          <Link href="/disputes" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/disputes" className="text-slate-600 hover:text-teal-600 transition">
             Disputes
           </Link>
-          <Link href="/plan" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/plan" className="text-slate-600 hover:text-teal-600 transition">
             Action Plan
           </Link>
           <button
@@ -238,16 +238,16 @@ export default function Dashboard() {
       {menuOpen && (
         <div className="md:hidden border-b border-slate-200 bg-white">
           <div className="px-4 py-3 space-y-3">
-            <Link href="/upload" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+            <Link href="/upload" className="block text-slate-600 hover:text-teal-600 transition" onClick={() => setMenuOpen(false)}>
               Upload Report
             </Link>
-            <Link href="/tools" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+            <Link href="/tools" className="block text-slate-600 hover:text-teal-600 transition" onClick={() => setMenuOpen(false)}>
               Credit Tools
             </Link>
-            <Link href="/disputes" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+            <Link href="/disputes" className="block text-slate-600 hover:text-teal-600 transition" onClick={() => setMenuOpen(false)}>
               Disputes
             </Link>
-            <Link href="/plan" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+            <Link href="/plan" className="block text-slate-600 hover:text-teal-600 transition" onClick={() => setMenuOpen(false)}>
               Action Plan
             </Link>
             <button
@@ -266,7 +266,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition">
             <p className="text-sm text-slate-500 mb-1">Latest Score</p>
-            <p className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <p className="text-4xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">
               {latestScore ?? "---"}
             </p>
           </div>
@@ -289,7 +289,7 @@ export default function Dashboard() {
             <h2 className="text-xl font-semibold">Recent Disputes</h2>
             <Link
               href="/disputes"
-              className="text-sm text-blue-600 hover:text-purple-600 transition"
+              className="text-sm text-teal-600 hover:text-lime-600 transition"
             >
               View all
             </Link>
@@ -304,7 +304,7 @@ export default function Dashboard() {
               <p className="text-slate-500 mb-4">No disputes yet. Upload a credit report to get started.</p>
               <Link
                 href="/upload"
-                className="inline-block px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-sm text-white font-medium hover:from-blue-500 hover:to-purple-500 transition"
+                className="inline-block px-6 py-2 bg-gradient-to-r from-lime-500 to-teal-600 rounded-lg text-sm text-white font-medium hover:from-lime-400 hover:to-teal-500 transition"
               >
                 Upload Report
               </Link>
@@ -343,7 +343,7 @@ export default function Dashboard() {
             <h2 className="text-xl font-semibold">Action Plan</h2>
             <Link
               href="/plan"
-              className="text-sm text-blue-600 hover:text-purple-600 transition"
+              className="text-sm text-teal-600 hover:text-lime-600 transition"
             >
               Full plan
             </Link>

@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
-import { getJobStatus, getTracking } from "@/lib/click2mail";
+import { getLetter } from "@/lib/lob";
 
-// Map Click2Mail job statuses to our internal status values
-function normalizeStatus(click2mailStatus: string): string {
-  const s = click2mailStatus.toUpperCase();
-  if (s === "MAILED") return "MAILED";
-  if (s === "IN_PRODUCTION" || s === "AWAITING_PRODUCTION") return "IN_PRODUCTION";
-  if (s === "ERROR") return "ERROR";
-  if (s === "ORDER_SUBMITTED" || s === "PROOF_ACCEPTED") return "SUBMITTED";
+/** Map Lob tracking events to a simple status string. */
+function deriveStatus(trackingEvents: { name: string }[]): string {
+  if (trackingEvents.length === 0) return "SUBMITTED";
+
+  // Use the most recent event (last in array)
+  const latest = trackingEvents[trackingEvents.length - 1].name;
+
+  if (latest === "Delivered") return "DELIVERED";
+  if (latest === "Returned to Sender") return "RETURNED";
+  if (latest === "Re-Routed") return "RE_ROUTED";
+  if (latest === "Processed for Delivery" || latest === "In Local Area") return "OUT_FOR_DELIVERY";
+  if (latest === "In Transit" || latest === "Mailed") return "IN_TRANSIT";
+
   return "SUBMITTED";
 }
 
@@ -41,34 +47,42 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "This dispute has not been mailed" }, { status: 400 });
     }
 
-    // Fetch status from Click2Mail
-    const jobStatus = await getJobStatus(mailJobId);
-    const tracking = await getTracking(mailJobId);
+    // Fetch letter from Lob
+    const letter = await getLetter(mailJobId);
+    const mailStatus = deriveStatus(letter.tracking_events);
 
-    const normalizedStatus = normalizeStatus(jobStatus.status);
+    // Get latest tracking event details
+    const latestEvent = letter.tracking_events.length > 0
+      ? letter.tracking_events[letter.tracking_events.length - 1]
+      : null;
 
     // Update Firestore with latest status
     const updateData: Record<string, unknown> = {
-      mailStatus: normalizedStatus,
+      mailStatus,
       updatedAt: new Date().toISOString(),
     };
 
-    if (tracking) {
+    if (latestEvent) {
       updateData.mailTracking = {
-        barcode: tracking.barcode || null,
-        status: tracking.status || null,
-        lastUpdate: tracking.statusDate || null,
+        status: latestEvent.name,
+        lastUpdate: latestEvent.date_created,
+        trackingNumber: letter.tracking_number || null,
       };
+    }
+
+    if (letter.expected_delivery_date) {
+      updateData.mailExpectedDelivery = letter.expected_delivery_date;
     }
 
     await firestore.updateDoc(COLLECTIONS.disputes, disputeId, updateData);
 
     return NextResponse.json({
       mailJobId,
-      mailStatus: normalizedStatus,
-      click2mailStatus: jobStatus.status,
-      description: jobStatus.description,
-      tracking: tracking || null,
+      mailStatus,
+      expectedDelivery: letter.expected_delivery_date || null,
+      trackingNumber: letter.tracking_number || null,
+      trackingEvents: letter.tracking_events,
+      latestEvent: latestEvent ? latestEvent.name : null,
     });
   } catch (error) {
     console.error("Mail status check failed:", error);

@@ -88,7 +88,7 @@ export default function ToolsPage() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -134,16 +134,16 @@ export default function ToolsPage() {
           <Logo className="h-7 sm:h-8 w-auto" />
         </Link>
         <div className="hidden md:flex gap-4 text-sm items-center">
-          <Link href="/dashboard" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/dashboard" className="text-slate-600 hover:text-teal-600 transition">
             Dashboard
           </Link>
-          <Link href="/upload" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/upload" className="text-slate-600 hover:text-teal-600 transition">
             Upload Report
           </Link>
-          <Link href="/disputes" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/disputes" className="text-slate-600 hover:text-teal-600 transition">
             Disputes
           </Link>
-          <Link href="/plan" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/plan" className="text-slate-600 hover:text-teal-600 transition">
             Action Plan
           </Link>
         </div>
@@ -176,7 +176,7 @@ export default function ToolsPage() {
             onClick={() => setActiveTab("letters")}
             className={`px-4 py-3 font-medium transition ${
               activeTab === "letters"
-                ? "text-blue-600 border-b-2 border-blue-600"
+                ? "text-teal-600 border-b-2 border-teal-600"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
@@ -186,7 +186,7 @@ export default function ToolsPage() {
             onClick={() => setActiveTab("sol")}
             className={`px-4 py-3 font-medium transition ${
               activeTab === "sol"
-                ? "text-blue-600 border-b-2 border-blue-600"
+                ? "text-teal-600 border-b-2 border-teal-600"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
@@ -196,7 +196,7 @@ export default function ToolsPage() {
             onClick={() => setActiveTab("calculator")}
             className={`px-4 py-3 font-medium transition ${
               activeTab === "calculator"
-                ? "text-blue-600 border-b-2 border-blue-600"
+                ? "text-teal-600 border-b-2 border-teal-600"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
@@ -219,7 +219,7 @@ export default function ToolsPage() {
                       key={type.value}
                       className={`block p-4 rounded-xl border-2 cursor-pointer transition ${
                         letterType === type.value
-                          ? "border-blue-500 bg-blue-50"
+                          ? "border-teal-500 bg-teal-50"
                           : "border-slate-200 hover:border-slate-300"
                       }`}
                     >
@@ -247,7 +247,7 @@ export default function ToolsPage() {
                     value={creditorName}
                     onChange={(e) => setCreditorName(e.target.value)}
                     placeholder="e.g., Midland Credit Management"
-                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
                   />
                 </div>
 
@@ -258,7 +258,7 @@ export default function ToolsPage() {
                     value={accountNumber}
                     onChange={(e) => setAccountNumber(e.target.value)}
                     placeholder="e.g., ****1234"
-                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
                   />
                 </div>
 
@@ -269,7 +269,7 @@ export default function ToolsPage() {
                     value={balance}
                     onChange={(e) => setBalance(e.target.value)}
                     placeholder="e.g., 1500"
-                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
                   />
                 </div>
 
@@ -298,7 +298,7 @@ export default function ToolsPage() {
                     <select
                       value={bureau}
                       onChange={(e) => setBureau(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                      className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
                     >
                       <option value="EQUIFAX">Equifax</option>
                       <option value="EXPERIAN">Experian</option>
@@ -315,7 +315,7 @@ export default function ToolsPage() {
                       onChange={(e) => setReason(e.target.value)}
                       placeholder="Explain why this information is inaccurate..."
                       rows={3}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                      className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
                     />
                   </div>
                 )}
@@ -328,7 +328,7 @@ export default function ToolsPage() {
                         type="date"
                         value={latePaymentDate}
                         onChange={(e) => setLatePaymentDate(e.target.value)}
-                        className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                        className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
                       />
                     </div>
                     <div>
@@ -338,7 +338,7 @@ export default function ToolsPage() {
                         onChange={(e) => setCircumstance(e.target.value)}
                         placeholder="e.g., I was hospitalized and unable to make the payment on time..."
                         rows={2}
-                        className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                        className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
                       />
                     </div>
                   </>
@@ -346,7 +346,7 @@ export default function ToolsPage() {
 
                 <button
                   onClick={handleGenerateLetter}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-500 hover:to-purple-500 transition"
+                  className="w-full py-3 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl font-medium hover:from-lime-400 hover:to-teal-500 transition"
                 >
                   Generate Letter
                 </button>
@@ -402,7 +402,7 @@ export default function ToolsPage() {
                   <select
                     value={solState}
                     onChange={(e) => setSolState(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
                   >
                     {Object.entries(STATE_NAMES).map(([code, name]) => (
                       <option key={code} value={code}>
@@ -417,7 +417,7 @@ export default function ToolsPage() {
                   <select
                     value={debtType}
                     onChange={(e) => setDebtType(e.target.value as typeof debtType)}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
                   >
                     <option value="openEnded">Credit Cards / Open-Ended Accounts</option>
                     <option value="written">Written Contracts (Auto Loans, Personal Loans)</option>
@@ -432,7 +432,7 @@ export default function ToolsPage() {
                     type="date"
                     value={lastActivityDate}
                     onChange={(e) => setLastActivityDate(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
                   />
                   <p className="text-xs text-slate-500 mt-1">
                     This is typically your last payment or last charge on the account
@@ -441,7 +441,7 @@ export default function ToolsPage() {
 
                 <button
                   onClick={handleCalculateSOL}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-500 hover:to-purple-500 transition"
+                  className="w-full py-3 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl font-medium hover:from-lime-400 hover:to-teal-500 transition"
                 >
                   Check Status
                 </button>
@@ -533,7 +533,7 @@ export default function ToolsPage() {
                     type="date"
                     value={firstDelinquencyDate}
                     onChange={(e) => setFirstDelinquencyDate(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
                   />
                   <p className="text-xs text-slate-500 mt-1">
                     This is when you first became 30+ days late on the account
@@ -542,16 +542,16 @@ export default function ToolsPage() {
 
                 <button
                   onClick={handleCalculateRemoval}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-500 hover:to-purple-500 transition"
+                  className="w-full py-3 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl font-medium hover:from-lime-400 hover:to-teal-500 transition"
                 >
                   Calculate Removal Date
                 </button>
               </div>
 
               {removalDate && (
-                <div className="mt-6 p-6 bg-blue-50 border border-blue-200 rounded-xl">
-                  <h3 className="font-semibold text-blue-700 mb-2">Removal Date</h3>
-                  <p className="text-3xl font-bold text-blue-600 mb-2">
+                <div className="mt-6 p-6 bg-teal-50 border border-teal-200 rounded-xl">
+                  <h3 className="font-semibold text-teal-700 mb-2">Removal Date</h3>
+                  <p className="text-3xl font-bold text-teal-600 mb-2">
                     {removalDate.toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "long",
@@ -574,19 +574,19 @@ export default function ToolsPage() {
                 <h3 className="font-semibold mb-2">Important Notes</h3>
                 <ul className="space-y-2 text-sm text-slate-600">
                   <li className="flex items-start gap-2">
-                    <span className="text-blue-500 mt-1">•</span>
+                    <span className="text-teal-500 mt-1">•</span>
                     <span>Bankruptcies remain for 7-10 years depending on the chapter filed</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-blue-500 mt-1">•</span>
+                    <span className="text-teal-500 mt-1">•</span>
                     <span>Some states have shorter reporting periods for paid collections</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-blue-500 mt-1">•</span>
+                    <span className="text-teal-500 mt-1">•</span>
                     <span>The date cannot be reset by paying the debt or the debt being sold</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-blue-500 mt-1">•</span>
+                    <span className="text-teal-500 mt-1">•</span>
                     <span>If an item is reported beyond 7 years, you can dispute it for immediate removal</span>
                   </li>
                 </ul>

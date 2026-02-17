@@ -17,7 +17,7 @@ export default function Home() {
           </Link>
           <Link
             href="/register"
-            className="px-3 sm:px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition whitespace-nowrap"
+            className="px-3 sm:px-4 py-2 text-sm bg-teal-600 hover:bg-teal-500 text-white rounded-lg transition whitespace-nowrap"
           >
             Get Started
           </Link>
@@ -31,7 +31,7 @@ export default function Home() {
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
               Fix Your Credit
               <br />
-              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">With AI</span>
+              <span className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 bg-clip-text text-transparent">With AI</span>
             </h1>
             <p className="mt-4 sm:mt-6 text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed">
               Upload your credit report. Our AI analyzes every line item, finds
@@ -41,7 +41,7 @@ export default function Home() {
             <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Link
                 href="/register"
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-lg font-medium transition text-center"
+                className="px-6 py-3 bg-gradient-to-r from-lime-500 to-teal-600 hover:from-lime-400 hover:to-teal-500 text-white rounded-lg font-medium transition text-center"
               >
                 Start Free Analysis
               </Link>
@@ -87,7 +87,7 @@ export default function Home() {
               key={item.step}
               className="border border-slate-200 rounded-xl p-6 hover:border-slate-300 hover:shadow-lg transition"
             >
-              <span className="text-sm font-mono bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold">
+              <span className="text-sm font-mono bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent font-bold">
                 {item.step}
               </span>
               <h3 className="text-xl font-semibold mt-3 mb-2">{item.title}</h3>
@@ -164,7 +164,7 @@ export default function Home() {
           </p>
           <Link
             href="/tools"
-            className="inline-block px-6 sm:px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white rounded-lg font-medium transition"
+            className="inline-block px-6 sm:px-8 py-3 bg-gradient-to-r from-lime-500 to-teal-600 hover:from-lime-400 hover:to-teal-500 text-white rounded-lg font-medium transition"
           >
             Access Free Tools
           </Link>
@@ -182,10 +182,10 @@ export default function Home() {
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           {[
-            { label: "Payment History", weight: "35%", color: "bg-blue-500" },
+            { label: "Payment History", weight: "35%", color: "bg-lime-500" },
             { label: "Credit Utilization", weight: "30%", color: "bg-emerald-500" },
             { label: "Credit Age", weight: "15%", color: "bg-amber-500" },
-            { label: "New Credit", weight: "10%", color: "bg-purple-500" },
+            { label: "New Credit", weight: "10%", color: "bg-cyan-500" },
             { label: "Credit Mix", weight: "10%", color: "bg-pink-500" },
           ].map((factor) => (
             <div
@@ -204,18 +204,18 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 py-12 sm:py-20">
+      <section className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 py-12 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-white">
             Ready to Take Control of Your Credit?
           </h2>
-          <p className="text-blue-100 mb-6 sm:mb-8 max-w-xl mx-auto text-sm sm:text-base">
+          <p className="text-lime-100 mb-6 sm:mb-8 max-w-xl mx-auto text-sm sm:text-base">
             Upload your credit report and get an AI analysis in minutes. No credit
             card required to start.
           </p>
           <Link
             href="/register"
-            className="inline-block px-6 sm:px-8 py-3 bg-white text-blue-600 hover:bg-slate-100 rounded-lg font-medium transition"
+            className="inline-block px-6 sm:px-8 py-3 bg-white text-teal-600 hover:bg-slate-100 rounded-lg font-medium transition"
           >
             Get Started Free
           </Link>

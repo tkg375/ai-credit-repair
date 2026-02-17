@@ -22,7 +22,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<User>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -192,11 +192,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await syncSession(user);
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string): Promise<User> => {
     const user = await signUpWithPassword(email, password);
     saveUser(user);
     setUser(user);
     await syncSession(user);
+    return user;
   };
 
   const signInWithGoogle = async () => {
@@ -228,7 +229,7 @@ export function useAuth(): AuthContextType {
       user: null,
       loading: true,
       signIn: async () => {},
-      signUp: async () => {},
+      signUp: async () => { throw new Error("Auth not initialized"); },
       signInWithGoogle: async () => {},
       signOut: async () => {},
     };

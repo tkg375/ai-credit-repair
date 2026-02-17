@@ -1,0 +1,69 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getAuthUser } from "@/lib/auth";
+import { firestore } from "@/lib/firebase-admin";
+
+export async function GET(req: NextRequest) {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    const notifications = await firestore.query("notifications", [
+      { field: "userId", op: "EQUAL", value: user.uid },
+    ]);
+
+    const sorted = notifications.sort((a, b) => {
+      const aDate = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
+      const bDate = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
+      return bDate - aDate;
+    });
+
+    return NextResponse.json({ notifications: sorted.slice(0, 50) });
+  } catch (error) {
+    console.error("Failed to fetch notifications:", error);
+    return NextResponse.json({ error: "Failed to fetch notifications" }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    const { type, title, message, actionUrl } = await req.json();
+
+    const docId = await firestore.addDoc("notifications", {
+      userId: user.uid,
+      type: type || "info",
+      title,
+      message,
+      read: false,
+      createdAt: new Date().toISOString(),
+      actionUrl: actionUrl || null,
+    });
+
+    return NextResponse.json({ id: docId });
+  } catch (error) {
+    console.error("Failed to create notification:", error);
+    return NextResponse.json({ error: "Failed to create notification" }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    const { notificationId, read } = await req.json();
+
+    if (!notificationId) {
+      return NextResponse.json({ error: "notificationId required" }, { status: 400 });
+    }
+
+    await firestore.updateDoc("notifications", notificationId, { read: read ?? true });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Failed to update notification:", error);
+    return NextResponse.json({ error: "Failed to update notification" }, { status: 500 });
+  }
+}

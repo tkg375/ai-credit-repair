@@ -12,12 +12,39 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [dob, setDob] = useState("");
+  const [address, setAddress] = useState("");
+  const [address2, setAddress2] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zip, setZip] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!fullName.trim()) {
+      setError("Full name is required.");
+      return;
+    }
+
+    if (!dob) {
+      setError("Date of birth is required.");
+      return;
+    }
+
+    if (!address.trim() || !city.trim() || !state.trim() || !zip.trim()) {
+      setError("Full mailing address is required.");
+      return;
+    }
+
+    if (state.length !== 2) {
+      setError("State must be a 2-letter abbreviation (e.g., CA, TX).");
+      return;
+    }
 
     if (password !== confirm) {
       setError("Passwords do not match.");
@@ -32,7 +59,26 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await signUp(email, password);
+      const user = await signUp(email, password);
+
+      // Save profile to Firestore
+      await fetch("/api/users/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.idToken}`,
+        },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          dateOfBirth: dob,
+          address: address.trim(),
+          address2: address2.trim(),
+          city: city.trim(),
+          state: state.trim().toUpperCase(),
+          zip: zip.trim(),
+        }),
+      });
+
       router.push("/dashboard");
     } catch {
       setError("Could not create account. Email may already be in use.");
@@ -42,8 +88,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white text-slate-900 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white text-slate-900 flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md">
         <Link href="/" className="flex justify-center mb-8">
           <Logo className="h-12 w-auto" />
         </Link>
@@ -58,42 +104,123 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Full Legal Name *</label>
+              <input
+                type="text"
+                placeholder="John A. Doe"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Date of Birth *</label>
+              <input
+                type="date"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Street Address *</label>
+              <input
+                type="text"
+                placeholder="123 Main Street"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Apt / Suite</label>
+              <input
+                type="text"
+                placeholder="Apt 4B (optional)"
+                value={address2}
+                onChange={(e) => setAddress2(e.target.value)}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+              />
+            </div>
+            <div className="grid grid-cols-5 gap-3">
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1">City *</label>
+                <input
+                  type="text"
+                  placeholder="Dallas"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                />
+              </div>
+              <div className="col-span-1">
+                <label className="block text-sm font-medium text-slate-700 mb-1">State *</label>
+                <input
+                  type="text"
+                  placeholder="TX"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  maxLength={2}
+                  required
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition uppercase"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1">ZIP *</label>
+                <input
+                  type="text"
+                  placeholder="75201"
+                  value={zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                />
+              </div>
+            </div>
+
+            <hr className="border-slate-200" />
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email *</label>
               <input
                 type="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Password *</label>
               <input
                 type="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Confirm Password *</label>
               <input
                 type="password"
                 placeholder="••••••••"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 text-white rounded-lg font-medium transition disabled:opacity-50"
+              className="w-full py-3 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 hover:from-lime-400 hover:via-teal-400 hover:to-cyan-500 text-white rounded-lg font-medium transition disabled:opacity-50"
             >
               {loading ? "Creating account..." : "Create Account"}
             </button>
@@ -102,7 +229,7 @@ export default function RegisterPage() {
 
         <p className="text-sm text-slate-500 text-center mt-6">
           Already have an account?{" "}
-          <Link href="/login" className="text-blue-600 hover:text-purple-600 font-medium transition">
+          <Link href="/login" className="text-teal-600 hover:text-lime-600 font-medium transition">
             Log in
           </Link>
         </p>

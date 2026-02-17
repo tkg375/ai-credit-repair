@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
-import { generateLetterPdf } from "@/lib/pdf-letter";
-import {
-  uploadDocument,
-  uploadAddressList,
-  createJob,
-  submitJob,
-  type Click2MailAddress,
-} from "@/lib/click2mail";
+import { sendLetter, letterToHtml, type LobAddress } from "@/lib/lob";
 
 export async function POST(request: NextRequest) {
   const user = await getAuthUser();
@@ -17,10 +10,14 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { disputeId } = body;
+  const { disputeId, fromAddress, toAddress: manualToAddress } = body;
 
   if (!disputeId) {
     return NextResponse.json({ error: "disputeId is required" }, { status: 400 });
+  }
+
+  if (!fromAddress || !fromAddress.name || !fromAddress.address_line1 || !fromAddress.address_city || !fromAddress.address_state || !fromAddress.address_zip) {
+    return NextResponse.json({ error: "fromAddress is required with name, address_line1, address_city, address_state, and address_zip" }, { status: 400 });
   }
 
   try {
@@ -42,11 +39,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Dispute has no letter content" }, { status: 400 });
     }
 
-    // Check that a creditor address is available
+    // Check that a creditor address is available (from DB or manual entry)
     const creditorAddress = dispute.data.creditorAddress as Record<string, unknown> | undefined;
-    if (!creditorAddress || !creditorAddress.address) {
+    if (!creditorAddress?.address && !manualToAddress) {
       return NextResponse.json(
-        { error: "No creditor address available. Delete and re-generate this dispute to auto-lookup the address." },
+        { error: "No creditor address available. Please provide the recipient address." },
         { status: 400 }
       );
     }
@@ -60,59 +57,72 @@ export async function POST(request: NextRequest) {
     }
 
     // TODO: Add Stripe payment check here before mailing.
-    // Example: await verifyPayment(user.uid, disputeId);
 
-    // Step 1: Generate PDF from letter text
-    console.log("[mail] Step 1: Generating PDF...");
-    const pdfBuffer = await generateLetterPdf(letterContent);
-    console.log(`[mail] PDF generated: ${pdfBuffer.length} bytes`);
+    // Build recipient address (use manual override if provided, otherwise DB)
+    const creditorName = (dispute.data.creditorName as string) || "Creditor";
+    let toAddress: LobAddress;
+    if (manualToAddress?.address_line1) {
+      toAddress = {
+        name: manualToAddress.name || creditorName,
+        address_line1: manualToAddress.address_line1,
+        address_line2: manualToAddress.address_line2 || "",
+        address_city: manualToAddress.address_city,
+        address_state: manualToAddress.address_state,
+        address_zip: manualToAddress.address_zip,
+      };
+    } else {
+      toAddress = {
+        name: (creditorAddress!.name as string) || creditorName,
+        address_line1: creditorAddress!.address as string,
+        address_line2: (creditorAddress!.department as string) || "",
+        address_city: creditorAddress!.city as string,
+        address_state: creditorAddress!.state as string,
+        address_zip: creditorAddress!.zip as string,
+      };
+    }
 
-    // Step 2: Upload PDF to Click2Mail
-    const creditorName = (dispute.data.creditorName as string) || "Dispute";
-    const documentName = `dispute-${creditorName.replace(/[^a-zA-Z0-9]/g, "-").slice(0, 30)}-${Date.now()}`;
-    console.log(`[mail] Step 2: Uploading document "${documentName}"...`);
-    const documentId = await uploadDocument(pdfBuffer, documentName);
-    console.log(`[mail] Document uploaded: ${documentId}`);
-
-    // Step 3: Upload recipient address
-    const mailAddress: Click2MailAddress = {
-      organization: (creditorAddress.name as string) || (creditorAddress.department as string) || creditorName,
-      address1: creditorAddress.address as string,
-      address2: (creditorAddress.department as string) || "",
-      city: creditorAddress.city as string,
-      state: creditorAddress.state as string,
-      zip: creditorAddress.zip as string,
+    // Build sender address from request
+    const senderAddress: LobAddress = {
+      name: fromAddress.name,
+      address_line1: fromAddress.address_line1,
+      address_line2: fromAddress.address_line2 || "",
+      address_city: fromAddress.address_city,
+      address_state: fromAddress.address_state,
+      address_zip: fromAddress.address_zip,
     };
-    console.log(`[mail] Step 3: Uploading address for "${mailAddress.organization}"...`);
-    const addressId = await uploadAddressList(mailAddress);
-    console.log(`[mail] Address uploaded: ${addressId}`);
 
-    // Step 4: Create and submit the mail job
-    console.log("[mail] Step 4: Creating job...");
-    const jobId = await createJob(documentId, addressId);
-    console.log(`[mail] Job created: ${jobId}, submitting...`);
-    await submitJob(jobId);
-    console.log("[mail] Job submitted successfully");
+    // Convert letter text to HTML
+    const html = letterToHtml(letterContent);
 
-    // Step 5: Update Firestore with mail metadata
+    // Send via Lob (single API call!)
+    console.log(`[mail] Sending letter for dispute ${disputeId} via Lob...`);
+    const letter = await sendLetter({
+      to: toAddress,
+      from: senderAddress,
+      html,
+      description: `Dispute: ${creditorName} (${dispute.data.bureau || "unknown bureau"})`,
+    });
+    console.log(`[mail] Letter created: ${letter.id}, expected delivery: ${letter.expected_delivery_date}`);
+
+    // Update Firestore with mail metadata
     const now = new Date().toISOString();
     await firestore.updateDoc(COLLECTIONS.disputes, disputeId, {
-      mailJobId: jobId,
-      mailDocumentId: documentId,
-      mailAddressId: addressId,
+      mailJobId: letter.id,
       mailStatus: "SUBMITTED",
       mailedAt: now,
+      mailExpectedDelivery: letter.expected_delivery_date || null,
       status: "SENT",
       updatedAt: now,
     });
 
     return NextResponse.json({
       success: true,
-      mailJobId: jobId,
+      mailJobId: letter.id,
       mailStatus: "SUBMITTED",
+      expectedDelivery: letter.expected_delivery_date,
     });
   } catch (error) {
-    const errorMsg = error instanceof Error ? `${error.message}\n${error.stack}` : String(error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
     console.error("Mail dispatch failed:", errorMsg);
 
     // Record the error in Firestore so the user can see what went wrong
@@ -127,7 +137,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Failed to mail letter", details: error instanceof Error ? error.message : String(error) },
+      { error: "Failed to mail letter", details: errorMsg },
       { status: 500 }
     );
   }

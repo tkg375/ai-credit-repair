@@ -263,7 +263,7 @@ export default function UploadPage() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -276,16 +276,16 @@ export default function UploadPage() {
         </Link>
         {/* Desktop nav */}
         <div className="hidden md:flex gap-4 text-sm items-center">
-          <Link href="/dashboard" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/dashboard" className="text-slate-600 hover:text-teal-600 transition">
             Dashboard
           </Link>
-          <Link href="/tools" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/tools" className="text-slate-600 hover:text-teal-600 transition">
             Credit Tools
           </Link>
-          <Link href="/disputes" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/disputes" className="text-slate-600 hover:text-teal-600 transition">
             Disputes
           </Link>
-          <Link href="/plan" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/plan" className="text-slate-600 hover:text-teal-600 transition">
             Action Plan
           </Link>
         </div>
@@ -307,16 +307,16 @@ export default function UploadPage() {
       {menuOpen && (
         <div className="md:hidden border-b border-slate-200 bg-white">
           <div className="px-4 py-3 space-y-3">
-            <Link href="/dashboard" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+            <Link href="/dashboard" className="block text-slate-600 hover:text-teal-600 transition" onClick={() => setMenuOpen(false)}>
               Dashboard
             </Link>
-            <Link href="/tools" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+            <Link href="/tools" className="block text-slate-600 hover:text-teal-600 transition" onClick={() => setMenuOpen(false)}>
               Credit Tools
             </Link>
-            <Link href="/disputes" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+            <Link href="/disputes" className="block text-slate-600 hover:text-teal-600 transition" onClick={() => setMenuOpen(false)}>
               Disputes
             </Link>
-            <Link href="/plan" className="block text-slate-600 hover:text-blue-600 transition" onClick={() => setMenuOpen(false)}>
+            <Link href="/plan" className="block text-slate-600 hover:text-teal-600 transition" onClick={() => setMenuOpen(false)}>
               Action Plan
             </Link>
           </div>
@@ -340,7 +340,7 @@ export default function UploadPage() {
             <div
               className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition ${
                 dragActive
-                  ? "border-blue-500 bg-blue-50"
+                  ? "border-teal-500 bg-teal-50"
                   : file
                   ? "border-green-500 bg-green-50"
                   : "border-slate-300 hover:border-slate-400"
@@ -390,7 +390,7 @@ export default function UploadPage() {
             {file && (
               <button
                 onClick={handleUpload}
-                className="w-full mt-6 py-3.5 sm:py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 text-white rounded-xl font-medium transition text-base sm:text-lg"
+                className="w-full mt-6 py-3.5 sm:py-4 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 hover:from-lime-400 hover:via-teal-400 hover:to-cyan-500 text-white rounded-xl font-medium transition text-base sm:text-lg"
               >
                 Analyze Report
               </button>
@@ -460,7 +460,7 @@ export default function UploadPage() {
           </>
         ) : (
           <div className="text-center py-10 sm:py-16">
-            <div className="w-16 sm:w-20 h-16 sm:h-20 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+            <div className="w-16 sm:w-20 h-16 sm:h-20 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
             <h2 className="text-lg sm:text-xl font-semibold mb-2">
               {analyzing ? "Analyzing Your Report" : "Uploading..."}
             </h2>
@@ -473,7 +473,7 @@ export default function UploadPage() {
               </div>
               <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-1000"
+                  className="h-full bg-gradient-to-r from-lime-500 to-teal-600 transition-all duration-1000"
                   style={{ width: analyzing ? "75%" : "25%" }}
                 ></div>
               </div>

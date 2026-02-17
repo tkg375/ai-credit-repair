@@ -1,0 +1,100 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getAuthUser } from "@/lib/auth";
+import { firestore } from "@/lib/firebase-admin";
+import { put, del } from "@vercel/blob";
+
+export async function GET(req: NextRequest) {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    const docs = await firestore.query("documents", {
+      where: [{ field: "userId", op: "EQUAL", value: user.uid }],
+    });
+
+    const sorted = docs.sort((a, b) => {
+      const aDate = a.uploadedAt ? new Date(a.uploadedAt as string).getTime() : 0;
+      const bDate = b.uploadedAt ? new Date(b.uploadedAt as string).getTime() : 0;
+      return bDate - aDate;
+    });
+
+    return NextResponse.json({ documents: sorted });
+  } catch (error) {
+    console.error("Failed to fetch documents:", error);
+    return NextResponse.json({ error: "Failed to fetch documents" }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    const formData = await req.formData();
+    const file = formData.get("file") as File;
+    const name = (formData.get("name") as string) || file.name;
+    const category = (formData.get("category") as string) || "other";
+
+    if (!file) {
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    // Upload to Vercel Blob
+    const blob = await put(`vault/${user.uid}/${Date.now()}-${file.name}`, file, {
+      access: "public",
+    });
+
+    // Save metadata to Firestore
+    const docId = await firestore.addDoc("documents", {
+      userId: user.uid,
+      name,
+      type: file.type,
+      size: file.size,
+      blobUrl: blob.url,
+      category,
+      uploadedAt: new Date().toISOString(),
+    });
+
+    return NextResponse.json({ id: docId, url: blob.url });
+  } catch (error) {
+    console.error("Failed to upload document:", error);
+    return NextResponse.json({ error: "Failed to upload document" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    const { searchParams } = new URL(req.url);
+    const documentId = searchParams.get("documentId");
+
+    if (!documentId) {
+      return NextResponse.json({ error: "documentId required" }, { status: 400 });
+    }
+
+    // Get the document to find the blob URL
+    const doc = await firestore.getDoc("documents", documentId);
+    if (!doc || doc.userId !== user.uid) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 });
+    }
+
+    // Delete from Vercel Blob
+    if (doc.blobUrl) {
+      try {
+        await del(doc.blobUrl as string);
+      } catch {
+        // Blob might already be deleted
+      }
+    }
+
+    // Delete from Firestore
+    await firestore.deleteDoc("documents", documentId);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Failed to delete document:", error);
+    return NextResponse.json({ error: "Failed to delete document" }, { status: 500 });
+  }
+}

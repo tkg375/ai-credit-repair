@@ -11,15 +11,15 @@ export function ScoreChart({ className = "" }: { className?: string }) {
         <defs>
           {/* Gradient for the chart line */}
           <linearGradient id="chartGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="50%" stopColor="#8b5cf6" />
-            <stop offset="100%" stopColor="#ec4899" />
+            <stop offset="0%" stopColor="#84cc16" />
+            <stop offset="50%" stopColor="#14b8a6" />
+            <stop offset="100%" stopColor="#06b6d4" />
           </linearGradient>
 
           {/* Gradient for the area under the line */}
           <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+            <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#14b8a6" stopOpacity="0" />
           </linearGradient>
 
           {/* Glow filter */}
@@ -43,18 +43,18 @@ export function ScoreChart({ className = "" }: { className?: string }) {
 
           {/* Animated gradient for score */}
           <linearGradient id="scoreAnimatedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#3b82f6">
+            <stop offset="0%" stopColor="#84cc16">
               <animate
                 attributeName="stop-color"
-                values="#3b82f6;#8b5cf6;#ec4899;#3b82f6"
+                values="#84cc16;#14b8a6;#06b6d4;#84cc16"
                 dur="3s"
                 repeatCount="indefinite"
               />
             </stop>
-            <stop offset="100%" stopColor="#ec4899">
+            <stop offset="100%" stopColor="#06b6d4">
               <animate
                 attributeName="stop-color"
-                values="#ec4899;#3b82f6;#8b5cf6;#ec4899"
+                values="#06b6d4;#84cc16;#14b8a6;#06b6d4"
                 dur="3s"
                 repeatCount="indefinite"
               />

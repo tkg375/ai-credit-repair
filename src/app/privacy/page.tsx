@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
           <Link href="/login" className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap">
             Log In
           </Link>
-          <Link href="/register" className="px-3 sm:px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition whitespace-nowrap">
+          <Link href="/register" className="px-3 sm:px-4 py-2 text-sm bg-teal-600 hover:bg-teal-500 text-white rounded-lg transition whitespace-nowrap">
             Get Started
           </Link>
         </div>

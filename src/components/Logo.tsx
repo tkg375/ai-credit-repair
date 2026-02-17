@@ -11,26 +11,26 @@ export function Logo({ className = "" }: { className?: string }) {
         <defs>
           {/* Animated gradient for 800 */}
           <linearGradient id="animatedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#3b82f6">
+            <stop offset="0%" stopColor="#84cc16">
               <animate
                 attributeName="stop-color"
-                values="#3b82f6;#8b5cf6;#ec4899;#3b82f6"
+                values="#84cc16;#14b8a6;#06b6d4;#84cc16"
                 dur="3s"
                 repeatCount="indefinite"
               />
             </stop>
-            <stop offset="50%" stopColor="#8b5cf6">
+            <stop offset="50%" stopColor="#14b8a6">
               <animate
                 attributeName="stop-color"
-                values="#8b5cf6;#ec4899;#3b82f6;#8b5cf6"
+                values="#14b8a6;#06b6d4;#84cc16;#14b8a6"
                 dur="3s"
                 repeatCount="indefinite"
               />
             </stop>
-            <stop offset="100%" stopColor="#ec4899">
+            <stop offset="100%" stopColor="#06b6d4">
               <animate
                 attributeName="stop-color"
-                values="#ec4899;#3b82f6;#8b5cf6;#ec4899"
+                values="#06b6d4;#84cc16;#14b8a6;#06b6d4"
                 dur="3s"
                 repeatCount="indefinite"
               />
@@ -47,26 +47,26 @@ export function Logo({ className = "" }: { className?: string }) {
             </feMerge>
           </filter>
 
-          {/* Background gradient for pill */}
+          {/* Background for pill */}
           <linearGradient id="pillBg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#1e1b4b" />
-            <stop offset="100%" stopColor="#0f172a" />
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="100%" stopColor="#ffffff" />
           </linearGradient>
 
           {/* Border gradient */}
           <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#3b82f6">
+            <stop offset="0%" stopColor="#84cc16">
               <animate
                 attributeName="stop-color"
-                values="#3b82f6;#8b5cf6;#ec4899;#3b82f6"
+                values="#84cc16;#14b8a6;#06b6d4;#84cc16"
                 dur="2s"
                 repeatCount="indefinite"
               />
             </stop>
-            <stop offset="100%" stopColor="#ec4899">
+            <stop offset="100%" stopColor="#06b6d4">
               <animate
                 attributeName="stop-color"
-                values="#ec4899;#3b82f6;#8b5cf6;#ec4899"
+                values="#06b6d4;#84cc16;#14b8a6;#06b6d4"
                 dur="2s"
                 repeatCount="indefinite"
               />
@@ -105,8 +105,8 @@ export function Logo({ className = "" }: { className?: string }) {
           y="0"
           width="50"
           height="60"
-          fill="white"
-          opacity="0.1"
+          fill="#14b8a6"
+          opacity="0.07"
           clipPath="url(#pillClip)"
         >
           <animate
@@ -117,14 +117,14 @@ export function Logo({ className = "" }: { className?: string }) {
           />
         </rect>
 
-        {/* CREDIT text in white */}
+        {/* CREDIT text in black */}
         <text
           x="24"
           y="38"
           fontFamily="system-ui, -apple-system, sans-serif"
           fontSize="28"
           fontWeight="800"
-          fill="white"
+          fill="#0f172a"
           letterSpacing="-0.5"
         >
           CREDIT
@@ -145,7 +145,7 @@ export function Logo({ className = "" }: { className?: string }) {
         </text>
 
         {/* Sparkle effects */}
-        <g fill="white">
+        <g fill="#14b8a6">
           <circle cx="16" cy="14" r="1.5" opacity="0.9">
             <animate
               attributeName="opacity"
@@ -193,18 +193,18 @@ export function LogoIcon({ className = "" }: { className?: string }) {
     >
       <defs>
         <linearGradient id="iconAnimatedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#3b82f6">
+          <stop offset="0%" stopColor="#84cc16">
             <animate
               attributeName="stop-color"
-              values="#3b82f6;#8b5cf6;#ec4899;#3b82f6"
+              values="#84cc16;#14b8a6;#06b6d4;#84cc16"
               dur="3s"
               repeatCount="indefinite"
             />
           </stop>
-          <stop offset="100%" stopColor="#ec4899">
+          <stop offset="100%" stopColor="#06b6d4">
             <animate
               attributeName="stop-color"
-              values="#ec4899;#3b82f6;#8b5cf6;#ec4899"
+              values="#06b6d4;#84cc16;#14b8a6;#06b6d4"
               dur="3s"
               repeatCount="indefinite"
             />
@@ -221,18 +221,18 @@ export function LogoIcon({ className = "" }: { className?: string }) {
         </filter>
 
         <linearGradient id="iconBorder" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#3b82f6">
+          <stop offset="0%" stopColor="#84cc16">
             <animate
               attributeName="stop-color"
-              values="#3b82f6;#8b5cf6;#ec4899;#3b82f6"
+              values="#84cc16;#14b8a6;#06b6d4;#84cc16"
               dur="2s"
               repeatCount="indefinite"
             />
           </stop>
-          <stop offset="100%" stopColor="#ec4899">
+          <stop offset="100%" stopColor="#06b6d4">
             <animate
               attributeName="stop-color"
-              values="#ec4899;#3b82f6;#8b5cf6;#ec4899"
+              values="#06b6d4;#84cc16;#14b8a6;#06b6d4"
               dur="2s"
               repeatCount="indefinite"
             />

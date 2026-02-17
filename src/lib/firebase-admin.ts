@@ -413,6 +413,30 @@ export const firestore = {
     );
   },
 
+  async setDoc(
+    collectionName: string,
+    docId: string,
+    data: Record<string, unknown>
+  ): Promise<void> {
+    const token = await getAccessToken();
+    const fields: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(data)) {
+      fields[key] = jsToFirestoreValue(value);
+    }
+
+    await fetch(
+      `${FIRESTORE_BASE()}/${collectionName}/${docId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fields }),
+      }
+    );
+  },
+
   async deleteDoc(
     collectionName: string,
     docId: string

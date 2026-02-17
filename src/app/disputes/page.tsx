@@ -49,6 +49,7 @@ interface Dispute {
   mailError: string | null;
   mailedAt: string | null;
   mailTracking: { barcode?: string; status?: string; lastUpdate?: string } | null;
+  resolvedAt: Date | null;
 }
 
 function firestoreValueToJs(val: Record<string, unknown>): unknown {
@@ -136,18 +137,33 @@ async function queryCollection(
 export default function DisputesPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"disputable" | "disputes">("disputable");
+  const [activeTab, setActiveTab] = useState<"disputable" | "disputes" | "history">("disputable");
   const [disputableItems, setDisputableItems] = useState<ReportItem[]>([]);
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [resolving, setResolving] = useState<string | null>(null);
   const [deletingItem, setDeletingItem] = useState<string | null>(null);
   const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [strategyPicker, setStrategyPicker] = useState<string | null>(null);
   const [mailing, setMailing] = useState<string | null>(null);
   const [checkingStatus, setCheckingStatus] = useState<string | null>(null);
+  const [showMailForm, setShowMailForm] = useState(false);
+  const [mailFormName, setMailFormName] = useState("");
+  const [mailFormAddress, setMailFormAddress] = useState("");
+  const [mailFormAddress2, setMailFormAddress2] = useState("");
+  const [mailFormCity, setMailFormCity] = useState("");
+  const [mailFormState, setMailFormState] = useState("");
+  const [mailFormZip, setMailFormZip] = useState("");
+  const [userProfile, setUserProfile] = useState<{ fullName: string; address: string; address2?: string; city: string; state: string; zip: string } | null>(null);
+  const [toName, setToName] = useState("");
+  const [toAddress, setToAddress] = useState("");
+  const [toAddress2, setToAddress2] = useState("");
+  const [toCity, setToCity] = useState("");
+  const [toState, setToState] = useState("");
+  const [toZip, setToZip] = useState("");
 
   useEffect(() => {
     if (authLoading) return;
@@ -158,6 +174,19 @@ export default function DisputesPage() {
 
     async function loadData() {
       try {
+        // Fetch user profile for mail form
+        try {
+          const profileRes = await fetch("/api/users/profile", {
+            headers: { Authorization: `Bearer ${user!.idToken}` },
+          });
+          if (profileRes.ok) {
+            const profileData = await profileRes.json();
+            if (profileData.profile) {
+              setUserProfile(profileData.profile);
+            }
+          }
+        } catch { /* non-blocking */ }
+
         // Load ALL report items to analyze for removal
         const items = await queryCollection(user!.idToken, "reportItems", user!.uid, []);
         setDisputableItems(
@@ -186,14 +215,19 @@ export default function DisputesPage() {
         setDisputes(
           disputeDocs.map((d: Record<string, unknown> & { id: string }) => {
             const addrData = d.creditorAddress as Record<string, unknown> | null;
-            // Detect address source from Firestore data, or infer from letter content
+            // Detect address source from Firestore data
             let addressSource: string | null = null;
             let addressConfidence: string | null = null;
-            if (addrData && typeof addrData === "object" && addrData.source) {
-              addressSource = addrData.source as string;
-              addressConfidence = (addrData.confidence as string) || null;
+            if (addrData && typeof addrData === "object") {
+              if (addrData.source) {
+                addressSource = addrData.source as string;
+                addressConfidence = (addrData.confidence as string) || null;
+              } else if (addrData.address || addrData.name) {
+                // Address exists but no source metadata — treat as database
+                addressSource = "database";
+              }
             } else if (d.letterContent && typeof d.letterContent === "string" && !String(d.letterContent).includes("[Insert Creditor")) {
-              // Letter has a real address but was generated before we stored metadata
+              // Letter has a real address but no creditorAddress object
               addressSource = "database";
             }
             const mailTrackingData = d.mailTracking as Record<string, unknown> | null;
@@ -217,6 +251,7 @@ export default function DisputesPage() {
                 status: (mailTrackingData.status as string) || undefined,
                 lastUpdate: (mailTrackingData.lastUpdate as string) || undefined,
               } : null,
+              resolvedAt: (d.resolvedAt as Date) || null,
             };
           })
         );
@@ -277,6 +312,7 @@ export default function DisputesPage() {
           mailError: null,
           mailedAt: null,
           mailTracking: null,
+          resolvedAt: null,
         },
         ...prev,
       ]);
@@ -349,10 +385,110 @@ export default function DisputesPage() {
     }
   };
 
+  const handleResolveDispute = async (disputeId: string) => {
+    if (!user) return;
+    if (!confirm("Mark this dispute as resolved? It will be moved to your history.")) return;
+
+    setResolving(disputeId);
+
+    try {
+      const now = new Date().toISOString();
+      const docUrl = `${FIRESTORE_BASE}/disputes/${disputeId}?updateMask.fieldPaths=status&updateMask.fieldPaths=resolvedAt`;
+      const res = await fetch(docUrl, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.idToken}`,
+        },
+        body: JSON.stringify({
+          fields: {
+            status: { stringValue: "RESOLVED" },
+            resolvedAt: { timestampValue: now },
+          },
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to resolve dispute");
+
+      setDisputes((prev) =>
+        prev.map((d) =>
+          d.id === disputeId ? { ...d, status: "RESOLVED", resolvedAt: new Date(now) } : d
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Failed to mark dispute as resolved. Please try again.");
+    } finally {
+      setResolving(null);
+    }
+  };
+
   const handleMailLetter = async (disputeId: string) => {
     if (!user) return;
-    if (!confirm("Mail this dispute letter via USPS? The letter will be printed and mailed to the creditor.")) return;
 
+    // Pre-fill from user profile, then localStorage, then empty
+    if (userProfile) {
+      setMailFormName(userProfile.fullName || "");
+      setMailFormAddress(userProfile.address || "");
+      setMailFormAddress2(userProfile.address2 || "");
+      setMailFormCity(userProfile.city || "");
+      setMailFormState(userProfile.state || "");
+      setMailFormZip(userProfile.zip || "");
+    } else {
+      const saved = localStorage.getItem("credit800_return_address");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setMailFormName(parsed.name || "");
+        setMailFormAddress(parsed.address_line1 || "");
+        setMailFormAddress2(parsed.address_line2 || "");
+        setMailFormCity(parsed.address_city || "");
+        setMailFormState(parsed.address_state || "");
+        setMailFormZip(parsed.address_zip || "");
+      } else {
+        setMailFormName(user.displayName || "");
+      }
+    }
+    setShowMailForm(true);
+  };
+
+  const handleConfirmMail = async () => {
+    if (!user || !selectedDispute) return;
+    if (!mailFormName || !mailFormAddress || !mailFormCity || !mailFormState || !mailFormZip) {
+      alert("Please fill in all required return address fields.");
+      return;
+    }
+
+    // If no creditor address on file, require manual recipient address
+    const needsRecipient = !selectedDispute.addressSource;
+    if (needsRecipient && (!toName || !toAddress || !toCity || !toState || !toZip)) {
+      alert("Please fill in the recipient address fields.");
+      return;
+    }
+
+    const disputeId = selectedDispute.id;
+    const fromAddress = {
+      name: mailFormName,
+      address_line1: mailFormAddress,
+      address_line2: mailFormAddress2,
+      address_city: mailFormCity,
+      address_state: mailFormState,
+      address_zip: mailFormZip,
+    };
+
+    // Save return address for future use
+    localStorage.setItem("credit800_return_address", JSON.stringify(fromAddress));
+
+    // Build manual recipient address if needed
+    const manualToAddress = needsRecipient ? {
+      name: toName,
+      address_line1: toAddress,
+      address_line2: toAddress2,
+      address_city: toCity,
+      address_state: toState,
+      address_zip: toZip,
+    } : undefined;
+
+    setShowMailForm(false);
     setMailing(disputeId);
 
     try {
@@ -362,7 +498,7 @@ export default function DisputesPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.idToken}`,
         },
-        body: JSON.stringify({ disputeId }),
+        body: JSON.stringify({ disputeId, fromAddress, toAddress: manualToAddress }),
       });
 
       const data = await res.json();
@@ -391,6 +527,44 @@ export default function DisputesPage() {
       alert(err instanceof Error ? err.message : "Failed to mail letter. Please try again.");
     } finally {
       setMailing(null);
+    }
+  };
+
+  const handleClearMailError = async (disputeId: string) => {
+    if (!user) return;
+
+    try {
+      // Clear the mail error fields in Firestore so the user can retry
+      const docUrl = `${FIRESTORE_BASE}/disputes/${disputeId}?updateMask.fieldPaths=mailJobId&updateMask.fieldPaths=mailStatus&updateMask.fieldPaths=mailError&updateMask.fieldPaths=mailDocumentId&updateMask.fieldPaths=mailAddressId&updateMask.fieldPaths=status`;
+      await fetch(docUrl, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.idToken}`,
+        },
+        body: JSON.stringify({
+          fields: {
+            status: { stringValue: "DRAFT" },
+          },
+        }),
+      });
+
+      // Update local state
+      setDisputes((prev) =>
+        prev.map((d) =>
+          d.id === disputeId
+            ? { ...d, mailJobId: null, mailStatus: null, mailError: null, status: "DRAFT" }
+            : d
+        )
+      );
+      if (selectedDispute?.id === disputeId) {
+        setSelectedDispute((prev) =>
+          prev ? { ...prev, mailJobId: null, mailStatus: null, mailError: null, status: "DRAFT" } : prev
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to clear error. Please try again.");
     }
   };
 
@@ -438,14 +612,31 @@ export default function DisputesPage() {
     switch (status) {
       case "SUBMITTED":
         return "bg-blue-100 text-blue-700";
-      case "IN_PRODUCTION":
+      case "IN_TRANSIT":
         return "bg-amber-100 text-amber-700";
-      case "MAILED":
+      case "OUT_FOR_DELIVERY":
+        return "bg-emerald-100 text-emerald-700";
+      case "DELIVERED":
         return "bg-green-100 text-green-700";
+      case "RETURNED":
+      case "RE_ROUTED":
       case "ERROR":
         return "bg-red-100 text-red-700";
       default:
         return "bg-slate-100 text-slate-700";
+    }
+  };
+
+  const getMailStatusLabel = (status: string) => {
+    switch (status) {
+      case "SUBMITTED": return "Submitted to USPS";
+      case "IN_TRANSIT": return "In Transit";
+      case "OUT_FOR_DELIVERY": return "Out for Delivery";
+      case "DELIVERED": return "Delivered";
+      case "RETURNED": return "Returned to Sender";
+      case "RE_ROUTED": return "Re-Routed";
+      case "ERROR": return "Error";
+      default: return status;
     }
   };
 
@@ -466,11 +657,14 @@ export default function DisputesPage() {
     }
   };
 
+  const activeDisputes = disputes.filter((d) => d.status !== "RESOLVED" && d.status !== "REJECTED");
+  const historyDisputes = disputes.filter((d) => d.status === "RESOLVED" || d.status === "REJECTED");
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-500">Loading...</p>
         </div>
       </div>
@@ -484,16 +678,16 @@ export default function DisputesPage() {
           <Logo className="h-7 sm:h-8 w-auto" />
         </Link>
         <div className="hidden md:flex gap-4 text-sm items-center">
-          <Link href="/dashboard" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/dashboard" className="text-slate-600 hover:text-teal-600 transition">
             Dashboard
           </Link>
-          <Link href="/upload" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/upload" className="text-slate-600 hover:text-teal-600 transition">
             Upload Report
           </Link>
-          <Link href="/tools" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/tools" className="text-slate-600 hover:text-teal-600 transition">
             Credit Tools
           </Link>
-          <Link href="/plan" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/plan" className="text-slate-600 hover:text-teal-600 transition">
             Action Plan
           </Link>
         </div>
@@ -526,7 +720,7 @@ export default function DisputesPage() {
             onClick={() => setActiveTab("disputable")}
             className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition text-sm sm:text-base ${
               activeTab === "disputable"
-                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                ? "bg-gradient-to-r from-lime-500 to-teal-600 text-white"
                 : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300"
             }`}
           >
@@ -536,11 +730,21 @@ export default function DisputesPage() {
             onClick={() => setActiveTab("disputes")}
             className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition text-sm sm:text-base ${
               activeTab === "disputes"
-                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                ? "bg-gradient-to-r from-lime-500 to-teal-600 text-white"
                 : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300"
             }`}
           >
-            My Disputes ({disputes.length})
+            My Disputes ({activeDisputes.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("history")}
+            className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition text-sm sm:text-base ${
+              activeTab === "history"
+                ? "bg-gradient-to-r from-lime-500 to-teal-600 text-white"
+                : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300"
+            }`}
+          >
+            History ({historyDisputes.length})
           </button>
         </div>
 
@@ -557,7 +761,7 @@ export default function DisputesPage() {
                 <p className="text-slate-500 mb-6">Upload a credit report to find items you can dispute.</p>
                 <Link
                   href="/upload"
-                  className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-500 hover:to-purple-500 transition"
+                  className="inline-block px-6 py-3 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl font-medium hover:from-lime-400 hover:to-teal-500 transition"
                 >
                   Upload Report
                 </Link>
@@ -565,7 +769,7 @@ export default function DisputesPage() {
             ) : (
               <div className="space-y-6">
                 {/* Removal Analysis Summary */}
-                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-6 text-white">
+                <div className="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-2xl p-6 text-white">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -575,13 +779,13 @@ export default function DisputesPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                     <div className="bg-white/10 rounded-xl p-3 sm:p-4">
                       <div className="text-2xl sm:text-3xl font-bold">{disputableItems.length}</div>
-                      <div className="text-xs sm:text-sm text-emerald-100">Items to Dispute</div>
+                      <div className="text-xs sm:text-sm text-cyan-100">Items to Dispute</div>
                     </div>
                     <div className="bg-white/10 rounded-xl p-3 sm:p-4">
                       <div className="text-2xl sm:text-3xl font-bold truncate">
                         ${disputableItems.reduce((sum, item) => sum + item.balance, 0).toLocaleString()}
                       </div>
-                      <div className="text-xs sm:text-sm text-emerald-100">Potential Removal</div>
+                      <div className="text-xs sm:text-sm text-cyan-100">Potential Removal</div>
                     </div>
                     <div className="bg-white/10 rounded-xl p-3 sm:p-4">
                       <div className="text-2xl sm:text-3xl font-bold">
@@ -589,7 +793,7 @@ export default function DisputesPage() {
                           sum + (item.removalStrategies?.filter(s => s.priority === "HIGH").length || 0), 0
                         )}
                       </div>
-                      <div className="text-xs sm:text-sm text-emerald-100">High Priority Strategies</div>
+                      <div className="text-xs sm:text-sm text-cyan-100">High Priority Strategies</div>
                     </div>
                     <div className="bg-white/10 rounded-xl p-3 sm:p-4">
                       <div className="text-2xl sm:text-3xl font-bold">
@@ -597,10 +801,10 @@ export default function DisputesPage() {
                           sum + (item.removalStrategies?.length || 0), 0
                         )}
                       </div>
-                      <div className="text-xs sm:text-sm text-emerald-100">Total Strategies</div>
+                      <div className="text-xs sm:text-sm text-cyan-100">Total Strategies</div>
                     </div>
                   </div>
-                  <p className="mt-4 text-sm text-emerald-100">
+                  <p className="mt-4 text-sm text-cyan-100">
                     Our AI has analyzed each debt and identified the best removal strategies based on account age, debt type, and legal factors.
                   </p>
                 </div>
@@ -753,7 +957,7 @@ export default function DisputesPage() {
                         {generating === item.id ? (
                           <button
                             disabled
-                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm rounded-lg font-medium disabled:opacity-50"
+                            className="px-4 py-2 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-sm rounded-lg font-medium disabled:opacity-50"
                           >
                             <span className="flex items-center gap-2">
                               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -763,7 +967,7 @@ export default function DisputesPage() {
                         ) : (
                           <button
                             onClick={() => setStrategyPicker(strategyPicker === item.id ? null : item.id)}
-                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm rounded-lg font-medium hover:from-blue-500 hover:to-purple-500 transition"
+                            className="px-4 py-2 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-sm rounded-lg font-medium hover:from-lime-400 hover:to-teal-500 transition"
                           >
                             Generate Dispute
                           </button>
@@ -780,7 +984,7 @@ export default function DisputesPage() {
                                   <button
                                     key={idx}
                                     onClick={() => handleGenerateDispute(item, strategy.method)}
-                                    className="w-full text-left px-3 py-2.5 hover:bg-blue-50 transition border-b border-slate-100 last:border-b-0"
+                                    className="w-full text-left px-3 py-2.5 hover:bg-teal-50 transition border-b border-slate-100 last:border-b-0"
                                   >
                                     <div className="flex items-center gap-2">
                                       <span className={`text-xs px-1.5 py-0.5 rounded font-medium shrink-0 ${
@@ -799,7 +1003,7 @@ export default function DisputesPage() {
                               ) : (
                                 <button
                                   onClick={() => handleGenerateDispute(item)}
-                                  className="w-full text-left px-3 py-2.5 hover:bg-blue-50 transition"
+                                  className="w-full text-left px-3 py-2.5 hover:bg-teal-50 transition"
                                 >
                                   <span className="text-sm font-medium text-slate-800">General Dispute Letter</span>
                                 </button>
@@ -831,21 +1035,21 @@ export default function DisputesPage() {
               </div>
             )}
           </div>
-        ) : (
+        ) : activeTab === "disputes" ? (
           <div>
-            {disputes.length === 0 ? (
+            {activeDisputes.length === 0 ? (
               <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
                 <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">No Disputes Yet</h3>
-                <p className="text-slate-500">Generate disputes from your disputable items.</p>
+                <h3 className="text-lg font-semibold mb-2">No Active Disputes</h3>
+                <p className="text-slate-500">Generate disputes from your disputable items, or check your history.</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {disputes.map((dispute) => (
+                {activeDisputes.map((dispute) => (
                   <div
                     key={dispute.id}
                     className="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg transition"
@@ -867,7 +1071,7 @@ export default function DisputesPage() {
                               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                               </svg>
-                              {dispute.mailStatus === "MAILED" ? "DELIVERED TO USPS" : `MAIL: ${dispute.mailStatus}`}
+                              {getMailStatusLabel(dispute.mailStatus)}
                             </span>
                           )}
                         </div>
@@ -877,6 +1081,90 @@ export default function DisputesPage() {
                         <button
                           onClick={() => setSelectedDispute(dispute)}
                           className="px-4 py-2 border border-slate-200 text-slate-600 text-sm rounded-lg font-medium hover:border-slate-300 hover:bg-slate-50 transition"
+                        >
+                          View Letter
+                        </button>
+                        <button
+                          onClick={() => handleResolveDispute(dispute.id)}
+                          disabled={resolving === dispute.id}
+                          className="px-3 py-2 border border-emerald-200 text-emerald-600 text-sm rounded-lg font-medium hover:border-emerald-300 hover:bg-emerald-50 transition disabled:opacity-50"
+                          title="Mark as Resolved"
+                        >
+                          {resolving === dispute.id ? (
+                            <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDispute(dispute.id)}
+                          disabled={deleting === dispute.id}
+                          className="px-3 py-2 border border-red-200 text-red-600 text-sm rounded-lg font-medium hover:border-red-300 hover:bg-red-50 transition disabled:opacity-50"
+                        >
+                          {deleting === dispute.id ? (
+                            <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          /* History Tab */
+          <div>
+            {historyDisputes.length === 0 ? (
+              <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
+                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No History Yet</h3>
+                <p className="text-slate-500">Resolved disputes will appear here.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {historyDisputes.map((dispute) => (
+                  <div
+                    key={dispute.id}
+                    className="bg-slate-50 border border-slate-200 rounded-xl p-6 transition"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-lg text-slate-700">{dispute.creditorName}</h3>
+                          {dispute.bureau && dispute.bureau !== "UNKNOWN" && (
+                            <span className="text-xs px-2 py-1 bg-slate-200 text-slate-600 rounded-full">
+                              {dispute.bureau}
+                            </span>
+                          )}
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusColor(dispute.status)}`}>
+                            {dispute.status.replace("_", " ")}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-500">{dispute.reason}</p>
+                        <div className="flex flex-wrap gap-3 mt-2 text-xs text-slate-400">
+                          {dispute.resolvedAt && (
+                            <span>Resolved: {new Date(dispute.resolvedAt).toLocaleDateString()}</span>
+                          )}
+                          {dispute.createdAt && (
+                            <span>Created: {new Date(dispute.createdAt).toLocaleDateString()}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <button
+                          onClick={() => setSelectedDispute(dispute)}
+                          className="px-4 py-2 border border-slate-200 text-slate-500 text-sm rounded-lg font-medium hover:border-slate-300 hover:bg-white transition"
                         >
                           View Letter
                         </button>
@@ -905,8 +1193,8 @@ export default function DisputesPage() {
         {/* Letter Modal */}
         {selectedDispute && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-              <div className="p-6 border-b border-slate-200 flex items-center justify-between">
+            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden">
+              <div className="p-6 border-b border-slate-200 flex items-center justify-between shrink-0">
                 <h2 className="text-xl font-semibold">Dispute Letter</h2>
                 <button
                   onClick={() => setSelectedDispute(null)}
@@ -917,7 +1205,7 @@ export default function DisputesPage() {
                   </svg>
                 </button>
               </div>
-              <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="p-6 overflow-y-auto flex-1 min-h-0">
                 {/* Address confidence banner */}
                 {selectedDispute.addressSource === "database" && (
                   <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-sm text-green-700">
@@ -935,12 +1223,12 @@ export default function DisputesPage() {
                     Address found via AI search — please verify before sending
                   </div>
                 )}
-                {!selectedDispute.addressSource && selectedDispute.letterContent?.includes("[Insert Creditor") && (
-                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 text-sm text-blue-700">
+                {!selectedDispute.addressSource && (
+                  <div className="mb-4 p-3 bg-teal-50 border border-teal-200 rounded-lg flex items-center gap-2 text-sm text-teal-700">
                     <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    This letter was generated before address auto-lookup. Delete and re-generate to fill in the address automatically.
+                    Creditor address not found — you can enter it manually when mailing.
                   </div>
                 )}
                 <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700 leading-relaxed">
@@ -949,9 +1237,9 @@ export default function DisputesPage() {
               </div>
               {/* Mail status banner */}
               {selectedDispute.mailStatus && (
-                <div className={`px-6 py-3 border-t flex items-center justify-between ${
-                  selectedDispute.mailStatus === "MAILED" ? "bg-green-50" :
-                  selectedDispute.mailStatus === "ERROR" ? "bg-red-50" :
+                <div className={`px-6 py-3 border-t flex items-center justify-between shrink-0 ${
+                  selectedDispute.mailStatus === "DELIVERED" ? "bg-green-50" :
+                  selectedDispute.mailStatus === "ERROR" || selectedDispute.mailStatus === "RETURNED" ? "bg-red-50" :
                   "bg-blue-50"
                 }`}>
                   <div className="flex items-center gap-2 text-sm">
@@ -959,13 +1247,19 @@ export default function DisputesPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     <span className="font-medium">
-                      {selectedDispute.mailStatus === "SUBMITTED" && "Letter submitted for mailing"}
-                      {selectedDispute.mailStatus === "IN_PRODUCTION" && "Letter is being printed"}
-                      {selectedDispute.mailStatus === "MAILED" && "Letter delivered to USPS"}
-                      {selectedDispute.mailStatus === "ERROR" && `Mailing error: ${selectedDispute.mailError || "Unknown error"}`}
+                      {selectedDispute.mailStatus === "ERROR"
+                        ? `Mailing error: ${selectedDispute.mailError || "Unknown error"}`
+                        : getMailStatusLabel(selectedDispute.mailStatus)}
                     </span>
                   </div>
-                  {selectedDispute.mailStatus !== "ERROR" && (
+                  {selectedDispute.mailStatus === "ERROR" ? (
+                    <button
+                      onClick={() => handleClearMailError(selectedDispute.id)}
+                      className="text-sm px-3 py-1 border border-red-300 text-red-700 rounded-lg hover:bg-red-100 transition"
+                    >
+                      Clear & Retry
+                    </button>
+                  ) : (
                     <button
                       onClick={() => handleCheckMailStatus(selectedDispute.id)}
                       disabled={checkingStatus === selectedDispute.id}
@@ -977,14 +1271,134 @@ export default function DisputesPage() {
                 </div>
               )}
               {selectedDispute.mailTracking?.status && (
-                <div className="px-6 py-2 bg-slate-50 border-t text-xs text-slate-600 flex items-center gap-4">
+                <div className="px-6 py-2 bg-slate-50 border-t text-xs text-slate-600 flex items-center gap-4 shrink-0">
                   <span>USPS: {selectedDispute.mailTracking.status}</span>
                   {selectedDispute.mailTracking.lastUpdate && (
-                    <span>Updated: {selectedDispute.mailTracking.lastUpdate}</span>
+                    <span>Updated: {new Date(selectedDispute.mailTracking.lastUpdate).toLocaleString()}</span>
                   )}
                 </div>
               )}
-              <div className="p-6 border-t border-slate-200 flex gap-3">
+              {/* Mail address form */}
+              {showMailForm && (
+                <div className="px-6 py-4 border-t bg-slate-50 shrink-0 max-h-[50vh] overflow-y-auto">
+                  {/* Recipient address (only when not on file) */}
+                  {!selectedDispute.addressSource && (
+                    <>
+                      <h4 className="text-sm font-semibold mb-3">Recipient Address (Creditor)</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                        <input
+                          type="text"
+                          placeholder="Company / Creditor Name *"
+                          value={toName}
+                          onChange={(e) => setToName(e.target.value)}
+                          className="px-3 py-2 border border-slate-300 rounded-lg text-sm sm:col-span-2"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Street Address / P.O. Box *"
+                          value={toAddress}
+                          onChange={(e) => setToAddress(e.target.value)}
+                          className="px-3 py-2 border border-slate-300 rounded-lg text-sm sm:col-span-2"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Dept / Suite (optional)"
+                          value={toAddress2}
+                          onChange={(e) => setToAddress2(e.target.value)}
+                          className="px-3 py-2 border border-slate-300 rounded-lg text-sm sm:col-span-2"
+                        />
+                        <input
+                          type="text"
+                          placeholder="City *"
+                          value={toCity}
+                          onChange={(e) => setToCity(e.target.value)}
+                          className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                        />
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="State *"
+                            value={toState}
+                            onChange={(e) => setToState(e.target.value)}
+                            maxLength={2}
+                            className="px-3 py-2 border border-slate-300 rounded-lg text-sm w-20 uppercase"
+                          />
+                          <input
+                            type="text"
+                            placeholder="ZIP *"
+                            value={toZip}
+                            onChange={(e) => setToZip(e.target.value)}
+                            className="px-3 py-2 border border-slate-300 rounded-lg text-sm flex-1"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  <h4 className="text-sm font-semibold mb-3">Your Return Address</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      placeholder="Full Name *"
+                      value={mailFormName}
+                      onChange={(e) => setMailFormName(e.target.value)}
+                      className="px-3 py-2 border border-slate-300 rounded-lg text-sm sm:col-span-2"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Street Address *"
+                      value={mailFormAddress}
+                      onChange={(e) => setMailFormAddress(e.target.value)}
+                      className="px-3 py-2 border border-slate-300 rounded-lg text-sm sm:col-span-2"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Apt/Suite (optional)"
+                      value={mailFormAddress2}
+                      onChange={(e) => setMailFormAddress2(e.target.value)}
+                      className="px-3 py-2 border border-slate-300 rounded-lg text-sm sm:col-span-2"
+                    />
+                    <input
+                      type="text"
+                      placeholder="City *"
+                      value={mailFormCity}
+                      onChange={(e) => setMailFormCity(e.target.value)}
+                      className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="State *"
+                        value={mailFormState}
+                        onChange={(e) => setMailFormState(e.target.value)}
+                        maxLength={2}
+                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm w-20"
+                      />
+                      <input
+                        type="text"
+                        placeholder="ZIP *"
+                        value={mailFormZip}
+                        onChange={(e) => setMailFormZip(e.target.value)}
+                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm flex-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    <button
+                      onClick={handleConfirmMail}
+                      className="flex-1 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-lg font-medium text-sm hover:from-teal-500 hover:to-cyan-500 transition"
+                    >
+                      Confirm & Mail Letter
+                    </button>
+                    <button
+                      onClick={() => setShowMailForm(false)}
+                      className="px-4 py-2 border border-slate-300 rounded-lg text-sm hover:bg-white transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+              <div className="p-6 border-t border-slate-200 flex gap-3 shrink-0">
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(selectedDispute.letterContent || "");
@@ -1008,11 +1422,11 @@ export default function DisputesPage() {
                 >
                   Download Letter
                 </button>
-                {!selectedDispute.mailJobId && selectedDispute.addressSource && (
+                {!selectedDispute.mailJobId && !showMailForm && (
                   <button
                     onClick={() => handleMailLetter(selectedDispute.id)}
                     disabled={mailing === selectedDispute.id}
-                    className="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-medium hover:from-emerald-500 hover:to-teal-500 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl font-medium hover:from-teal-500 hover:to-cyan-500 transition disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {mailing === selectedDispute.id ? (
                       <>

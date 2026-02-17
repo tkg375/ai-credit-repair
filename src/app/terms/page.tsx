@@ -12,7 +12,7 @@ export default function TermsOfService() {
           <Link href="/login" className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap">
             Log In
           </Link>
-          <Link href="/register" className="px-3 sm:px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition whitespace-nowrap">
+          <Link href="/register" className="px-3 sm:px-4 py-2 text-sm bg-teal-600 hover:bg-teal-500 text-white rounded-lg transition whitespace-nowrap">
             Get Started
           </Link>
         </div>
@@ -93,7 +93,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-semibold mb-3">7. Privacy and Data Security</h2>
             <p className="text-slate-600 leading-relaxed">
-              Your use of the Service is also governed by our <Link href="/privacy" className="text-blue-600 hover:text-blue-500">Privacy Policy</Link>.
+              Your use of the Service is also governed by our <Link href="/privacy" className="text-teal-600 hover:text-teal-500">Privacy Policy</Link>.
               We take reasonable measures to protect your personal information, but no method of transmission
               over the Internet is 100% secure.
             </p>

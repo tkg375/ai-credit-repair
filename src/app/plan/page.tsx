@@ -270,7 +270,7 @@ export default function PlanPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-500">Loading...</p>
         </div>
       </div>
@@ -288,16 +288,16 @@ export default function PlanPage() {
           <Logo className="h-7 sm:h-8 w-auto" />
         </Link>
         <div className="hidden md:flex gap-4 text-sm items-center">
-          <Link href="/dashboard" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/dashboard" className="text-slate-600 hover:text-teal-600 transition">
             Dashboard
           </Link>
-          <Link href="/upload" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/upload" className="text-slate-600 hover:text-teal-600 transition">
             Upload Report
           </Link>
-          <Link href="/tools" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/tools" className="text-slate-600 hover:text-teal-600 transition">
             Credit Tools
           </Link>
-          <Link href="/disputes" className="text-slate-600 hover:text-blue-600 transition">
+          <Link href="/disputes" className="text-slate-600 hover:text-teal-600 transition">
             Disputes
           </Link>
         </div>
@@ -339,7 +339,7 @@ export default function PlanPage() {
               <button
                 onClick={handleGeneratePlan}
                 disabled={generating}
-                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-500 hover:to-purple-500 transition disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl font-medium hover:from-lime-400 hover:to-teal-500 transition disabled:opacity-50"
               >
                 {generating ? (
                   <>
@@ -382,22 +382,22 @@ export default function PlanPage() {
                       "Regenerate Plan"
                     )}
                   </button>
-                  <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  <span className="text-3xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">
                     {progressPercent}%
                   </span>
                 </div>
               </div>
               <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 ></div>
               </div>
             </div>
 
             {plan.summary && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8">
-                <p className="text-blue-800 text-sm">{plan.summary}</p>
+              <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 mb-8">
+                <p className="text-teal-800 text-sm">{plan.summary}</p>
               </div>
             )}
 
@@ -458,7 +458,7 @@ export default function PlanPage() {
                             className={`w-full sm:w-auto px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition text-center ${
                               isCompleted
                                 ? "bg-slate-200 text-slate-600 hover:bg-slate-300"
-                                : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500"
+                                : "bg-gradient-to-r from-lime-500 to-teal-600 text-white hover:from-lime-400 hover:to-teal-500"
                             }`}
                           >
                             {isCompleted ? "Mark Incomplete" : "Mark Complete"}
@@ -472,7 +472,7 @@ export default function PlanPage() {
             </div>
 
             {/* Tips */}
-            <div className="mt-8 sm:mt-12 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-5 sm:p-8 text-white">
+            <div className="mt-8 sm:mt-12 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 rounded-2xl p-5 sm:p-8 text-white">
               <h3 className="text-lg sm:text-xl font-semibold mb-4">Pro Tips for Credit Improvement</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">

@@ -8,6 +8,21 @@ function isBureauDispute(reason: string): boolean {
   return r.includes("credit bureau dispute") || r.includes("fcra section 611") || r.includes("fcra 611");
 }
 
+interface UserProfile {
+  fullName: string;
+  dateOfBirth: string;
+  address: string;
+  address2?: string;
+  city: string;
+  state: string;
+  zip: string;
+}
+
+function formatUserAddress(profile: UserProfile): string {
+  const line2 = profile.address2 ? `\n${profile.address2}` : "";
+  return `${profile.address}${line2}\n${profile.city}, ${profile.state} ${profile.zip}`;
+}
+
 function generateBureauDisputeLetterContent(params: {
   creditorName: string;
   bureauAddress: CreditorAddress | null;
@@ -16,8 +31,9 @@ function generateBureauDisputeLetterContent(params: {
   reason: string;
   userName: string;
   balance?: number;
+  profile?: UserProfile | null;
 }): string {
-  const { creditorName, bureauAddress, bureauName, accountNumber, reason, userName, balance } = params;
+  const { creditorName, bureauAddress, bureauName, accountNumber, reason, userName, balance, profile } = params;
   const today = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -77,15 +93,10 @@ Please send the results of your investigation to the address below.
 
 Sincerely,
 
-${userName}
-[Your Address]
-[City, State ZIP]
+${profile?.fullName || userName}
+${profile ? formatUserAddress(profile) : "[Your Address]\n[City, State ZIP]"}
+${profile?.dateOfBirth ? `DOB: ${profile.dateOfBirth}` : ""}
 
----
-SEND THIS LETTER VIA CERTIFIED MAIL WITH RETURN RECEIPT REQUESTED
-
-This dispute letter was generated using Credit 800.
-The information contained herein is provided for educational purposes only.
 `;
 }
 
@@ -97,8 +108,9 @@ function generateDisputeLetterContent(params: {
   reason: string;
   userName: string;
   balance?: number;
+  profile?: UserProfile | null;
 }): string {
-  const { creditorName, creditorAddress, accountNumber, reason, userName, balance } = params;
+  const { creditorName, creditorAddress, accountNumber, reason, userName, balance, profile } = params;
   const today = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -162,15 +174,10 @@ Please respond in writing within 30 days. If I do not receive proper validation,
 
 Sincerely,
 
-${userName}
-[Your Address]
-[City, State ZIP]
+${profile?.fullName || userName}
+${profile ? formatUserAddress(profile) : "[Your Address]\n[City, State ZIP]"}
+${profile?.dateOfBirth ? `DOB: ${profile.dateOfBirth}` : ""}
 
----
-SEND THIS LETTER VIA CERTIFIED MAIL WITH RETURN RECEIPT REQUESTED
-
-This dispute letter was generated using Credit 800.
-The information contained herein is provided for educational purposes only.
 `;
 }
 
@@ -185,6 +192,25 @@ export async function POST(req: NextRequest) {
 
     const disputeReason = reason || "Information is inaccurate or unverifiable";
     const bureauDispute = isBureauDispute(disputeReason);
+
+    // Fetch user profile for letter personalization
+    let userProfile: UserProfile | null = null;
+    try {
+      const profileDoc = await firestore.getDoc(COLLECTIONS.users, user.uid);
+      if (profileDoc.exists && profileDoc.data.fullName) {
+        userProfile = {
+          fullName: profileDoc.data.fullName as string,
+          dateOfBirth: profileDoc.data.dateOfBirth as string,
+          address: profileDoc.data.address as string,
+          address2: (profileDoc.data.address2 as string) || "",
+          city: profileDoc.data.city as string,
+          state: profileDoc.data.state as string,
+          zip: profileDoc.data.zip as string,
+        };
+      }
+    } catch (profileError) {
+      console.error("Profile lookup failed (non-blocking):", profileError);
+    }
 
     // Look up address: bureau address for bureau disputes, creditor address otherwise
     let creditorAddress: CreditorAddress | null = null;
@@ -208,8 +234,9 @@ export async function POST(req: NextRequest) {
         bureauName: bureau || "Credit Bureau",
         accountNumber,
         reason: disputeReason,
-        userName: user.email?.split("@")[0] || "Consumer",
+        userName: userProfile?.fullName || user.email?.split("@")[0] || "Consumer",
         balance,
+        profile: userProfile,
       });
     } else {
       letterContent = generateDisputeLetterContent({
@@ -218,8 +245,9 @@ export async function POST(req: NextRequest) {
         accountNumber,
         bureau,
         reason: disputeReason,
-        userName: user.email?.split("@")[0] || "Consumer",
+        userName: userProfile?.fullName || user.email?.split("@")[0] || "Consumer",
         balance,
+        profile: userProfile,
       });
     }
 
