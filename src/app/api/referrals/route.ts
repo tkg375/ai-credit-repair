@@ -17,12 +17,12 @@ export async function GET(req: NextRequest) {
 
   try {
     // Find existing referral record
-    const referrals = await firestore.query("referrals", {
-      where: [{ field: "referrerId", op: "EQUAL", value: user.uid }],
-    });
+    const referrals = await firestore.query("referrals", [
+      { field: "referrerId", op: "EQUAL", value: user.uid },
+    ]);
 
     if (referrals.length > 0) {
-      return NextResponse.json({ referral: referrals[0] });
+      return NextResponse.json({ referral: { id: referrals[0].id, ...referrals[0].data } });
     }
 
     // Create new referral record
@@ -60,16 +60,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Find the referral by code
-    const referrals = await firestore.query("referrals", {
-      where: [{ field: "referralCode", op: "EQUAL", value: referralCode }],
-    });
+    const referrals = await firestore.query("referrals", [
+      { field: "referralCode", op: "EQUAL", value: referralCode },
+    ]);
 
     if (referrals.length === 0) {
       return NextResponse.json({ error: "Invalid referral code" }, { status: 404 });
     }
 
     const referral = referrals[0];
-    const existingUsers = (referral.referredUsers as string[]) || [];
+    const existingUsers = (referral.data.referredUsers as string[]) || [];
 
     // Don't add duplicate
     if (existingUsers.includes(newUserId)) {
@@ -77,9 +77,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Update referral record
-    await firestore.updateDoc("referrals", referral.id as string, {
+    await firestore.updateDoc("referrals", referral.id, {
       referredUsers: [...existingUsers, newUserId],
-      rewards: (referral.rewards as number || 0) + 1,
+      rewards: (referral.data.rewards as number || 0) + 1,
     });
 
     // Mark the new user as referred

@@ -7,17 +7,17 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const scores = await firestore.query("creditScores", {
-      where: [{ field: "userId", op: "EQUAL", value: user.uid }],
-    });
+    const scores = await firestore.query("creditScores", [
+      { field: "userId", op: "EQUAL", value: user.uid },
+    ]);
 
     const sorted = scores.sort((a, b) => {
-      const aDate = a.recordedAt ? new Date(a.recordedAt as string).getTime() : 0;
-      const bDate = b.recordedAt ? new Date(b.recordedAt as string).getTime() : 0;
+      const aDate = a.data.recordedAt ? new Date(a.data.recordedAt as string).getTime() : 0;
+      const bDate = b.data.recordedAt ? new Date(b.data.recordedAt as string).getTime() : 0;
       return aDate - bDate;
     });
 
-    return NextResponse.json({ scores: sorted });
+    return NextResponse.json({ scores: sorted.map((s) => ({ id: s.id, ...s.data })) });
   } catch (error) {
     console.error("Failed to fetch scores:", error);
     return NextResponse.json({ error: "Failed to fetch scores" }, { status: 500 });

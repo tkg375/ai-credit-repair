@@ -8,17 +8,17 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const docs = await firestore.query("documents", {
-      where: [{ field: "userId", op: "EQUAL", value: user.uid }],
-    });
+    const docs = await firestore.query("documents", [
+      { field: "userId", op: "EQUAL", value: user.uid },
+    ]);
 
     const sorted = docs.sort((a, b) => {
-      const aDate = a.uploadedAt ? new Date(a.uploadedAt as string).getTime() : 0;
-      const bDate = b.uploadedAt ? new Date(b.uploadedAt as string).getTime() : 0;
+      const aDate = a.data.uploadedAt ? new Date(a.data.uploadedAt as string).getTime() : 0;
+      const bDate = b.data.uploadedAt ? new Date(b.data.uploadedAt as string).getTime() : 0;
       return bDate - aDate;
     });
 
-    return NextResponse.json({ documents: sorted });
+    return NextResponse.json({ documents: sorted.map((d) => ({ id: d.id, ...d.data })) });
   } catch (error) {
     console.error("Failed to fetch documents:", error);
     return NextResponse.json({ error: "Failed to fetch documents" }, { status: 500 });
