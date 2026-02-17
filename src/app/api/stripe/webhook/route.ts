@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
           await firestore.updateDoc("users", uid, {
             stripeSubscriptionId: subscription.id,
             subscriptionStatus: subscription.status,
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+            currentPeriodEnd: new Date(subscription.currentPeriodEnd * 1000).toISOString(),
           });
         }
         break;
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
         if (uid) {
           await firestore.updateDoc("users", uid, {
             subscriptionStatus: subscription.status,
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+            currentPeriodEnd: new Date(subscription.currentPeriodEnd * 1000).toISOString(),
           });
         }
         break;
