@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   try {
     // Check if user already has a Stripe customer ID
     const userDoc = await firestore.getDoc("users", user.uid);
-    let customerId = userDoc?.stripeCustomerId as string | undefined;
+    let customerId = userDoc?.data?.stripeCustomerId as string | undefined;
 
     if (!customerId) {
       // Create Stripe customer

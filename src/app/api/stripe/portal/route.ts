@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const userDoc = await firestore.getDoc("users", user.uid);
-    const customerId = userDoc?.stripeCustomerId as string | undefined;
+    const customerId = userDoc?.data?.stripeCustomerId as string | undefined;
 
     if (!customerId) {
       return NextResponse.json({ error: "No subscription found" }, { status: 400 });

@@ -76,14 +76,14 @@ export async function DELETE(req: NextRequest) {
 
     // Get the document to find the blob URL
     const doc = await firestore.getDoc("documents", documentId);
-    if (!doc || doc.userId !== user.uid) {
+    if (!doc?.exists || doc.data.userId !== user.uid) {
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
     }
 
     // Delete from Vercel Blob
-    if (doc.blobUrl) {
+    if (doc.data.blobUrl) {
       try {
-        await del(doc.blobUrl as string);
+        await del(doc.data.blobUrl as string);
       } catch {
         // Blob might already be deleted
       }
