@@ -223,7 +223,7 @@ export default function PayoffPage() {
                     <AreaChart data={chartData}>
                       <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="#94a3b8" />
                       <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
-                      <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, ""]} />
+                      <Tooltip formatter={(value) => [`$${Number(value).toLocaleString()}`, ""]} />
                       <Legend />
                       <Area type="monotone" dataKey="Minimum" stroke="#94a3b8" fill="#f1f5f9" strokeWidth={2} />
                       <Area type="monotone" dataKey="Snowball" stroke="#06b6d4" fill="#cffafe" strokeWidth={2} />
