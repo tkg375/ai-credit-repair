@@ -26,10 +26,11 @@ export async function POST(req: NextRequest) {
         const uid = session.metadata?.firebaseUid;
         if (uid && session.subscription) {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+          const periodEnd = subscription.items.data[0]?.current_period_end;
           await firestore.updateDoc("users", uid, {
             stripeSubscriptionId: subscription.id,
             subscriptionStatus: subscription.status,
-            currentPeriodEnd: new Date(subscription.currentPeriodEnd * 1000).toISOString(),
+            ...(periodEnd && { currentPeriodEnd: new Date(periodEnd * 1000).toISOString() }),
           });
         }
         break;
@@ -40,9 +41,10 @@ export async function POST(req: NextRequest) {
         const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
         const uid = customer.metadata?.firebaseUid;
         if (uid) {
+          const periodEnd = subscription.items.data[0]?.current_period_end;
           await firestore.updateDoc("users", uid, {
             subscriptionStatus: subscription.status,
-            currentPeriodEnd: new Date(subscription.currentPeriodEnd * 1000).toISOString(),
+            ...(periodEnd && { currentPeriodEnd: new Date(periodEnd * 1000).toISOString() }),
           });
         }
         break;
