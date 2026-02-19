@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       { field: "userId", op: "EQUAL", value: user.uid },
     ]);
 
-    // Delete items in batches - Vercel has generous limits
+    // Delete items in batches
     let deleted = 0;
     const maxDeletes = 100;
 
