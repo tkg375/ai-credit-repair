@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
-import { upload } from "@vercel/blob/client";
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
 const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
@@ -126,16 +125,37 @@ export default function UploadPage() {
     setProgress("Uploading credit report...");
 
     try {
-      // Upload directly to Vercel Blob (bypasses API size limits)
-      const timestamp = Date.now();
-      const blob = await upload(`${user.uid}/${timestamp}-${file.name}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/reports/blob-upload",
+      // Get a pre-signed S3 upload URL (bypasses API size limits)
+      const urlRes = await fetch("/api/reports/get-upload-url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.idToken}`,
+        },
+        body: JSON.stringify({ fileName: file.name }),
       });
+
+      if (!urlRes.ok) {
+        const errorData = await urlRes.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to get upload URL");
+      }
+
+      const { uploadUrl, s3Key } = await urlRes.json();
+
+      // Upload directly to S3 (bypasses Next.js API size limits)
+      const putRes = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": "application/pdf" },
+      });
+
+      if (!putRes.ok) {
+        throw new Error(`S3 upload failed: ${putRes.status} ${putRes.statusText}`);
+      }
 
       setProgress("Creating report record...");
 
-      // Create report record with blob URL
+      // Create report record with S3 key
       const createRes = await fetch("/api/reports/create", {
         method: "POST",
         headers: {
@@ -146,7 +166,7 @@ export default function UploadPage() {
           fileName: file.name,
           fileSize: file.size,
           bureau: detectBureau(file.name),
-          blobUrl: blob.url,
+          s3Key,
         }),
       });
 
@@ -158,31 +178,64 @@ export default function UploadPage() {
 
       const { reportId } = await createRes.json();
 
-      setProgress("Analyzing credit report with AI... (this may take a minute for large reports)");
+      setProgress("Starting AI analysis...");
       setAnalyzing(true);
 
-      // Call analyze API with real PDF analysis
+      // Trigger background Lambda analysis (returns immediately with status: "processing")
       const analyzeRes = await fetch("/api/reports/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.idToken}`,
         },
-        body: JSON.stringify({
-          reportId,
-          simulateData: false, // Use real Claude analysis
-        }),
+        body: JSON.stringify({ reportId, simulateData: false }),
       });
 
       if (!analyzeRes.ok) {
         const errorData = await analyzeRes.json().catch(() => ({}));
-        throw new Error(errorData.details || errorData.error || "Failed to analyze report");
+        throw new Error(errorData.details || errorData.error || "Failed to start analysis");
       }
 
-      const analysisResult = await analyzeRes.json();
-      setProgress(`Found ${analysisResult.itemsCreated} accounts, ${analysisResult.disputableItems} disputable. Generating action plan...`);
+      // Poll for completion — Lambda runs in background, updates Firestore when done
+      setProgress("Analyzing credit report with AI... (this may take a few minutes for large reports)");
 
-      // Call plan generation API
+      const POLL_INTERVAL = 4000; // 4 seconds
+      const MAX_WAIT = 10 * 60 * 1000; // 10 minutes
+      const startTime = Date.now();
+
+      await new Promise<void>((resolve, reject) => {
+        const poll = async () => {
+          if (Date.now() - startTime > MAX_WAIT) {
+            reject(new Error("Analysis is taking longer than expected. Check back on your dashboard — it will appear when complete."));
+            return;
+          }
+
+          try {
+            const statusRes = await fetch(`/api/reports/status?reportId=${reportId}`, {
+              headers: { Authorization: `Bearer ${user.idToken}` },
+            });
+            const { status, errorMessage } = await statusRes.json();
+
+            if (status === "ANALYZED") {
+              resolve();
+            } else if (status === "ERROR") {
+              reject(new Error(errorMessage || "Analysis failed. Please try again."));
+            } else {
+              // Still ANALYZING — update progress message with elapsed time
+              const elapsed = Math.round((Date.now() - startTime) / 1000);
+              setProgress(`Analyzing credit report with AI... (${elapsed}s elapsed)`);
+              setTimeout(poll, POLL_INTERVAL);
+            }
+          } catch {
+            setTimeout(poll, POLL_INTERVAL);
+          }
+        };
+        setTimeout(poll, POLL_INTERVAL);
+      });
+
+      setProgress("Analysis complete! Generating action plan...");
+
+      // Plan is generated by the Lambda, but call generate in case it's needed
       const planRes = await fetch("/api/plans/generate", {
         method: "POST",
         headers: {
@@ -193,8 +246,8 @@ export default function UploadPage() {
       });
 
       if (!planRes.ok) {
-        const errorData = await planRes.json().catch(() => ({}));
-        throw new Error(errorData.details || errorData.error || "Failed to generate action plan");
+        // Plan generation is best-effort — don't block redirect on failure
+        console.warn("Plan generation failed, continuing to dashboard");
       }
 
       setProgress("Complete! Redirecting to dashboard...");

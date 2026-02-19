@@ -14,14 +14,14 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { fileName, fileSize, bureau, blobUrl } = await req.json();
+    const { fileName, fileSize, bureau, s3Key } = await req.json();
 
     // Create credit report record in Firestore
     const reportId = await firestore.addDoc(COLLECTIONS.creditReports, {
       userId: user.uid,
       fileName,
       fileSize,
-      blobUrl,
+      s3Key,
       uploadedAt: new Date().toISOString(),
       status: "UPLOADED",
       bureau: bureau || "UNKNOWN",

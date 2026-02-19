@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
-import { put } from "@vercel/blob";
+import { putObject } from "@/lib/s3";
 
 // Allow larger file uploads and longer execution
 export const runtime = "nodejs";
@@ -26,20 +26,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File must be a PDF" }, { status: 400 });
     }
 
-    // Upload to Vercel Blob
+    // Upload to S3
     const timestamp = Date.now();
-    const filename = `${user.uid}/${timestamp}-${file.name}`;
-
-    const blob = await put(filename, file, {
-      access: "public",
-      contentType: "application/pdf",
-    });
+    const s3Key = `reports/${user.uid}/${timestamp}-${file.name}`;
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    await putObject(s3Key, bytes, "application/pdf");
 
     // Create credit report record in Firestore
     const reportId = await firestore.addDoc(COLLECTIONS.creditReports, {
       userId: user.uid,
       fileName: file.name,
-      blobUrl: blob.url,
+      s3Key,
       fileSize: file.size,
       uploadedAt: new Date().toISOString(),
       status: "UPLOADED",

@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser, getLastAuthError } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
-import { analyzeWithGemini } from "@/lib/gemini-analyzer";
-import { analyzeWithClaude } from "@/lib/claude-analyzer";
+import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 
-// Allow up to 5 minutes for AI analysis
 export const runtime = "nodejs";
-export const maxDuration = 300;
+// Analyze route now just triggers Lambda — returns well within API Gateway 29s limit
+export const maxDuration = 30;
+
+function getLambdaClient() {
+  return new LambdaClient({
+    region: process.env.AWS_REGION || "us-east-1",
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    },
+  });
+}
 
 export async function POST(req: NextRequest) {
   let user;
@@ -318,159 +327,47 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Real PDF analysis with Gemini
-    const geminiKey = process.env.GEMINI_API_KEY;
-
-    if (!geminiKey) {
+    // Real PDF analysis — delegate to background Lambda
+    const functionName = process.env.LAMBDA_FUNCTION_NAME;
+    if (!functionName) {
       return NextResponse.json(
-        { error: "AI analysis not configured. Add GEMINI_API_KEY to environment." },
+        { error: "LAMBDA_FUNCTION_NAME not configured" },
         { status: 500 }
       );
     }
 
-    // Get the report record to find the blob URL
+    // Get the report to confirm it exists and get the s3Key
     const report = await firestore.getDoc(COLLECTIONS.creditReports, reportId);
     if (!report.exists) {
-      return NextResponse.json(
-        { error: "Report not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Report not found" }, { status: 404 });
     }
 
-    const blobUrl = report.data.blobUrl as string;
-    if (!blobUrl) {
+    const s3Key = (report.data.s3Key || report.data.blobUrl) as string;
+    if (!s3Key) {
       return NextResponse.json(
         { error: "PDF file not found for this report" },
         { status: 404 }
       );
     }
 
-    // Fetch PDF from Vercel Blob
-    const pdfResponse = await fetch(blobUrl);
-    if (!pdfResponse.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch PDF from storage" },
-        { status: 500 }
-      );
-    }
-
-    // Convert to base64 (chunk-based to handle large files)
-    const pdfBuffer = await pdfResponse.arrayBuffer();
-    const fileSizeMB = pdfBuffer.byteLength / (1024 * 1024);
-    console.log(`PDF size: ${fileSizeMB.toFixed(2)} MB`);
-
-    // Check file size - Gemini has limits
-    if (fileSizeMB > 20) {
-      return NextResponse.json(
-        { error: `PDF too large (${fileSizeMB.toFixed(1)}MB). Max 20MB supported.` },
-        { status: 400 }
-      );
-    }
-
-    const bytes = new Uint8Array(pdfBuffer);
-
-    // Process in chunks to avoid stack overflow
-    let pdfBase64 = "";
-    const chunkSize = 32768; // 32KB chunks
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-      const chunk = bytes.slice(i, i + chunkSize);
-      pdfBase64 += String.fromCharCode.apply(null, Array.from(chunk));
-    }
-    pdfBase64 = btoa(pdfBase64);
-
-    console.log(`Base64 size: ${(pdfBase64.length / (1024 * 1024)).toFixed(2)} MB`);
-
-    // Analyze with Gemini, fall back to Claude if Gemini is unavailable
     const bureau = (report.data.bureau as string) || "UNKNOWN";
-    let analysis;
-    let provider = "gemini";
-    try {
-      console.log("Starting Gemini analysis...");
-      analysis = await analyzeWithGemini(pdfBase64, geminiKey, bureau);
-      console.log(`Gemini analysis complete. Found ${analysis.items.length} items.`);
-    } catch (geminiError) {
-      console.error("Gemini analysis failed after retries:", geminiError);
 
-      // Fall back to Claude if available
-      const claudeKey = process.env.ANTHROPIC_API_KEY;
-      if (claudeKey) {
-        try {
-          console.log("Falling back to Claude for analysis...");
-          provider = "claude";
-          analysis = await analyzeWithClaude(pdfBase64, claudeKey, bureau);
-          console.log(`Claude fallback analysis complete. Found ${analysis.items.length} items.`);
-        } catch (claudeError) {
-          console.error("Claude fallback also failed:", claudeError);
-          return NextResponse.json(
-            { error: `AI analysis failed: All providers exhausted. Gemini: ${geminiError instanceof Error ? geminiError.message : String(geminiError)}. Claude: ${claudeError instanceof Error ? claudeError.message : String(claudeError)}` },
-            { status: 503 }
-          );
-        }
-      } else {
-        return NextResponse.json(
-          { error: `AI analysis failed: ${geminiError instanceof Error ? geminiError.message : String(geminiError)}` },
-          { status: 503 }
-        );
-      }
-    }
-
-    // Check for existing items for THIS specific report to avoid duplicates on re-analysis
-    const existingItems = await firestore.query(COLLECTIONS.reportItems, [
-      { field: "userId", op: "EQUAL", value: user.uid },
-      { field: "creditReportId", op: "EQUAL", value: reportId },
-    ]);
-
-    if (existingItems.length > 0) {
-      await firestore.updateDoc(COLLECTIONS.creditReports, reportId, {
-        status: "ANALYZED",
-        analyzedAt: new Date().toISOString(),
-      });
-
-      return NextResponse.json({
-        success: true,
-        itemsCreated: 0,
-        disputableItems: existingItems.filter(i => i.data.isDisputable).length,
-        message: "Report already analyzed. Existing items preserved.",
-      });
-    }
-
-    // Save items to Firestore (limit to 30 to avoid subrequest limit)
-    const itemsToSave = analysis.items.slice(0, 30);
-    for (const item of itemsToSave) {
-      await firestore.addDoc(COLLECTIONS.reportItems, {
-        userId: user.uid,
-        creditReportId: reportId,
-        ...item,
-      });
-    }
-
-    if (analysis.items.length > 30) {
-      console.log(`Saved ${itemsToSave.length} of ${analysis.items.length} items (limited to avoid timeout)`);
-    }
-
-    // Save credit score if found
-    if (analysis.creditScore) {
-      await firestore.addDoc(COLLECTIONS.creditScores, {
-        userId: user.uid,
-        score: analysis.creditScore,
-        bureau,
-        recordedAt: new Date().toISOString(),
-      });
-    }
-
-    // Update report status with summary
+    // Mark as ANALYZING so the client can show a progress state
     await firestore.updateDoc(COLLECTIONS.creditReports, reportId, {
-      status: "ANALYZED",
-      analyzedAt: new Date().toISOString(),
-      summary: analysis.summary,
+      status: "ANALYZING",
+      analysisStartedAt: new Date().toISOString(),
     });
 
-    return NextResponse.json({
-      success: true,
-      itemsCreated: analysis.items.length,
-      disputableItems: analysis.items.filter(i => i.isDisputable).length,
-      summary: analysis.summary,
-    });
+    // Fire-and-forget Lambda invocation (InvocationType: Event returns 202 immediately)
+    await getLambdaClient().send(new InvokeCommand({
+      FunctionName: functionName,
+      InvocationType: "Event",
+      Payload: JSON.stringify({ reportId, userId: user.uid, s3Key, bureau }),
+    }));
+
+    console.log(`Lambda invoked for report ${reportId}`);
+
+    return NextResponse.json({ status: "processing", reportId });
   } catch (err) {
     console.error("Analyze error:", err);
     return NextResponse.json(

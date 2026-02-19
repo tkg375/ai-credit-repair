@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore } from "@/lib/firebase-admin";
-import { put, del } from "@vercel/blob";
+import { putObject, deleteObject, getDownloadUrl } from "@/lib/s3";
 
 export async function GET(req: NextRequest) {
   const user = await getAuthUser();
@@ -18,7 +18,22 @@ export async function GET(req: NextRequest) {
       return bDate - aDate;
     });
 
-    return NextResponse.json({ documents: sorted.map((d) => ({ id: d.id, ...d.data })) });
+    // Generate pre-signed download URLs for each document
+    const documents = await Promise.all(
+      sorted.map(async (d) => {
+        const data = { id: d.id, ...d.data };
+        if (d.data.s3Key) {
+          try {
+            (data as Record<string, unknown>).downloadUrl = await getDownloadUrl(d.data.s3Key as string);
+          } catch {
+            // If URL generation fails, omit it
+          }
+        }
+        return data;
+      })
+    );
+
+    return NextResponse.json({ documents });
   } catch (error) {
     console.error("Failed to fetch documents:", error);
     return NextResponse.json({ error: "Failed to fetch documents" }, { status: 500 });
@@ -39,10 +54,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Upload to Vercel Blob
-    const blob = await put(`vault/${user.uid}/${Date.now()}-${file.name}`, file, {
-      access: "public",
-    });
+    // Upload to S3
+    const s3Key = `vault/${user.uid}/${Date.now()}-${file.name}`;
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    await putObject(s3Key, bytes, file.type || "application/octet-stream");
+
+    // Generate a pre-signed download URL to return immediately
+    const downloadUrl = await getDownloadUrl(s3Key);
 
     // Save metadata to Firestore
     const docId = await firestore.addDoc("documents", {
@@ -50,12 +68,12 @@ export async function POST(req: NextRequest) {
       name,
       type: file.type,
       size: file.size,
-      blobUrl: blob.url,
+      s3Key,
       category,
       uploadedAt: new Date().toISOString(),
     });
 
-    return NextResponse.json({ id: docId, url: blob.url });
+    return NextResponse.json({ id: docId, url: downloadUrl });
   } catch (error) {
     console.error("Failed to upload document:", error);
     return NextResponse.json({ error: "Failed to upload document" }, { status: 500 });
@@ -74,18 +92,18 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "documentId required" }, { status: 400 });
     }
 
-    // Get the document to find the blob URL
+    // Get the document to find the S3 key
     const doc = await firestore.getDoc("documents", documentId);
     if (!doc?.exists || doc.data.userId !== user.uid) {
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
     }
 
-    // Delete from Vercel Blob
-    if (doc.data.blobUrl) {
+    // Delete from S3
+    if (doc.data.s3Key) {
       try {
-        await del(doc.data.blobUrl as string);
+        await deleteObject(doc.data.s3Key as string);
       } catch {
-        // Blob might already be deleted
+        // Object might already be deleted
       }
     }
 
