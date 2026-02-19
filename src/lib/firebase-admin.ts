@@ -161,11 +161,12 @@ async function getAccessToken(): Promise<string> {
 
   const signInput = `${encodedHeader}.${encodedClaim}`;
 
-  // Import private key — PEM body is standard base64, decode directly with atob
+  // Import private key — strip headers and any non-base64 characters (handles
+  // literal \n sequences, actual newlines, spaces, carriage returns, etc.)
   const pemBody = privateKeyPem
-    .replace("-----BEGIN PRIVATE KEY-----", "")
-    .replace("-----END PRIVATE KEY-----", "")
-    .replace(/\s/g, "");
+    .replace(/-----BEGIN PRIVATE KEY-----/g, "")
+    .replace(/-----END PRIVATE KEY-----/g, "")
+    .replace(/[^A-Za-z0-9+/=]/g, "");
   const pemBinary = atob(pemBody);
   const pemBytes = new Uint8Array(pemBinary.length);
   for (let i = 0; i < pemBinary.length; i++) {
