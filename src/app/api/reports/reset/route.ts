@@ -75,9 +75,10 @@ export async function POST(req: NextRequest) {
         : `All data cleared! Deleted ${deleted} items.`,
     });
   } catch (err) {
-    console.error("Reset error:", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Reset error:", msg);
     return NextResponse.json(
-      { error: "Internal server error", details: String(err) },
+      { error: msg },
       { status: 500 }
     );
   }
