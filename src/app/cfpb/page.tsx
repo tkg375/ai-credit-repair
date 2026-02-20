@@ -21,6 +21,14 @@ function CFPBComplaintContent() {
   const [additionalDetails, setAdditionalDetails] = useState("");
   const [generatedComplaint, setGeneratedComplaint] = useState("");
   const [copied, setCopied] = useState(false);
+  const [showMailForm, setShowMailForm] = useState(false);
+  const [mailing, setMailing] = useState(false);
+  const [mailSent, setMailSent] = useState(false);
+  const [mailName, setMailName] = useState("");
+  const [mailAddress, setMailAddress] = useState("");
+  const [mailCity, setMailCity] = useState("");
+  const [mailState, setMailState] = useState("");
+  const [mailZip, setMailZip] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -28,7 +36,7 @@ function CFPBComplaintContent() {
     }
   }, [user, authLoading, router]);
 
-  // Load user profile for consumer name
+  // Load user profile for consumer name and address
   useEffect(() => {
     if (!user) return;
     fetch("/api/users/profile", {
@@ -36,12 +44,41 @@ function CFPBComplaintContent() {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.profile?.fullName) {
-          setConsumerName(data.profile.fullName);
-        }
+        if (data.profile?.fullName) setConsumerName(data.profile.fullName);
+        if (data.profile?.fullName) setMailName(data.profile.fullName);
+        if (data.profile?.address) setMailAddress(data.profile.address);
+        if (data.profile?.city) setMailCity(data.profile.city);
+        if (data.profile?.state) setMailState(data.profile.state);
+        if (data.profile?.zip) setMailZip(data.profile.zip);
       })
       .catch(() => {});
   }, [user]);
+
+  const handleMailCfpb = async () => {
+    if (!mailName || !mailAddress || !mailCity || !mailState || !mailZip) {
+      alert("Please fill in all return address fields.");
+      return;
+    }
+    setMailing(true);
+    try {
+      const res = await fetch("/api/cfpb/mail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user!.idToken}` },
+        body: JSON.stringify({
+          complaintText: generatedComplaint,
+          fromAddress: { name: mailName, address_line1: mailAddress, address_city: mailCity, address_state: mailState, address_zip: mailZip },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.details || data.error || "Failed to mail");
+      setMailSent(true);
+      setShowMailForm(false);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to mail complaint.");
+    } finally {
+      setMailing(false);
+    }
+  };
 
   const handleGenerate = () => {
     if (!selectedType) return;
@@ -203,18 +240,28 @@ function CFPBComplaintContent() {
             <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">Generated Complaint</h2>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button
                     onClick={handleCopy}
                     className="px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition"
                   >
-                    {copied ? "Copied!" : "Copy to Clipboard"}
+                    {copied ? "Copied!" : "Copy"}
                   </button>
+                  {mailSent ? (
+                    <span className="px-4 py-2 text-sm bg-green-100 text-green-700 rounded-lg font-medium">✓ Mailed to CFPB</span>
+                  ) : (
+                    <button
+                      onClick={() => setShowMailForm(!showMailForm)}
+                      className="px-4 py-2 text-sm bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-lg hover:opacity-90 transition"
+                    >
+                      Mail to CFPB via USPS
+                    </button>
+                  )}
                   <button
                     onClick={() => setGeneratedComplaint("")}
                     className="px-4 py-2 text-sm border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50 transition"
                   >
-                    Edit Details
+                    Edit
                   </button>
                 </div>
               </div>
@@ -222,6 +269,33 @@ function CFPBComplaintContent() {
                 {generatedComplaint}
               </pre>
             </div>
+
+            {showMailForm && (
+              <div className="bg-white rounded-xl border border-slate-200 p-5">
+                <h3 className="font-semibold mb-1">Your Return Address</h3>
+                <p className="text-xs text-slate-500 mb-4">We&apos;ll mail your complaint directly to the CFPB at PO Box 27170, Washington DC 20038.</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <input type="text" placeholder="Full Name *" value={mailName} onChange={e => setMailName(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <input type="text" placeholder="Street Address *" value={mailAddress} onChange={e => setMailAddress(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+                  </div>
+                  <input type="text" placeholder="City *" value={mailCity} onChange={e => setMailCity(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+                  <div className="flex gap-2">
+                    <input type="text" placeholder="State *" value={mailState} onChange={e => setMailState(e.target.value)} maxLength={2} className="w-16 px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+                    <input type="text" placeholder="ZIP *" value={mailZip} onChange={e => setMailZip(e.target.value)} className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+                  </div>
+                </div>
+                <button
+                  onClick={handleMailCfpb}
+                  disabled={mailing}
+                  className="mt-4 w-full py-2.5 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-lg font-medium hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {mailing ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Mailing...</> : "Confirm & Mail to CFPB"}
+                </button>
+              </div>
+            )}
 
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
               <h3 className="font-medium text-amber-800 mb-2">How to Submit</h3>

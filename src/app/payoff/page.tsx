@@ -15,6 +15,9 @@ const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: 
 const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), { ssr: false });
 const Legend = dynamic(() => import("recharts").then((m) => m.Legend), { ssr: false });
 
+const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
+const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+
 export default function PayoffPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -24,10 +27,62 @@ export default function PayoffPage() {
   const [extraPayment, setExtraPayment] = useState(200);
   const [results, setResults] = useState<{ avalanche: PayoffResult; snowball: PayoffResult; minimum: PayoffResult } | null>(null);
   const [nextId, setNextId] = useState(2);
+  const [loadingReport, setLoadingReport] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/login");
   }, [user, authLoading, router]);
+
+  const loadFromReport = async () => {
+    if (!user) return;
+    setLoadingReport(true);
+    try {
+      const res = await fetch(`${FIRESTORE_BASE}:runQuery`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: "reportItems" }],
+            where: { fieldFilter: { field: { fieldPath: "userId" }, op: "EQUAL", value: { stringValue: user.uid } } },
+          },
+        }),
+      });
+      const data = await res.json();
+      const items = data.filter((r: Record<string, unknown>) => r.document).map((r: Record<string, unknown>) => {
+        const doc = r.document as Record<string, unknown>;
+        const fields = doc.fields as Record<string, Record<string, unknown>>;
+        const get = (f: string) => fields?.[f];
+        const str = (f: string) => (get(f)?.stringValue as string) || "";
+        const num = (f: string) => Number(get(f)?.integerValue || get(f)?.doubleValue || 0);
+        return { creditorName: str("creditorName"), accountType: str("accountType"), balance: num("balance") };
+      }).filter((i: { balance: number }) => i.balance > 0);
+
+      if (items.length === 0) {
+        alert("No debts with balances found in your credit report. Upload a report first.");
+        return;
+      }
+
+      let id = nextId;
+      const loaded: Debt[] = items.map((item: { creditorName: string; accountType: string; balance: number }) => {
+        const minPct = item.accountType.toLowerCase().includes("credit card") ? 0.02 : 0.015;
+        return {
+          id: String(id++),
+          name: item.creditorName || "Unknown Creditor",
+          balance: item.balance,
+          interestRate: item.accountType.toLowerCase().includes("credit card") ? 22.99 : 18.0,
+          minimumPayment: Math.max(25, Math.round(item.balance * minPct)),
+        };
+      });
+      setDebts(loaded);
+      setNextId(id);
+      setResults(null);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load debts from report.");
+    } finally {
+      setLoadingReport(false);
+    }
+  };
 
   const addDebt = () => {
     setDebts([...debts, { id: String(nextId), name: `Debt ${nextId}`, balance: 0, interestRate: 0, minimumPayment: 0 }]);
@@ -89,9 +144,22 @@ export default function PayoffPage() {
   return (
     <AuthenticatedLayout activeNav="payoff">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 bg-clip-text text-transparent">
-          Debt Payoff Optimizer
-        </h1>
+        <div className="flex items-start justify-between mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 bg-clip-text text-transparent">
+            Debt Payoff Optimizer
+          </h1>
+          <button
+            onClick={loadFromReport}
+            disabled={loadingReport}
+            className="px-4 py-2 text-sm bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-700 transition disabled:opacity-50 flex items-center gap-2"
+          >
+            {loadingReport ? (
+              <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Loading...</>
+            ) : (
+              <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>Load from Report</>
+            )}
+          </button>
+        </div>
         <p className="text-slate-500 mb-8">Compare strategies to pay off your debt faster and save money.</p>
 
         {/* Debt Inputs */}

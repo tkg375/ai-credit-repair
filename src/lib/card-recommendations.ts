@@ -11,6 +11,8 @@ export interface CreditCard {
   bestFor: string;
   scoreRange: { min: number; max: number };
   colorClass: string;
+  applyUrl: string;
+  bonusOffer?: string;
 }
 
 export const creditCards: CreditCard[] = [
@@ -27,6 +29,8 @@ export const creditCards: CreditCard[] = [
     bestFor: "Best overall secured card",
     scoreRange: { min: 300, max: 650 },
     colorClass: "from-orange-400 to-orange-600",
+    applyUrl: "https://www.discover.com/credit-cards/secured/",
+    bonusOffer: "Cashback Match™ — dollar-for-dollar match all cash back earned in your first year",
   },
   {
     id: "capital-one-platinum-secured",
@@ -41,6 +45,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "Building credit with Capital One",
     scoreRange: { min: 300, max: 600 },
     colorClass: "from-blue-600 to-blue-800",
+    applyUrl: "https://www.capitalone.com/credit-cards/secured-mastercard/",
   },
   {
     id: "opensky-secured",
@@ -55,6 +60,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "No credit check needed",
     scoreRange: { min: 300, max: 850 },
     colorClass: "from-sky-400 to-sky-600",
+    applyUrl: "https://www.openskycc.com/",
   },
   {
     id: "chime-credit-builder",
@@ -69,6 +75,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "No fees at all",
     scoreRange: { min: 300, max: 850 },
     colorClass: "from-green-400 to-green-600",
+    applyUrl: "https://www.chime.com/credit-builder-visa-credit-card/",
   },
   {
     id: "self-credit-builder",
@@ -83,6 +90,8 @@ export const creditCards: CreditCard[] = [
     bestFor: "Build credit and savings simultaneously",
     scoreRange: { min: 300, max: 850 },
     colorClass: "from-purple-400 to-purple-600",
+    applyUrl: "https://www.self.inc/",
+    bonusOffer: "Save money while building credit — get your savings back at the end",
   },
   {
     id: "citi-secured",
@@ -97,6 +106,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "Citi banking customers",
     scoreRange: { min: 300, max: 650 },
     colorClass: "from-blue-500 to-indigo-600",
+    applyUrl: "https://www.citi.com/credit-cards/citi-secured-mastercard-credit-card",
   },
   {
     id: "boa-secured",
@@ -111,6 +121,8 @@ export const creditCards: CreditCard[] = [
     bestFor: "Best rewards on a secured card",
     scoreRange: { min: 300, max: 650 },
     colorClass: "from-red-500 to-red-700",
+    applyUrl: "https://www.bankofamerica.com/credit-cards/products/cash-back-credit-card/",
+    bonusOffer: "3% cash back in your chosen category — top rewards on a secured card",
   },
   {
     id: "first-progress-platinum",
@@ -125,6 +137,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "Lowest APR secured card",
     scoreRange: { min: 300, max: 850 },
     colorClass: "from-yellow-500 to-amber-600",
+    applyUrl: "https://www.firstprogress.com/",
   },
   {
     id: "applied-bank-secured",
@@ -139,6 +152,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "Lowest fixed APR option",
     scoreRange: { min: 300, max: 850 },
     colorClass: "from-amber-400 to-amber-600",
+    applyUrl: "https://www.appliedbank.com/secured-visa-gold-card/",
   },
   {
     id: "credit-one-platinum",
@@ -153,6 +167,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "Unsecured option for bad credit",
     scoreRange: { min: 500, max: 650 },
     colorClass: "from-slate-600 to-slate-800",
+    applyUrl: "https://www.creditonebank.com/credit-cards/platinum-visa",
   },
 ];
 

@@ -155,7 +155,7 @@ export default function RecommendationsPage() {
                       </div>
                     </div>
 
-                    <ul className="text-xs text-slate-600 space-y-1">
+                    <ul className="text-xs text-slate-600 space-y-1 mb-3">
                       {card.features.slice(0, 3).map((f, i) => (
                         <li key={i} className="flex items-start gap-1">
                           <span className="text-teal-500 mt-0.5">+</span>
@@ -163,6 +163,19 @@ export default function RecommendationsPage() {
                         </li>
                       ))}
                     </ul>
+                    {card.bonusOffer && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+                        <p className="text-xs text-amber-800 font-medium">🎁 {card.bonusOffer}</p>
+                      </div>
+                    )}
+                    <a
+                      href={card.applyUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-sm font-medium rounded-lg hover:opacity-90 transition"
+                    >
+                      Apply Now →
+                    </a>
                   </div>
                 </div>
               </div>

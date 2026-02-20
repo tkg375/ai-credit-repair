@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
 import { NotificationBell } from "@/components/NotificationBell";
 
-type NavItem = "dashboard" | "upload" | "tools" | "disputes" | "plan" | "scores" | "simulator" | "education" | "vault" | "payoff" | "recommendations" | "cfpb" | "referrals" | "pricing";
+type NavItem = "dashboard" | "upload" | "tools" | "disputes" | "plan" | "scores" | "simulator" | "education" | "vault" | "payoff" | "recommendations" | "cfpb" | "referrals" | "pricing" | "utilization" | "bureaus";
 
 const mainNavItems: { href: string; label: string; key: NavItem }[] = [
   { href: "/dashboard", label: "Dashboard", key: "dashboard" },
@@ -23,6 +23,8 @@ const moreNavItems: { href: string; label: string; key: NavItem }[] = [
   { href: "/vault", label: "Document Vault", key: "vault" },
   { href: "/payoff", label: "Debt Payoff", key: "payoff" },
   { href: "/recommendations", label: "Card Picks", key: "recommendations" },
+  { href: "/utilization", label: "Utilization Optimizer", key: "utilization" },
+  { href: "/bureaus", label: "Bureau Comparison", key: "bureaus" },
   { href: "/cfpb", label: "CFPB Complaint", key: "cfpb" },
   { href: "/referrals", label: "Referrals", key: "referrals" },
   { href: "/pricing", label: "Upgrade", key: "pricing" },

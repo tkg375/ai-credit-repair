@@ -150,6 +150,7 @@ export default function DisputesPage() {
   const [strategyPicker, setStrategyPicker] = useState<string | null>(null);
   const [mailing, setMailing] = useState<string | null>(null);
   const [checkingStatus, setCheckingStatus] = useState<string | null>(null);
+  const [escalating, setEscalating] = useState<string | null>(null);
   const [showMailForm, setShowMailForm] = useState(false);
   const [mailFormName, setMailFormName] = useState("");
   const [mailFormAddress, setMailFormAddress] = useState("");
@@ -420,6 +421,54 @@ export default function DisputesPage() {
       alert("Failed to mark dispute as resolved. Please try again.");
     } finally {
       setResolving(null);
+    }
+  };
+
+  const handleEscalate = async (disputeId: string) => {
+    if (!user) return;
+    const dispute = disputes.find(d => d.id === disputeId);
+    if (!dispute) return;
+
+    // Determine round: check if already escalated once
+    const round = 2; // For now always round 2; round 3 can be triggered from the escalated dispute
+
+    setEscalating(disputeId);
+    try {
+      const res = await fetch("/api/disputes/escalate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
+        body: JSON.stringify({ disputeId, round }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to escalate");
+
+      // Add the new escalation dispute to the list
+      const newDispute = {
+        id: data.disputeId,
+        itemId: dispute.itemId,
+        creditorName: dispute.creditorName,
+        bureau: dispute.bureau,
+        reason: `[Round 2] Method of Verification Demand`,
+        status: "DRAFT",
+        letterContent: data.letterContent,
+        createdAt: new Date(),
+        addressSource: dispute.addressSource,
+        addressConfidence: dispute.addressConfidence,
+        mailJobId: null,
+        mailStatus: null,
+        mailError: null,
+        mailedAt: null,
+        mailTracking: null,
+        resolvedAt: null,
+      };
+      setDisputes(prev => [newDispute, ...prev]);
+      setSelectedDispute(newDispute);
+      alert("Round 2 escalation letter created! Review and mail it to apply more pressure.");
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Failed to escalate dispute.");
+    } finally {
+      setEscalating(null);
     }
   };
 
@@ -1439,6 +1488,22 @@ export default function DisputesPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         Mail via USPS
+                      </>
+                    )}
+                  </button>
+                )}
+                {(selectedDispute.status === "SENT" || selectedDispute.status === "UNDER_INVESTIGATION") && (
+                  <button
+                    onClick={() => handleEscalate(selectedDispute.id)}
+                    disabled={escalating === selectedDispute.id}
+                    className="flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-medium hover:from-amber-400 hover:to-orange-400 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {escalating === selectedDispute.id ? (
+                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Escalating...</>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                        Escalate (Round 2)
                       </>
                     )}
                   </button>

@@ -28,6 +28,7 @@ export default function ScoresPage() {
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   // Form state
   const [newScore, setNewScore] = useState(700);
@@ -60,6 +61,39 @@ export default function ScoresPage() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [user, authLoading, router]);
+
+  const handleImportScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setImporting(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = (reader.result as string).split(",")[1];
+        const res = await fetch("/api/scores/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
+          body: JSON.stringify({ imageBase64: base64, mimeType: file.type }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to import");
+        setScores(prev => [...prev, {
+          id: data.id,
+          score: data.score,
+          source: data.source,
+          bureau: data.bureau,
+          recordedAt: data.recordedAt,
+        }].sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime()));
+        alert(`Score ${data.score} imported successfully!`);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to import screenshot.");
+    } finally {
+      setImporting(false);
+      e.target.value = "";
+    }
+  };
 
   const handleAddScore = async () => {
     if (!user) return;
@@ -108,6 +142,14 @@ export default function ScoresPage() {
   const oldestScore = scores.length > 1 ? scores[0].score : null;
   const change = latestScore && oldestScore ? latestScore - oldestScore : null;
 
+  const target = 800;
+  const pointsNeeded = latestScore ? Math.max(0, target - latestScore) : null;
+  const progressPct = latestScore ? Math.min(100, ((latestScore - 300) / (target - 300)) * 100) : 0;
+  const monthlyRate = change && scores.length > 1
+    ? change / Math.max(1, (new Date(scores[scores.length - 1].recordedAt).getTime() - new Date(scores[0].recordedAt).getTime()) / (1000 * 60 * 60 * 24 * 30))
+    : null;
+  const monthsTo800 = monthlyRate && monthlyRate > 0 && pointsNeeded ? Math.ceil(pointsNeeded / monthlyRate) : null;
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
@@ -126,34 +168,85 @@ export default function ScoresPage() {
             </h1>
             <p className="text-slate-500 mt-1">Track your credit score over time</p>
           </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition"
-          >
-            + Add Score
-          </button>
+          <div className="flex gap-2">
+            <label className={`px-4 py-2 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition cursor-pointer flex items-center gap-2 ${importing ? "opacity-50 pointer-events-none" : ""}`}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              {importing ? "Scanning..." : "Import Screenshot"}
+              <input type="file" accept="image/*" className="hidden" onChange={handleImportScreenshot} disabled={importing} />
+            </label>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="px-4 py-2 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition"
+            >
+              + Add Score
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}
         {latestScore && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-            <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <p className="text-sm text-slate-500">Current Score</p>
-              <p className="text-3xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">{latestScore}</p>
-            </div>
-            {change !== null && (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
               <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <p className="text-sm text-slate-500">Total Change</p>
-                <p className={`text-3xl font-bold ${change >= 0 ? "text-green-600" : "text-red-600"}`}>
-                  {change >= 0 ? "+" : ""}{change}
-                </p>
+                <p className="text-sm text-slate-500">Current Score</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">{latestScore}</p>
               </div>
-            )}
-            <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <p className="text-sm text-slate-500">Entries</p>
-              <p className="text-3xl font-bold text-slate-900">{scores.length}</p>
+              {change !== null && (
+                <div className="bg-white rounded-xl border border-slate-200 p-4">
+                  <p className="text-sm text-slate-500">Total Change</p>
+                  <p className={`text-3xl font-bold ${change >= 0 ? "text-green-600" : "text-red-600"}`}>
+                    {change >= 0 ? "+" : ""}{change}
+                  </p>
+                </div>
+              )}
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <p className="text-sm text-slate-500">Points to 800</p>
+                <p className="text-3xl font-bold text-slate-900">{pointsNeeded}</p>
+              </div>
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <p className="text-sm text-slate-500">Entries</p>
+                <p className="text-3xl font-bold text-slate-900">{scores.length}</p>
+              </div>
             </div>
-          </div>
+
+            {/* Path to 800 */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-semibold">Path to 800</h2>
+                {monthsTo800 && <span className="text-sm text-teal-600 font-medium">~{monthsTo800} months at current pace</span>}
+              </div>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-sm text-slate-500 w-8">{latestScore}</span>
+                <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 rounded-full transition-all duration-500"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+                <span className="text-sm font-bold text-slate-700 w-8">800</span>
+              </div>
+              <div className="grid grid-cols-3 gap-3 mt-4">
+                {[
+                  { label: "Fair", range: "580–669", color: "bg-red-100 text-red-700" },
+                  { label: "Good", range: "670–739", color: "bg-amber-100 text-amber-700" },
+                  { label: "Very Good", range: "740–799", color: "bg-lime-100 text-lime-700" },
+                ].map((tier) => (
+                  <div key={tier.label} className={`rounded-lg p-2 text-center ${tier.color}`}>
+                    <p className="text-xs font-semibold">{tier.label}</p>
+                    <p className="text-xs">{tier.range}</p>
+                  </div>
+                ))}
+              </div>
+              {monthlyRate !== null && monthlyRate > 0 && (
+                <p className="text-xs text-slate-500 mt-3">
+                  Based on your average improvement of +{monthlyRate.toFixed(1)} pts/month. Disputed items typically add 20–100 points each when removed.
+                </p>
+              )}
+              {scores.length < 2 && (
+                <p className="text-xs text-slate-500 mt-3">Add at least 2 score entries to see your projected timeline.</p>
+              )}
+            </div>
+          </>
         )}
 
         {/* Add Score Form */}

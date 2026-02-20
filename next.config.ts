@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
     S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY ?? "",
     LAMBDA_FUNCTION_NAME: process.env.LAMBDA_FUNCTION_NAME ?? "",
     LOB_API_KEY: process.env.LOB_API_KEY ?? "",
+    RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",
   },
 };
 

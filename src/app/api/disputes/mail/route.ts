@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
 import { sendLetter, letterToHtml, type LobAddress } from "@/lib/lob";
+import { sendDisputeMailedEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   const user = await getAuthUser();
@@ -122,6 +123,13 @@ export async function POST(request: NextRequest) {
       status: "SENT",
       updatedAt: now,
     });
+
+    // Send email notification (non-blocking)
+    if (user.email) {
+      const profileDoc = await firestore.getDoc(COLLECTIONS.users, user.uid).catch(() => null);
+      const name = (profileDoc?.data?.fullName as string) || "";
+      sendDisputeMailedEmail(user.email, name, creditorName, letter.expected_delivery_date || "").catch(() => {});
+    }
 
     return NextResponse.json({
       success: true,

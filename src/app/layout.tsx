@@ -17,6 +17,16 @@ export const metadata: Metadata = {
   title: "Credit 800 - AI-Powered Credit Repair",
   description:
     "Analyze your credit report, dispute inaccuracies, and get a personalized action plan to reach an 800 credit score.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Credit 800",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "msapplication-TileColor": "#14b8a6",
+  },
 };
 
 export default function RootLayout({
