@@ -6,9 +6,9 @@ export async function GET() {
   // Process the key the same way firebase-admin.ts does
   const afterNewlineReplace = raw.replace(/\\n/g, "\n");
   const pemBody = afterNewlineReplace
-    .replace(/-----BEGIN PRIVATE KEY-----/g, "")
-    .replace(/-----END PRIVATE KEY-----/g, "")
-    .replace(/[^A-Za-z0-9+/=]/g, "");
+    .split("\n")
+    .filter(line => /^[A-Za-z0-9+/=]+$/.test(line.trim()))
+    .join("");
 
   // Try to decode and import to get the real error
   let keyDiag: Record<string, unknown> = {
