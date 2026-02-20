@@ -1,24 +1,44 @@
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
+import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
+
 const FROM_EMAIL = "Credit 800 <noreply@credit-800.com>";
 
+function getSesClient() {
+  const region = process.env.S3_REGION || "us-east-1";
+  const accessKeyId = process.env.S3_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+
+  if (!accessKeyId || !secretAccessKey) {
+    return null;
+  }
+
+  return new SESv2Client({
+    region,
+    credentials: { accessKeyId, secretAccessKey },
+  });
+}
+
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
-  if (!RESEND_API_KEY) {
-    console.warn("[email] RESEND_API_KEY not set — skipping email:", subject);
+  const client = getSesClient();
+  if (!client) {
+    console.warn("[email] AWS credentials not set — skipping email:", subject);
     return;
   }
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-    },
-    body: JSON.stringify({ from: FROM_EMAIL, to, subject, html }),
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    console.error("[email] Resend error:", err);
+  try {
+    await client.send(
+      new SendEmailCommand({
+        FromEmailAddress: FROM_EMAIL,
+        Destination: { ToAddresses: [to] },
+        Content: {
+          Simple: {
+            Subject: { Data: subject, Charset: "UTF-8" },
+            Body: { Html: { Data: html, Charset: "UTF-8" } },
+          },
+        },
+      })
+    );
+  } catch (err) {
+    console.error("[email] SES error:", err);
   }
 }
 
