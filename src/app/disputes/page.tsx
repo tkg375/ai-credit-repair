@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { Logo } from "@/components/Logo";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
 const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
@@ -721,42 +721,7 @@ export default function DisputesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white text-slate-900">
-      <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto border-b border-slate-200">
-        <Link href="/">
-          <Logo className="h-7 sm:h-8 w-auto" />
-        </Link>
-        <div className="hidden md:flex gap-4 text-sm items-center">
-          <Link href="/dashboard" className="text-slate-600 hover:text-teal-600 transition">
-            Dashboard
-          </Link>
-          <Link href="/upload" className="text-slate-600 hover:text-teal-600 transition">
-            Upload Report
-          </Link>
-          <Link href="/tools" className="text-slate-600 hover:text-teal-600 transition">
-            Credit Tools
-          </Link>
-          <Link href="/plan" className="text-slate-600 hover:text-teal-600 transition">
-            Action Plan
-          </Link>
-        </div>
-        <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 text-slate-600">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            {menuOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
-          </svg>
-        </button>
-      </nav>
-      {menuOpen && (
-        <div className="md:hidden border-b border-slate-200 bg-white">
-          <div className="px-4 py-3 space-y-3">
-            <Link href="/dashboard" className="block text-slate-600" onClick={() => setMenuOpen(false)}>Dashboard</Link>
-            <Link href="/upload" className="block text-slate-600" onClick={() => setMenuOpen(false)}>Upload Report</Link>
-            <Link href="/tools" className="block text-slate-600" onClick={() => setMenuOpen(false)}>Credit Tools</Link>
-            <Link href="/plan" className="block text-slate-600" onClick={() => setMenuOpen(false)}>Action Plan</Link>
-          </div>
-        </div>
-      )}
-
+    <AuthenticatedLayout activeNav="disputes">
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">Disputes</h1>
         <p className="text-slate-600 mb-6 sm:mb-8 text-sm sm:text-base">
@@ -1513,6 +1478,6 @@ export default function DisputesPage() {
           </div>
         )}
       </main>
-    </div>
+    </AuthenticatedLayout>
   );
 }
