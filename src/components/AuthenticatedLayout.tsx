@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
@@ -73,6 +73,23 @@ export function AuthenticatedLayout({
 }) {
   const { user, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileName, setProfileName] = useState<string | null>(null);
+  const [profilePhone, setProfilePhone] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    fetch("/api/users/profile", {
+      headers: { Authorization: `Bearer ${user.idToken}` },
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.profile) {
+          setProfileName(d.profile.fullName || null);
+          setProfilePhone(d.profile.phone || null);
+        }
+      })
+      .catch(() => {});
+  }, [user]);
 
   const navLinks = (onClick?: () => void) => (
     <nav className="flex-1 overflow-y-auto py-4">
@@ -123,11 +140,11 @@ export function AuthenticatedLayout({
             className={`flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition ${activeNav === "profile" ? "bg-gradient-to-r from-lime-500/10 to-teal-500/10" : ""}`}
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime-400 to-teal-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
-              {(user?.email || "?")[0].toUpperCase()}
+              {(profileName || user?.email || "?")[0].toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-medium text-slate-700 truncate">{user?.email}</p>
-              <p className="text-xs text-slate-400">View profile</p>
+              <p className="text-xs font-medium text-slate-700 truncate">{profileName || user?.email}</p>
+              <p className="text-xs text-slate-400 truncate">{profilePhone || user?.email}</p>
             </div>
           </Link>
           <div className="flex items-center justify-between px-2">
