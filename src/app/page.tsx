@@ -5,59 +5,61 @@ import { ScoreChart } from "@/components/ScoreChart";
 export default function Home() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      {/* Nav */}
-      <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
-        <Logo className="h-10 sm:h-14 w-auto" />
-        <div className="flex gap-2 sm:gap-4">
-          <Link
-            href="/login"
-            className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap"
-          >
-            Log In
-          </Link>
-          <Link
-            href="/register"
-            className="px-3 sm:px-4 py-2 text-sm bg-teal-600 hover:bg-teal-500 text-white rounded-lg transition whitespace-nowrap"
-          >
-            Get Started
-          </Link>
-        </div>
-      </nav>
+      {/* Nav + Hero with gradient background */}
+      <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
+        <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
+          <Logo className="h-10 sm:h-14 w-auto" />
+          <div className="flex gap-2 sm:gap-4">
+            <Link
+              href="/login"
+              className="px-3 sm:px-4 py-2 text-sm text-white/90 hover:text-white transition whitespace-nowrap"
+            >
+              Log In
+            </Link>
+            <Link
+              href="/register"
+              className="px-3 sm:px-4 py-2 text-sm bg-white text-teal-600 hover:bg-lime-50 rounded-lg transition whitespace-nowrap font-medium"
+            >
+              Get Started
+            </Link>
+          </div>
+        </nav>
 
-      {/* Hero */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-16 pb-12 sm:pb-16">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
-              Fix Your Credit
-              <br />
-              <span className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 bg-clip-text text-transparent">With AI</span>
-            </h1>
-            <p className="mt-4 sm:mt-6 text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed">
-              Upload your credit report. Our AI analyzes every line item, finds
-              disputable inaccuracies, generates FCRA-compliant dispute letters,
-              and builds a personalized plan to raise your score.
-            </p>
-            <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Link
-                href="/register"
-                className="px-6 py-3 bg-gradient-to-r from-lime-500 to-teal-600 hover:from-lime-400 hover:to-teal-500 text-white rounded-lg font-medium transition text-center"
-              >
-                Start Free Analysis
-              </Link>
-              <a
-                href="#how-it-works"
-                className="px-6 py-3 border border-slate-300 hover:border-slate-400 rounded-lg font-medium transition text-center"
-              >
-                How It Works
-              </a>
+        {/* Hero */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-16 pb-12 sm:pb-16">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-white">
+                Fix Your Credit
+                <br />
+                <span className="text-white/90">With AI</span>
+              </h1>
+              <p className="mt-4 sm:mt-6 text-base sm:text-lg text-lime-100 max-w-xl leading-relaxed">
+                Upload your credit report. Our AI analyzes every line item, finds
+                disputable inaccuracies, generates FCRA-compliant dispute letters,
+                and builds a personalized plan to raise your score.
+              </p>
+              <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <Link
+                  href="/register"
+                  className="px-6 py-3 bg-white text-teal-600 hover:bg-lime-50 rounded-lg font-medium transition text-center"
+                >
+                  Start Free Analysis
+                </Link>
+                <a
+                  href="#how-it-works"
+                  className="px-6 py-3 border border-white/50 hover:border-white text-white rounded-lg font-medium transition text-center"
+                >
+                  How It Works
+                </a>
+              </div>
+            </div>
+            <div className="hidden lg:block">
+              <ScoreChart className="w-full max-w-md mx-auto" />
             </div>
           </div>
-          <div className="hidden lg:block">
-            <ScoreChart className="w-full max-w-md mx-auto" />
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* How It Works */}
       <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
