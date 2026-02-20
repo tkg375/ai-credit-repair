@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
@@ -9,6 +9,7 @@ import { Logo } from "@/components/Logo";
 export default function RegisterPage() {
   const { signUp } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -19,8 +20,14 @@ export default function RegisterPage() {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zip, setZip] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) setReferralCode(ref.toUpperCase());
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +85,15 @@ export default function RegisterPage() {
           zip: zip.trim(),
         }),
       });
+
+      // Redeem referral code if provided
+      if (referralCode.trim()) {
+        fetch("/api/referrals", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ referralCode: referralCode.trim().toUpperCase(), newUserId: user.uid }),
+        }).catch(() => {});
+      }
 
       router.push("/dashboard");
     } catch {
@@ -217,6 +233,22 @@ export default function RegisterPage() {
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Referral Code <span className="text-slate-400 font-normal">(optional)</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. C800-ABCD12"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition font-mono tracking-wider"
+              />
+              {referralCode && (
+                <p className="text-xs text-teal-600 mt-1">✓ Referral code applied — you&apos;ll both get a free month of Pro!</p>
+              )}
+            </div>
+
             <button
               type="submit"
               disabled={loading}
