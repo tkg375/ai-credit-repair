@@ -102,9 +102,9 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section className="bg-slate-50 py-12 sm:py-20">
+      <section className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 py-12 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-16 text-white">
             What We Help With
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -142,10 +142,10 @@ export default function Home() {
             ].map((feature) => (
               <div
                 key={feature.title}
-                className="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-lg transition"
+                className="bg-white/15 backdrop-blur-sm border border-white/30 rounded-xl p-5 hover:bg-white/25 transition"
               >
-                <h3 className="font-semibold mb-2">{feature.title}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
+                <h3 className="font-semibold mb-2 text-white">{feature.title}</h3>
+                <p className="text-sm text-lime-100 leading-relaxed">
                   {feature.description}
                 </p>
               </div>
