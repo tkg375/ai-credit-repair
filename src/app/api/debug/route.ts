@@ -51,6 +51,7 @@ export async function GET() {
       S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID ? "set" : "missing",
       S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY ? "set" : "missing",
       LAMBDA_FUNCTION_NAME: process.env.LAMBDA_FUNCTION_NAME ? "set" : "missing",
+      LOB_API_KEY: process.env.LOB_API_KEY ? "set" : "missing",
     },
     keyDiag,
     projectId: (process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "NONE").trim(),

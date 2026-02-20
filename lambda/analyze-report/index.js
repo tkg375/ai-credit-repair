@@ -34,7 +34,7 @@ const db = admin.firestore();
 const s3 = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
 
 // ── Gemini analysis ───────────────────────────────────────────────────────────
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 const GEMINI_PROMPT = `You are a credit report analyzer. Your task is to extract ALL negative/derogatory items from this credit report with 100% accuracy.
 

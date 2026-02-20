@@ -504,7 +504,7 @@ export default function DisputesPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to mail letter");
+        throw new Error(data.details || data.error || "Failed to mail letter");
       }
 
       // Update local state

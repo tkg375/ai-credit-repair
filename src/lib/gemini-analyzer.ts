@@ -1,7 +1,7 @@
 // Google Gemini API for credit report analysis
 
 // Using gemini-2.0-flash for PDF processing
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 interface CreditReportItem {
   creditorName: string;

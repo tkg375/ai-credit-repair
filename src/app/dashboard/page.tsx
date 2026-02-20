@@ -16,19 +16,6 @@ interface Dispute {
   status: string;
 }
 
-interface ActionStep {
-  order: number;
-  title: string;
-  category: string;
-  impact: string;
-}
-
-interface ActionPlan {
-  id: string;
-  title: string;
-  steps: ActionStep[];
-}
-
 // Firestore REST API helpers
 function firestoreValueToJs(val: Record<string, unknown>): unknown {
   if ("stringValue" in val) return val.stringValue;
@@ -122,7 +109,6 @@ export default function Dashboard() {
   const [latestScore, setLatestScore] = useState<number | null>(null);
   const [disputableCount, setDisputableCount] = useState(0);
   const [disputes, setDisputes] = useState<Dispute[]>([]);
-  const [plan, setPlan] = useState<ActionPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -158,16 +144,6 @@ export default function Dashboard() {
           }))
         );
 
-        // Load latest action plan
-        const plans = await queryCollection(user!.idToken, "actionPlans", user!.uid, "createdAt", 1);
-        if (plans.length > 0) {
-          const planData = plans[0];
-          setPlan({
-            id: planData.id,
-            title: planData.title as string,
-            steps: (planData.steps as ActionStep[]) || [],
-          });
-        }
       } catch (err) {
         console.error("Failed to load dashboard data:", err);
       } finally {
@@ -338,54 +314,6 @@ export default function Dashboard() {
           )}
         </section>
 
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Action Plan</h2>
-            <Link
-              href="/plan"
-              className="text-sm text-teal-600 hover:text-lime-600 transition"
-            >
-              Full plan
-            </Link>
-          </div>
-          {!plan ? (
-            <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                </svg>
-              </div>
-              <p className="text-slate-500">
-                No action plan yet. Upload a report and we will generate one.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {plan.steps.slice(0, 5).map((step, i) => (
-                <div
-                  key={i}
-                  className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition"
-                >
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ${
-                      step.impact === "HIGH"
-                        ? "bg-gradient-to-br from-red-500 to-pink-600"
-                        : step.impact === "MEDIUM"
-                          ? "bg-gradient-to-br from-amber-500 to-orange-600"
-                          : "bg-gradient-to-br from-slate-400 to-slate-500"
-                    }`}
-                  >
-                    {step.order}
-                  </div>
-                  <div>
-                    <p className="font-medium">{step.title}</p>
-                    <p className="text-sm text-slate-500">{step.category}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
       </main>
     </div>
   );

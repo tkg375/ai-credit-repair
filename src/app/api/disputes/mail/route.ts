@@ -20,6 +20,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "fromAddress is required with name, address_line1, address_city, address_state, and address_zip" }, { status: 400 });
   }
 
+  // Fail fast if Lob is not configured
+  if (!process.env.LOB_API_KEY) {
+    return NextResponse.json(
+      { error: "Mail service is not configured. Please contact support." },
+      { status: 503 }
+    );
+  }
+
   try {
     // Fetch the dispute from Firestore
     const dispute = await firestore.getDoc(COLLECTIONS.disputes, disputeId);
