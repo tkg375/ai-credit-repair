@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
@@ -12,7 +13,7 @@ interface NavEntry {
   href: string;
   label: string;
   key: NavItem;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }
 
 function Icon({ d }: { d: string }) {
@@ -68,7 +69,7 @@ export function AuthenticatedLayout({
   children,
 }: {
   activeNav: NavItem;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const { signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
