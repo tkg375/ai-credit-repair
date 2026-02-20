@@ -20,6 +20,7 @@ export default function RegisterPage() {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zip, setZip] = useState("");
+  const [phone, setPhone] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -78,6 +79,7 @@ export default function RegisterPage() {
         body: JSON.stringify({
           fullName: fullName.trim(),
           dateOfBirth: dob,
+          phone: phone.trim(),
           address: address.trim(),
           address2: address2.trim(),
           city: city.trim(),
@@ -137,6 +139,16 @@ export default function RegisterPage() {
                 value={dob}
                 onChange={(e) => setDob(e.target.value)}
                 required
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+              <input
+                type="tel"
+                placeholder="(555) 000-0000"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               />
             </div>
