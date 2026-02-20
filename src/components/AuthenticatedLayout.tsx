@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
 import { NotificationBell } from "@/components/NotificationBell";
 
-type NavItem = "dashboard" | "upload" | "tools" | "disputes" | "plan" | "scores" | "simulator" | "education" | "vault" | "payoff" | "recommendations" | "cfpb" | "referrals" | "pricing" | "utilization" | "bureaus";
+type NavItem = "dashboard" | "upload" | "tools" | "disputes" | "plan" | "scores" | "simulator" | "education" | "vault" | "payoff" | "recommendations" | "cfpb" | "referrals" | "pricing" | "utilization" | "bureaus" | "profile";
 
 interface NavEntry {
   href: string;
@@ -71,7 +71,7 @@ export function AuthenticatedLayout({
   activeNav: NavItem;
   children: ReactNode;
 }) {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navLinks = (onClick?: () => void) => (
@@ -117,14 +117,25 @@ export function AuthenticatedLayout({
 
         {navLinks()}
 
-        <div className="border-t border-slate-100 px-4 py-3 flex items-center justify-between">
-          <NotificationBell />
-          <button
-            onClick={signOut}
-            className="text-xs text-slate-400 hover:text-red-500 transition"
+        <div className="border-t border-slate-100 p-3 space-y-2">
+          <Link
+            href="/profile"
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition ${activeNav === "profile" ? "bg-gradient-to-r from-lime-500/10 to-teal-500/10" : ""}`}
           >
-            Sign Out
-          </button>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime-400 to-teal-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
+              {(user?.email || "?")[0].toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-slate-700 truncate">{user?.email}</p>
+              <p className="text-xs text-slate-400">View profile</p>
+            </div>
+          </Link>
+          <div className="flex items-center justify-between px-2">
+            <NotificationBell />
+            <button onClick={signOut} className="text-xs text-slate-400 hover:text-red-500 transition">
+              Sign Out
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -149,14 +160,29 @@ export function AuthenticatedLayout({
 
             {navLinks(() => setSidebarOpen(false))}
 
-            <div className="border-t border-slate-100 px-4 py-3 flex items-center justify-between">
-              <NotificationBell />
-              <button
-                onClick={() => { signOut(); setSidebarOpen(false); }}
-                className="text-xs text-slate-400 hover:text-red-500 transition"
+            <div className="border-t border-slate-100 p-3 space-y-2">
+              <Link
+                href="/profile"
+                onClick={() => setSidebarOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition"
               >
-                Sign Out
-              </button>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime-400 to-teal-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                  {(user?.email || "?")[0].toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-slate-700 truncate">{user?.email}</p>
+                  <p className="text-xs text-slate-400">View profile</p>
+                </div>
+              </Link>
+              <div className="flex items-center justify-between px-2">
+                <NotificationBell />
+                <button
+                  onClick={() => { signOut(); setSidebarOpen(false); }}
+                  className="text-xs text-slate-400 hover:text-red-500 transition"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           </aside>
         </>

@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { fullName, dateOfBirth, address, address2, city, state, zip } = body;
+  const { fullName, dateOfBirth, address, address2, city, state, zip, phone } = body;
 
   if (!fullName || !dateOfBirth || !address || !city || !state || !zip) {
     return NextResponse.json(
@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
     city,
     state,
     zip,
+    phone: phone || "",
     email: user.email || "",
     updatedAt: new Date().toISOString(),
   };
