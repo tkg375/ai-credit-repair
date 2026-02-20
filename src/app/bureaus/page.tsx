@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import { ProGate } from "@/components/ProGate";
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
 const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
@@ -100,6 +101,7 @@ export default function BureausPage() {
 
   return (
     <AuthenticatedLayout activeNav="bureaus">
+      <ProGate feature="Bureau Comparison">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 bg-clip-text text-transparent">
           Bureau Comparison
@@ -209,6 +211,7 @@ export default function BureausPage() {
           </>
         )}
       </main>
+      </ProGate>
     </AuthenticatedLayout>
   );
 }

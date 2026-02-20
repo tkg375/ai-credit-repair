@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import { ProGate } from "@/components/ProGate";
 import { calculateAvalanche, calculateSnowball, calculateMinimumOnly, type Debt, type PayoffResult } from "@/lib/payoff-calculator";
 import dynamic from "next/dynamic";
 
@@ -143,6 +144,7 @@ export default function PayoffPage() {
 
   return (
     <AuthenticatedLayout activeNav="payoff">
+      <ProGate feature="Debt Payoff Optimizer">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-start justify-between mb-2">
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 bg-clip-text text-transparent">
@@ -304,6 +306,7 @@ export default function PayoffPage() {
           </>
         )}
       </main>
+      </ProGate>
     </AuthenticatedLayout>
   );
 }

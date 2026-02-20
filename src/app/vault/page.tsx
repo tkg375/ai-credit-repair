@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import { ProGate } from "@/components/ProGate";
 
 interface Document {
   id: string;
@@ -124,6 +125,7 @@ export default function VaultPage() {
 
   return (
     <AuthenticatedLayout activeNav="vault">
+      <ProGate feature="Document Vault">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 bg-clip-text text-transparent">
           Document Vault
@@ -229,6 +231,7 @@ export default function VaultPage() {
           </div>
         )}
       </main>
+      </ProGate>
     </AuthenticatedLayout>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { useSubscription } from "@/lib/use-subscription";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
@@ -136,6 +137,7 @@ async function queryCollection(
 
 export default function DisputesPage() {
   const { user, loading: authLoading } = useAuth();
+  const { isPro } = useSubscription();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"disputable" | "disputes" | "history">("disputable");
   const [disputableItems, setDisputableItems] = useState<ReportItem[]>([]);
@@ -1437,25 +1439,37 @@ export default function DisputesPage() {
                   Download Letter
                 </button>
                 {!selectedDispute.mailJobId && !showMailForm && (
-                  <button
-                    onClick={() => handleMailLetter(selectedDispute.id)}
-                    disabled={mailing === selectedDispute.id}
-                    className="flex-1 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl font-medium hover:from-teal-500 hover:to-cyan-500 transition disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {mailing === selectedDispute.id ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Mailing...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        Mail via USPS
-                      </>
-                    )}
-                  </button>
+                  isPro ? (
+                    <button
+                      onClick={() => handleMailLetter(selectedDispute.id)}
+                      disabled={mailing === selectedDispute.id}
+                      className="flex-1 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl font-medium hover:from-teal-500 hover:to-cyan-500 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {mailing === selectedDispute.id ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Mailing...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                          Mail via USPS
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <Link
+                      href="/pricing"
+                      className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-medium hover:bg-slate-200 transition flex items-center justify-center gap-2 text-sm"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      Pro: Mail via USPS
+                    </Link>
+                  )
                 )}
                 {(selectedDispute.status === "SENT" || selectedDispute.status === "UNDER_INVESTIGATION") && (
                   <button

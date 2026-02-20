@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import { ProGate } from "@/components/ProGate";
 import { scenarios, simulateScoreChange, type SimulationResult } from "@/lib/score-simulator";
 
 function ScoreGauge({ score, label, color }: { score: number; label: string; color: string }) {
@@ -72,6 +73,7 @@ export default function SimulatorPage() {
 
   return (
     <AuthenticatedLayout activeNav="simulator">
+      <ProGate feature="Score Simulator">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 bg-clip-text text-transparent">
           Credit Score Simulator
@@ -207,6 +209,7 @@ export default function SimulatorPage() {
           </div>
         )}
       </main>
+      </ProGate>
     </AuthenticatedLayout>
   );
 }
