@@ -1,8 +1,18 @@
 "use client";
+import { useId } from "react";
 
 export function Logo({ className = "" }: { className?: string }) {
+  const uid = useId().replace(/:/g, "-");
+  const ids = {
+    gradient: `${uid}-ag`,
+    glow: `${uid}-sg`,
+    pillBg: `${uid}-pb`,
+    border: `${uid}-bg`,
+    clip: `${uid}-pc`,
+  };
+
   return (
-    <div className={`inline-flex items-center ${className}`} style={{ aspectRatio: '220 / 56' }}>
+    <div className={`inline-flex items-center ${className}`} style={{ aspectRatio: "220 / 56" }}>
       <svg
         viewBox="0 0 220 56"
         width="100%"
@@ -11,7 +21,7 @@ export function Logo({ className = "" }: { className?: string }) {
       >
         <defs>
           {/* Animated gradient for 800 */}
-          <linearGradient id="animatedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id={ids.gradient} x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#84cc16">
               <animate
                 attributeName="stop-color"
@@ -39,7 +49,7 @@ export function Logo({ className = "" }: { className?: string }) {
           </linearGradient>
 
           {/* Strong glow for 800 */}
-          <filter id="strongGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <filter id={ids.glow} x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="3" result="coloredBlur" />
             <feMerge>
               <feMergeNode in="coloredBlur" />
@@ -49,13 +59,13 @@ export function Logo({ className = "" }: { className?: string }) {
           </filter>
 
           {/* Background for pill */}
-          <linearGradient id="pillBg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={ids.pillBg} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#ffffff" />
             <stop offset="100%" stopColor="#ffffff" />
           </linearGradient>
 
           {/* Border gradient */}
-          <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={ids.border} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#84cc16">
               <animate
                 attributeName="stop-color"
@@ -83,7 +93,7 @@ export function Logo({ className = "" }: { className?: string }) {
           height="48"
           rx="24"
           fill="none"
-          stroke="url(#borderGradient)"
+          stroke={`url(#${ids.border})`}
           strokeWidth="2.5"
         />
 
@@ -94,11 +104,11 @@ export function Logo({ className = "" }: { className?: string }) {
           width="208"
           height="44"
           rx="22"
-          fill="url(#pillBg)"
+          fill={`url(#${ids.pillBg})`}
         />
 
         {/* Animated shine sweep */}
-        <clipPath id="pillClip">
+        <clipPath id={ids.clip}>
           <rect x="6" y="6" width="208" height="44" rx="22" />
         </clipPath>
         <rect
@@ -108,7 +118,7 @@ export function Logo({ className = "" }: { className?: string }) {
           height="60"
           fill="#14b8a6"
           opacity="0.07"
-          clipPath="url(#pillClip)"
+          clipPath={`url(#${ids.clip})`}
         >
           <animate
             attributeName="x"
@@ -138,9 +148,9 @@ export function Logo({ className = "" }: { className?: string }) {
           fontFamily="system-ui, -apple-system, sans-serif"
           fontSize="30"
           fontWeight="900"
-          fill="url(#animatedGradient)"
+          fill={`url(#${ids.gradient})`}
           textAnchor="middle"
-          filter="url(#strongGlow)"
+          filter={`url(#${ids.glow})`}
         >
           800
         </text>
@@ -186,6 +196,13 @@ export function Logo({ className = "" }: { className?: string }) {
 }
 
 export function LogoIcon({ className = "" }: { className?: string }) {
+  const uid = useId().replace(/:/g, "-");
+  const ids = {
+    gradient: `${uid}-ig`,
+    glow: `${uid}-igl`,
+    border: `${uid}-ib`,
+  };
+
   return (
     <svg
       viewBox="0 0 56 56"
@@ -193,7 +210,7 @@ export function LogoIcon({ className = "" }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <linearGradient id="iconAnimatedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id={ids.gradient} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#84cc16">
             <animate
               attributeName="stop-color"
@@ -212,7 +229,7 @@ export function LogoIcon({ className = "" }: { className?: string }) {
           </stop>
         </linearGradient>
 
-        <filter id="iconGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <filter id={ids.glow} x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="2" result="coloredBlur" />
           <feMerge>
             <feMergeNode in="coloredBlur" />
@@ -221,7 +238,7 @@ export function LogoIcon({ className = "" }: { className?: string }) {
           </feMerge>
         </filter>
 
-        <linearGradient id="iconBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id={ids.border} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#84cc16">
             <animate
               attributeName="stop-color"
@@ -247,7 +264,7 @@ export function LogoIcon({ className = "" }: { className?: string }) {
         cy="28"
         r="26"
         fill="none"
-        stroke="url(#iconBorder)"
+        stroke={`url(#${ids.border})`}
         strokeWidth="2"
       />
 
@@ -261,9 +278,9 @@ export function LogoIcon({ className = "" }: { className?: string }) {
         fontFamily="system-ui, -apple-system, sans-serif"
         fontSize="18"
         fontWeight="900"
-        fill="url(#iconAnimatedGradient)"
+        fill={`url(#${ids.gradient})`}
         textAnchor="middle"
-        filter="url(#iconGlow)"
+        filter={`url(#${ids.glow})`}
       >
         800
       </text>
