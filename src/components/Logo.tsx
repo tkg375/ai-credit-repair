@@ -2,10 +2,11 @@
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
-    <div className={`inline-flex items-center ${className}`}>
+    <div className={`inline-flex items-center ${className}`} style={{ aspectRatio: '220 / 56' }}>
       <svg
         viewBox="0 0 220 56"
-        className="h-full w-auto"
+        width="100%"
+        height="100%"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
