@@ -266,7 +266,7 @@ async function main() {
   } else {
     await lambda.send(new CreateFunctionCommand({
       FunctionName: LAMBDA_FUNCTION_NAME,
-      Runtime: 'nodejs20.x',
+      Runtime: 'nodejs24.x',
       Role: lambdaRoleArn,
       Handler: 'index.handler',
       Code: { ZipFile: zipBytes },

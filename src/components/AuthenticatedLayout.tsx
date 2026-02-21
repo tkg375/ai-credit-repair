@@ -206,13 +206,13 @@ export function AuthenticatedLayout({
       )}
 
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 relative">
         <button onClick={() => setSidebarOpen(true)} className="text-slate-600">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <Link href="/dashboard">
+        <Link href="/dashboard" className="absolute left-1/2 -translate-x-1/2">
           <Logo className="h-7 w-auto" />
         </Link>
         <NotificationBell />
