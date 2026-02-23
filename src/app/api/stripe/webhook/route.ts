@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { firestore } from "@/lib/firebase-admin";
-import { sendNewSubscriberNotification } from "@/lib/email";
+import { sendNewSubscriberNotification, sendProUpgradeEmail } from "@/lib/email";
 import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -34,9 +34,13 @@ export async function POST(req: NextRequest) {
             ...(periodEnd && { currentPeriodEnd: new Date(periodEnd * 1000).toISOString() }),
           });
         }
-        // Notify owner of new subscriber
         const subscriberEmail = session.customer_details?.email || "unknown";
         const amount = session.amount_total ?? 1999;
+        // Email the customer a confirmation
+        if (session.customer_details?.email) {
+          await sendProUpgradeEmail(session.customer_details.email, amount);
+        }
+        // Notify owner
         await sendNewSubscriberNotification(subscriberEmail, amount);
         break;
       }

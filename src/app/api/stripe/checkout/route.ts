@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       customer: customerId,
       mode: "subscription",
       payment_method_types: ["card"],
+      customer_update: { name: "auto", address: "auto" },
       line_items: [
         {
           price: PLANS.pro.priceId,

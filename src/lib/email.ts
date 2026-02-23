@@ -89,6 +89,37 @@ export async function sendDisputeMailedEmail(to: string, name: string, creditorN
   );
 }
 
+export async function sendProUpgradeEmail(to: string, amount: number) {
+  const amountStr = `$${(amount / 100).toFixed(2)}`;
+  await sendEmail(
+    to,
+    "You're now a Credit 800 Pro member 🎉",
+    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+      <div style="background:linear-gradient(135deg,#84cc16,#14b8a6);padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:24px">Welcome to Pro! 🎉</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Your Credit 800 Pro membership is now active</p>
+      </div>
+      <p>You're all set! Your Pro plan (${amountStr}/month) is active and all features are unlocked.</p>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:16px 0">
+        <p style="margin:0 0 8px;font-weight:bold;color:#15803d">What you now have access to:</p>
+        <ul style="margin:0;color:#166534;font-size:14px;padding-left:20px;line-height:1.8">
+          <li>Unlimited dispute letters (Rounds 1, 2 & 3)</li>
+          <li>CFPB complaint generator</li>
+          <li>Credit score simulator</li>
+          <li>Document vault</li>
+          <li>Debt payoff optimizer</li>
+          <li>Priority AI analysis</li>
+          <li>Score tracking &amp; charts</li>
+          <li>Card recommendations</li>
+        </ul>
+      </div>
+      <p style="color:#64748b;font-size:14px">A payment receipt has been sent to your email from Stripe. You can manage your subscription, update your payment method, or cancel anytime from the Subscription page.</p>
+      <a href="https://credit-800.com/disputes" style="display:inline-block;background:linear-gradient(135deg,#84cc16,#14b8a6);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:8px 0">Start Disputing →</a>
+      <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 · Questions? Reply to this email.<br>Not a credit repair organization. Educational tool only.</p>
+    </body></html>`
+  );
+}
+
 export async function sendNewSubscriberNotification(subscriberEmail: string, amount: number) {
   const ownerEmail = process.env.OWNER_NOTIFICATION_EMAIL;
   if (!ownerEmail) return;
