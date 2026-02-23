@@ -89,6 +89,32 @@ export async function sendDisputeMailedEmail(to: string, name: string, creditorN
   );
 }
 
+export async function sendNewSubscriberNotification(subscriberEmail: string, amount: number) {
+  const ownerEmail = process.env.OWNER_NOTIFICATION_EMAIL;
+  if (!ownerEmail) return;
+
+  const amountStr = `$${(amount / 100).toFixed(2)}`;
+  const now = new Date().toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" });
+
+  await sendEmail(
+    ownerEmail,
+    `💰 New subscriber — ${subscriberEmail} (${amountStr}/mo)`,
+    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+      <div style="background:linear-gradient(135deg,#84cc16,#14b8a6);padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:24px">New Subscriber 🎉</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Someone just upgraded to Credit 800 Pro</p>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+        <tr><td style="padding:10px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Email</td><td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:bold">${subscriberEmail}</td></tr>
+        <tr><td style="padding:10px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Amount</td><td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:bold;color:#16a34a">${amountStr}/month</td></tr>
+        <tr><td style="padding:10px;color:#64748b;font-size:14px">Time</td><td style="padding:10px">${now} ET</td></tr>
+      </table>
+      <a href="https://dashboard.stripe.com/customers" style="display:inline-block;background:linear-gradient(135deg,#84cc16,#14b8a6);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold">View in Stripe →</a>
+      <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 · Automated notification</p>
+    </body></html>`
+  );
+}
+
 export async function sendWelcomeEmail(to: string, name: string) {
   await sendEmail(
     to,
