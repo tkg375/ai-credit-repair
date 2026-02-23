@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit800.vercel.app"}/dashboard?upgraded=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit800.vercel.app"}/pricing`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/dashboard?upgraded=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/pricing`,
       metadata: {
         firebaseUid: user.uid,
       },

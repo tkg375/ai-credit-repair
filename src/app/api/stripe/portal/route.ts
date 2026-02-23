@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit800.vercel.app"}/dashboard`,
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/dashboard`,
     });
 
     return NextResponse.json({ url: session.url });
