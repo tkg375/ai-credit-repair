@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
+import OpenAI from "openai";
 
 const SYSTEM_PROMPT = `You are an expert credit repair advisor for Credit 800, an AI-powered credit repair platform. You help users understand and improve their credit scores.
 
@@ -29,7 +28,7 @@ Do NOT:
 - Make up specific statistics`;
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: "AI not configured" }, { status: 500 });
   }
@@ -41,7 +40,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Messages required" }, { status: 400 });
     }
 
-    // Validate message format and limit history
     const validMessages = messages
       .slice(-20)
       .filter(
@@ -55,29 +53,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No valid messages" }, { status: 400 });
     }
 
-    const response = await fetch(ANTHROPIC_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2024-01-01",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 1024,
-        system: SYSTEM_PROMPT,
-        messages: validMessages,
-      }),
+    const openai = new OpenAI({ apiKey });
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      max_tokens: 1024,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...validMessages,
+      ],
     });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      console.error("Claude API error:", error);
-      return NextResponse.json({ error: "AI service error" }, { status: 502 });
-    }
-
-    const data = await response.json();
-    const content = data.content?.[0]?.text;
+    const content = response.choices[0]?.message?.content;
 
     if (!content) {
       return NextResponse.json({ error: "No response from AI" }, { status: 502 });

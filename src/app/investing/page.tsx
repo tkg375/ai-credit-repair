@@ -47,17 +47,14 @@ function FundCard({ fund, selected, onClick }: { fund: Fund; selected: boolean; 
     >
       {/* Color header */}
       <div className={`h-2 bg-gradient-to-r ${fund.colorClass}`} />
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-1">
-          <div>
-            <span className="text-lg font-bold text-slate-900">{fund.ticker}</span>
-            <span className="ml-2 text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full">{fund.category}</span>
-          </div>
-          <span className={`text-sm font-bold ${fund.expenseRatio === "0.00%" ? "text-green-600" : "text-slate-700"}`}>
-            {fund.expenseRatio}
-          </span>
+      <div className="p-3">
+        <span className="text-base font-bold text-slate-900 block leading-tight">{fund.ticker}</span>
+        <span className="mt-1.5 inline-block text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full leading-snug">
+          {fund.category}
+        </span>
+        <div className={`mt-2 text-sm font-bold ${fund.expenseRatio === "0.00%" ? "text-green-600" : "text-slate-700"}`}>
+          {fund.expenseRatio}
         </div>
-        <p className="text-xs text-slate-500 leading-tight">{fund.name}</p>
       </div>
     </button>
   );
@@ -351,7 +348,7 @@ export default function InvestingPage() {
         {activeTab === "funds" && (
           <div className="space-y-6">
             {/* Fund selector grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
               {fidelityFunds.map((fund) => (
                 <FundCard
                   key={fund.ticker}
