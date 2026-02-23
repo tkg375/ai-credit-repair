@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import { OnboardingModal } from "@/components/OnboardingModal";
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
 const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
@@ -170,6 +171,7 @@ export default function Dashboard() {
 
   return (
     <AuthenticatedLayout activeNav="dashboard">
+      <OnboardingModal />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Dashboard</h1>
 

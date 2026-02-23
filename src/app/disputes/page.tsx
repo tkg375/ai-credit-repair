@@ -167,6 +167,9 @@ export default function DisputesPage() {
   const [toCity, setToCity] = useState("");
   const [toState, setToState] = useState("");
   const [toZip, setToZip] = useState("");
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
+  const [bulkGenerating, setBulkGenerating] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -330,6 +333,30 @@ export default function DisputesPage() {
     } finally {
       setGenerating(null);
     }
+  };
+
+  const handleBulkGenerate = async () => {
+    if (!user || selectedItemIds.size === 0 || bulkGenerating) return;
+    const itemsToGenerate = disputableItems.filter((i) => selectedItemIds.has(i.id));
+    if (itemsToGenerate.length === 0) return;
+
+    setBulkGenerating(true);
+    setBulkProgress({ done: 0, total: itemsToGenerate.length });
+    setSelectedItemIds(new Set());
+
+    for (let idx = 0; idx < itemsToGenerate.length; idx++) {
+      const item = itemsToGenerate[idx];
+      try {
+        await handleGenerateDispute(item);
+      } catch {
+        // continue to next item even if one fails
+      }
+      setBulkProgress({ done: idx + 1, total: itemsToGenerate.length });
+    }
+
+    setBulkGenerating(false);
+    setBulkProgress(null);
+    setActiveTab("disputes");
   };
 
   const handleDeleteDispute = async (disputeId: string) => {
@@ -825,14 +852,68 @@ export default function DisputesPage() {
                   </p>
                 </div>
 
+                {/* Bulk select controls */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        if (selectedItemIds.size === disputableItems.length) {
+                          setSelectedItemIds(new Set());
+                        } else {
+                          setSelectedItemIds(new Set(disputableItems.map((i) => i.id)));
+                        }
+                      }}
+                      className="text-sm text-teal-600 hover:text-teal-700 font-medium"
+                    >
+                      {selectedItemIds.size === disputableItems.length ? "Deselect All" : "Select All"}
+                    </button>
+                    {selectedItemIds.size > 0 && (
+                      <span className="text-sm text-slate-500">{selectedItemIds.size} selected</span>
+                    )}
+                  </div>
+                  {selectedItemIds.size > 0 && (
+                    <button
+                      onClick={handleBulkGenerate}
+                      disabled={bulkGenerating}
+                      className="px-4 py-2 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-sm rounded-xl font-medium hover:opacity-90 transition disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {bulkGenerating && bulkProgress ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Generating {bulkProgress.done}/{bulkProgress.total}...
+                        </>
+                      ) : (
+                        `Generate ${selectedItemIds.size} Letter${selectedItemIds.size > 1 ? "s" : ""}`
+                      )}
+                    </button>
+                  )}
+                </div>
+
                 {/* Individual Items */}
                 <div className="space-y-4">
                 {disputableItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white border border-slate-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition"
+                    className={`bg-white border rounded-xl p-4 sm:p-6 hover:shadow-lg transition ${
+                      selectedItemIds.has(item.id) ? "border-teal-400 ring-1 ring-teal-300" : "border-slate-200"
+                    }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                      {/* Checkbox */}
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={selectedItemIds.has(item.id)}
+                        onChange={() => {
+                          setSelectedItemIds((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(item.id)) next.delete(item.id);
+                            else next.add(item.id);
+                            return next;
+                          });
+                        }}
+                        className="mt-1.5 w-4 h-4 rounded accent-teal-600 shrink-0 cursor-pointer"
+                      />
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-2">
                           <h3 className="font-semibold text-base sm:text-lg">{item.creditorName}</h3>
@@ -969,6 +1050,7 @@ export default function DisputesPage() {
                           </div>
                         )}
                       </div>
+                      </div>{/* end checkbox+content wrapper */}
                       <div className="shrink-0 flex flex-row sm:flex-col gap-2 relative">
                         {generating === item.id ? (
                           <button
