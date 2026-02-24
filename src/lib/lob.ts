@@ -105,11 +105,11 @@ export function letterToHtml(text: string): string {
 <head>
 <meta charset="UTF-8">
 <style>
-  @page { size: letter; margin: 1in; }
+  @page { size: letter; margin: 0.75in; }
   body {
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: 10.5px;
+    line-height: 1.4;
     color: #000;
     margin: 0;
     padding: 0;
@@ -117,7 +117,7 @@ export function letterToHtml(text: string): string {
 </style>
 </head>
 <body>
-<div style="white-space: pre-wrap; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5;">${escaped}</div>
+<div style="white-space: pre-wrap; font-family: Arial, Helvetica, sans-serif; font-size: 10.5px; line-height: 1.4;">${escaped}</div>
 </body>
 </html>`;
 }

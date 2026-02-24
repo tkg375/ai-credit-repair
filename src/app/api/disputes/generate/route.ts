@@ -50,46 +50,28 @@ function generateBureauDisputeLetterContent(params: {
 
 ${addressBlock}
 
-Re: Formal Dispute Under FCRA Section 611
-Account: ${creditorName}
-Account Number: ${accountNumber}
-Reported Balance: ${balanceStr}
+Re: Formal Dispute Under FCRA Section 611 — ${creditorName}, Acct #${accountNumber}, Balance: ${balanceStr}
 
 To Whom It May Concern:
 
-I am writing to formally dispute the accuracy of the following account on my credit report, pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681i (Section 611).
-
-DISPUTED ACCOUNT INFORMATION:
-Creditor/Furnisher: ${creditorName}
-Account Number: ${accountNumber}
-Reported Balance: ${balanceStr}
+I am formally disputing the above account on my credit report pursuant to the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681i (Section 611).
 
 REASON FOR DISPUTE:
 ${reason}
 
 INVESTIGATION REQUEST:
-Under FCRA Section 611, I am requesting that you conduct a reasonable investigation into this disputed item. Specifically, I request that you:
+Under FCRA § 1681i, I request that you: (1) contact ${creditorName} to verify the accuracy of every element of this account; (2) verify the balance, payment history, dates, and account status; (3) verify the account belongs to me; and (4) review any enclosed documentation.
 
-1. Contact the furnisher (${creditorName}) to verify the accuracy of every element of this account
-2. Verify the account balance, payment history, dates, and account status
-3. Verify the account actually belongs to me
-4. Verify the original creditor information is accurate
-5. Review any documentation I have enclosed supporting my dispute
+REQUIRED ACTIONS (FCRA § 1681i):
+- Complete your investigation within 30 days
+- Forward all relevant information to the furnisher
+- Provide written results within 5 business days of completion
+- Delete or correct any information that cannot be verified
+- Notify me of my right to add a consumer statement
 
-LEGAL REQUIREMENTS:
-Under the FCRA, you are required to:
-- Conduct a reasonable investigation within 30 days of receiving this dispute (FCRA § 1681i(a)(1))
-- Forward all relevant information I provide to the furnisher (FCRA § 1681i(a)(2))
-- Provide me with written results of the investigation within 5 business days of completion (FCRA § 1681i(a)(6))
-- Delete or modify the disputed information if it cannot be verified (FCRA § 1681i(a)(5))
-- Notify me of my right to add a consumer statement if the dispute is not resolved in my favor
+If the furnisher cannot verify this information, it must be promptly deleted. Failure to investigate or continued reporting of inaccurate information may result in complaints to the CFPB and legal action under FCRA § 1681n/§ 1681o.
 
-If the furnisher cannot verify this information, it must be promptly deleted from my credit report. Under FCRA § 1681s-2(b), the furnisher is required to conduct its own investigation upon receiving notice from you.
-
-NOTICE OF RIGHTS:
-If you fail to investigate this dispute within 30 days, or if you continue to report information you know or have reason to believe is inaccurate, I will file complaints with the Consumer Financial Protection Bureau (CFPB) and may pursue legal action under FCRA § 1681n (willful noncompliance) or § 1681o (negligent noncompliance), which provide for actual damages, statutory damages, punitive damages, and attorney's fees.
-
-Please send the results of your investigation to the address below.
+Please send investigation results to the address below.
 
 Sincerely,
 
@@ -128,49 +110,22 @@ function generateDisputeLetterContent(params: {
 ${creditorName}
 ${addressBlock}
 
-Re: Debt Validation and Dispute Request
-Account Number: ${accountNumber}
-Alleged Balance: ${balanceStr}
+Re: Debt Validation and Dispute — Acct #${accountNumber}, Alleged Balance: ${balanceStr}
 
 To Whom It May Concern:
 
-I am writing regarding the above-referenced account. I dispute this debt and request validation pursuant to my rights under the Fair Debt Collection Practices Act (FDCPA), 15 U.S.C. § 1692g.
-
-ACCOUNT INFORMATION:
-Creditor/Collection Agency: ${creditorName}
-Account Number: ${accountNumber}
-Alleged Balance: ${balanceStr}
+I am formally disputing the above-referenced account and requesting debt validation pursuant to the Fair Debt Collection Practices Act (FDCPA), 15 U.S.C. § 1692g.
 
 REASON FOR DISPUTE:
 ${reason}
 
 VALIDATION REQUEST:
-Under the FDCPA, I am entitled to request validation of this debt. Please provide the following:
-
-1. The amount of the debt and how it was calculated, including all fees and interest
-2. The name and address of the original creditor
-3. A copy of any judgment (if applicable)
-4. Proof that you are licensed to collect debts in my state
-5. A copy of the original signed credit agreement or contract
-6. Complete payment history from the original creditor
-7. Proof that the statute of limitations has not expired
-8. Proof that you own the debt or are authorized to collect on it
+Under the FDCPA, please provide: (1) the amount owed and how it was calculated; (2) the name and address of the original creditor; (3) proof you are licensed to collect in my state; (4) a copy of the original signed agreement; (5) complete payment history; (6) proof the statute of limitations has not expired; and (7) proof you own or are authorized to collect this debt.
 
 LEGAL NOTICE:
-Until you provide proper validation, you must cease all collection activities including:
-- Contacting me by phone, mail, or any other means
-- Reporting this account to any credit reporting agency
-- Filing or continuing any legal action
+Until you provide proper validation, you must cease all collection activity, including credit reporting. Under FCRA § 623, reporting information you cannot validate constitutes a violation of federal law.
 
-Under the FDCPA, you have 30 days to provide this validation. If you cannot validate this debt, you must:
-1. Cease all collection efforts immediately
-2. Remove any negative reporting from all credit bureaus (Equifax, Experian, TransUnion)
-3. Notify me in writing that collection efforts have ceased
-
-CREDIT REPORTING NOTICE:
-Under the Fair Credit Reporting Act (FCRA), Section 623, you are prohibited from reporting information you know to be inaccurate. If you cannot validate this debt, continued reporting constitutes a violation of federal law.
-
-Please respond in writing within 30 days. If I do not receive proper validation, I will file complaints with the Consumer Financial Protection Bureau (CFPB), the Federal Trade Commission (FTC), and my state Attorney General.
+You have 30 days to respond. If you cannot validate this debt, you must immediately cease collection efforts, remove all negative reporting from Equifax, Experian, and TransUnion, and notify me in writing. Failure to comply may result in complaints to the CFPB, FTC, and my state Attorney General.
 
 Sincerely,
 
