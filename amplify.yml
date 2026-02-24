@@ -6,6 +6,7 @@ frontend:
         - npm ci
     build:
       commands:
+        - echo "DEBUG price id starts with= ${STRIPE_PRO_PRICE_ID:0:8}"
         - echo "STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY" >> .env.production.local
         - echo "STRIPE_PRO_PRICE_ID=$STRIPE_PRO_PRICE_ID" >> .env.production.local
         - echo "STRIPE_WEBHOOK_SECRET=$STRIPE_WEBHOOK_SECRET" >> .env.production.local
