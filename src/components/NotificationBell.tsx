@@ -13,7 +13,7 @@ interface Notification {
   actionUrl: string | null;
 }
 
-export function NotificationBell() {
+export function NotificationBell({ align = "right" }: { align?: "left" | "right" }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -122,7 +122,7 @@ export function NotificationBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-xl border border-slate-200 z-20 max-h-96 overflow-hidden flex flex-col">
+          <div className={`absolute ${align === "left" ? "left-0" : "right-0"} top-full mt-2 w-80 max-w-[calc(100vw-1rem)] bg-white rounded-lg shadow-xl border border-slate-200 z-50 max-h-96 overflow-hidden flex flex-col`}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
               <h3 className="font-semibold text-sm text-slate-900">Notifications</h3>
               {unreadCount > 0 && (

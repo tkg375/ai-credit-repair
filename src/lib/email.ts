@@ -170,3 +170,33 @@ export async function sendWelcomeEmail(to: string, name: string) {
     </body></html>`
   );
 }
+
+export async function sendIssueReport(params: {
+  userId: string;
+  userEmail: string;
+  issue: string;
+  page?: string;
+}) {
+  const { userId, userEmail, issue, page } = params;
+  await sendEmail(
+    REPLY_TO,
+    `[Issue Report] from ${userEmail}`,
+    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+      <div style="background:linear-gradient(135deg,#f59e0b,#ef4444);padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:22px">Issue Report</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">A user has reported a problem</p>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+        <tr><td style="padding:10px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:bold;width:130px">User ID</td><td style="padding:10px;border:1px solid #e2e8f0;font-family:monospace;font-size:13px">${userId}</td></tr>
+        <tr><td style="padding:10px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:bold">Email</td><td style="padding:10px;border:1px solid #e2e8f0">${userEmail}</td></tr>
+        ${page ? `<tr><td style="padding:10px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:bold">Page</td><td style="padding:10px;border:1px solid #e2e8f0">${page}</td></tr>` : ""}
+        <tr><td style="padding:10px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:bold">Submitted</td><td style="padding:10px;border:1px solid #e2e8f0">${new Date().toLocaleString("en-US", { timeZone: "America/New_York" })} ET</td></tr>
+      </table>
+      <div style="background:#fef9f0;border:1px solid #f59e0b;border-radius:8px;padding:16px">
+        <p style="margin:0 0 8px;font-weight:bold;color:#92400e">Issue Description</p>
+        <p style="margin:0;white-space:pre-wrap;color:#1e293b">${issue.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
+      </div>
+      <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 Issue Tracker · Reply to this email to respond to the user.</p>
+    </body></html>`
+  );
+}

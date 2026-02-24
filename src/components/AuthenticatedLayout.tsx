@@ -2,8 +2,87 @@
 
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
+import { Logo } from "@/components/Logo";
+import { NotificationBell } from "@/components/NotificationBell";
 
-function BetaBanner() {
+function ReportIssueModal({ onClose }: { onClose: () => void }) {
+  const { user } = useAuth();
+  const [issue, setIssue] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!issue.trim() || !user) return;
+    setSubmitting(true);
+    try {
+      await fetch("/api/support/issue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
+        body: JSON.stringify({ issue, page: window.location.pathname }),
+      });
+      setSubmitted(true);
+    } catch {
+      // still show success — don't block the user
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+        <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-white font-semibold text-lg">Report an Issue</h2>
+          <button onClick={onClose} className="text-white/70 hover:text-white transition text-2xl leading-none">×</button>
+        </div>
+        {submitted ? (
+          <div className="p-8 text-center">
+            <div className="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="font-semibold text-lg mb-2">Report Sent</h3>
+            <p className="text-slate-500 text-sm mb-6">Thanks for letting us know. We&apos;ll look into it as soon as possible.</p>
+            <button onClick={onClose} className="px-6 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl font-medium text-sm hover:opacity-90 transition">
+              Close
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <p className="text-sm text-slate-500">Describe the issue you&apos;re experiencing. Your account ID will be included automatically so we can investigate.</p>
+            <textarea
+              value={issue}
+              onChange={(e) => setIssue(e.target.value)}
+              placeholder="e.g. The dispute letter won't download, or the upload page shows an error..."
+              rows={5}
+              required
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+            />
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                disabled={submitting || !issue.trim()}
+                className="flex-1 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl font-medium text-sm hover:opacity-90 transition disabled:opacity-50"
+              >
+                {submitting ? "Sending..." : "Send Report"}
+              </button>
+              <button type="button" onClick={onClose} className="px-4 py-2.5 border border-slate-200 rounded-xl text-sm hover:bg-slate-50 transition">
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BetaBanner({ onReportIssue }: { onReportIssue: () => void }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -18,9 +97,9 @@ function BetaBanner() {
       <p className="text-center flex-1 leading-snug">
         <span className="font-semibold">Credit 800 is in early access.</span>{" "}
         You may encounter occasional bugs as we improve the platform.{" "}
-        <a href="mailto:support@credit-800.com" className="underline font-medium hover:text-white/80 transition">
-          support@credit-800.com
-        </a>{" "}
+        <button onClick={onReportIssue} className="underline font-medium hover:text-white/80 transition">
+          Report an issue
+        </button>{" "}
         — Thank you for your patience!
       </p>
       <button
@@ -33,10 +112,6 @@ function BetaBanner() {
     </div>
   );
 }
-import Link from "next/link";
-import { useAuth } from "@/lib/auth-context";
-import { Logo } from "@/components/Logo";
-import { NotificationBell } from "@/components/NotificationBell";
 
 type NavItem = "dashboard" | "upload" | "tools" | "disputes" | "plan" | "scores" | "simulator" | "education" | "vault" | "payoff" | "recommendations" | "cfpb" | "referrals" | "pricing" | "utilization" | "bureaus" | "profile" | "calendar" | "investing";
 
@@ -108,6 +183,7 @@ export function AuthenticatedLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [profilePhone, setProfilePhone] = useState<string | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -181,14 +257,17 @@ export function AuthenticatedLayout({
             </div>
           </Link>
           <div className="flex items-center justify-between px-2">
-            <NotificationBell />
+            <NotificationBell align="left" />
             <button onClick={signOut} className="text-xs text-slate-400 hover:text-red-500 transition">
               Sign Out
             </button>
           </div>
-          <a href="mailto:support@credit-800.com" className="block text-center text-xs text-slate-400 hover:text-teal-600 transition px-2 pb-1">
-            support@credit-800.com
-          </a>
+          <button
+            onClick={() => setShowReportModal(true)}
+            className="block w-full text-center text-xs text-slate-400 hover:text-teal-600 transition px-2 pb-1"
+          >
+            Report an Issue
+          </button>
         </div>
       </aside>
 
@@ -228,7 +307,7 @@ export function AuthenticatedLayout({
                 </div>
               </Link>
               <div className="flex items-center justify-between px-2">
-                <NotificationBell />
+                <NotificationBell align="left" />
                 <button
                   onClick={() => { signOut(); setSidebarOpen(false); }}
                   className="text-xs text-slate-400 hover:text-red-500 transition"
@@ -262,11 +341,11 @@ export function AuthenticatedLayout({
 
       {/* Main content */}
       <main className="flex-1 md:ml-56 pt-14 md:pt-0 min-h-screen">
-        <BetaBanner />
+        <BetaBanner onReportIssue={() => setShowReportModal(true)} />
         {children}
       </main>
 
-      {/* Floating AI Chat Widget */}
+      {showReportModal && <ReportIssueModal onClose={() => setShowReportModal(false)} />}
     </div>
   );
 }
