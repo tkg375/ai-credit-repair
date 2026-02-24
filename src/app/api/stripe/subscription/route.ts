@@ -14,7 +14,14 @@ export async function GET() {
     const subscriptionId = userDoc?.data?.stripeSubscriptionId as string | undefined;
 
     if (!subscriptionId || !customerId) {
-      return NextResponse.json({ plan: "free", status: "none", subscription: null });
+      // Fall back to manually-set subscription status in Firestore
+      const manualStatus = userDoc?.data?.subscriptionStatus as string | undefined;
+      const isPro = manualStatus === "active" || manualStatus === "trialing";
+      return NextResponse.json({
+        plan: isPro ? "pro" : "free",
+        status: manualStatus ?? "none",
+        subscription: null,
+      });
     }
 
     const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
