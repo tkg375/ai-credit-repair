@@ -115,17 +115,18 @@ export default function RecommendationsPage() {
               <div key={card.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                 <div className="flex flex-col sm:flex-row">
                   {/* Card Visual */}
-                  <div className={`w-full sm:w-48 h-28 sm:h-auto bg-gradient-to-br ${card.colorClass} p-4 flex flex-col justify-between`}>
-                    <p className="text-white/80 text-xs font-medium">{card.issuer}</p>
-                    <p className="text-white font-bold text-sm">{card.name}</p>
+                  <div className={`w-full sm:w-52 h-32 sm:h-auto bg-gradient-to-br ${card.colorClass} p-5 flex flex-col justify-between shrink-0`}>
+                    <p className="text-white/90 text-sm font-semibold tracking-wide">{card.issuer}</p>
+                    <p className="text-white font-bold text-base leading-tight">{card.name}</p>
                   </div>
 
                   {/* Card Details */}
                   <div className="flex-1 p-5">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="font-semibold">{card.name}</h3>
-                        <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">{card.bestFor}</span>
+                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-0.5">{card.issuer}</p>
+                        <h3 className="font-bold text-lg leading-tight">{card.name}</h3>
+                        <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full mt-1 inline-block">{card.bestFor}</span>
                       </div>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         card.type === "secured" ? "bg-blue-100 text-blue-700" :

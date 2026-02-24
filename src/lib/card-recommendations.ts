@@ -45,7 +45,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "Building credit with Capital One",
     scoreRange: { min: 300, max: 600 },
     colorClass: "from-blue-600 to-blue-800",
-    applyUrl: "https://www.capitalone.com/credit-cards/secured-mastercard/",
+    applyUrl: "https://www.capitalone.com/credit-cards/secured/",
   },
   {
     id: "opensky-secured",
@@ -75,7 +75,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "No fees at all",
     scoreRange: { min: 300, max: 850 },
     colorClass: "from-green-400 to-green-600",
-    applyUrl: "https://www.chime.com/credit-builder-visa-credit-card/",
+    applyUrl: "https://www.chime.com/banking/credit-builder-credit-card/",
   },
   {
     id: "self-credit-builder",
@@ -106,7 +106,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "Citi banking customers",
     scoreRange: { min: 300, max: 650 },
     colorClass: "from-blue-500 to-indigo-600",
-    applyUrl: "https://www.citi.com/credit-cards/citi-secured-mastercard-credit-card",
+    applyUrl: "https://www.citi.com/credit-cards/secured/",
   },
   {
     id: "boa-secured",
@@ -121,7 +121,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "Best rewards on a secured card",
     scoreRange: { min: 300, max: 650 },
     colorClass: "from-red-500 to-red-700",
-    applyUrl: "https://www.bankofamerica.com/credit-cards/products/cash-back-credit-card/",
+    applyUrl: "https://www.bankofamerica.com/credit-cards/products/secured-credit-card/",
     bonusOffer: "3% cash back in your chosen category — top rewards on a secured card",
   },
   {
@@ -152,7 +152,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "Lowest fixed APR option",
     scoreRange: { min: 300, max: 850 },
     colorClass: "from-amber-400 to-amber-600",
-    applyUrl: "https://www.appliedbank.com/secured-visa-gold-card/",
+    applyUrl: "https://www.appliedbank.com/credit-cards/secured-visa-gold/",
   },
   {
     id: "credit-one-platinum",
@@ -167,7 +167,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "Unsecured option for bad credit",
     scoreRange: { min: 500, max: 650 },
     colorClass: "from-slate-600 to-slate-800",
-    applyUrl: "https://www.creditonebank.com/credit-cards/platinum-visa",
+    applyUrl: "https://www.creditonebank.com/credit-cards/",
   },
 ];
 
