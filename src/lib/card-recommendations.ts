@@ -45,7 +45,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "Building credit with Capital One",
     scoreRange: { min: 300, max: 600 },
     colorClass: "from-blue-600 to-blue-800",
-    applyUrl: "https://www.capitalone.com/credit-cards/secured/",
+    applyUrl: "https://www.capitalone.com/credit-cards/",
   },
   {
     id: "opensky-secured",
@@ -152,7 +152,7 @@ export const creditCards: CreditCard[] = [
     bestFor: "Lowest fixed APR option",
     scoreRange: { min: 300, max: 850 },
     colorClass: "from-amber-400 to-amber-600",
-    applyUrl: "https://www.appliedbank.com/credit-cards/secured-visa-gold/",
+    applyUrl: "https://www.appliedbank.com/",
   },
   {
     id: "credit-one-platinum",
