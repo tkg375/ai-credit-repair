@@ -76,10 +76,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, alreadyReferred: true });
     }
 
-    // Update referral record
+    // Update referral record — rewards increment only when referred user subscribes (see webhook)
     await firestore.updateDoc("referrals", referral.id, {
       referredUsers: [...existingUsers, newUserId],
-      rewards: (referral.data.rewards as number || 0) + 1,
     });
 
     // Mark the new user as referred

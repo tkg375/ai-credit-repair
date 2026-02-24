@@ -33,6 +33,26 @@ export async function POST(req: NextRequest) {
             subscriptionStatus: subscription.status,
             ...(periodEnd && { currentPeriodEnd: new Date(periodEnd * 1000).toISOString() }),
           });
+
+          // Handle referral reward: only credit referrer when referred user actually subscribes
+          const userDoc = await firestore.getDoc("users", uid);
+          const referredBy = userDoc?.data?.referredBy as string | undefined;
+          const referralDiscountUsed = userDoc?.data?.referralDiscountUsed as boolean | undefined;
+          if (referredBy && !referralDiscountUsed) {
+            // Mark discount as used for this subscriber
+            await firestore.updateDoc("users", uid, { referralDiscountUsed: true });
+
+            // Increment referrer's rewards count
+            const referrals = await firestore.query("referrals", [
+              { field: "referralCode", op: "EQUAL", value: referredBy },
+            ]);
+            if (referrals.length > 0) {
+              const referral = referrals[0];
+              await firestore.updateDoc("referrals", referral.id, {
+                rewards: (referral.data.rewards as number || 0) + 1,
+              });
+            }
+          }
         }
         const subscriberEmail = session.customer_details?.email || "unknown";
         const amount = session.amount_total ?? 1999;

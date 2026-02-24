@@ -37,12 +37,19 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Apply 20% referral discount if user was referred and hasn't used it yet
+    const referredBy = userDoc?.data?.referredBy as string | undefined;
+    const referralDiscountUsed = userDoc?.data?.referralDiscountUsed as boolean | undefined;
+    const referralCouponId = process.env.STRIPE_REFERRAL_COUPON_ID;
+    const applyDiscount = !!(referredBy && !referralDiscountUsed && referralCouponId);
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
       payment_method_types: ["card"],
       customer_update: { name: "auto", address: "auto" },
       line_items: [{ price: priceId as string, quantity: 1 }],
+      ...(applyDiscount && { discounts: [{ coupon: referralCouponId! }] }),
       success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/dashboard?upgraded=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/pricing`,
       metadata: { firebaseUid: user.uid },
