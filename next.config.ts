@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? "",
     OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? "",
     OWNER_NOTIFICATION_EMAIL: process.env.OWNER_NOTIFICATION_EMAIL ?? "",
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
   },
 };
 
