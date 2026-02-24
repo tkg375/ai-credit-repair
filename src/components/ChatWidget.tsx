@@ -59,13 +59,14 @@ export function ChatWidget() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to get response");
+      if (!res.ok) throw new Error(data.detail || data.error || "Failed to get response");
 
       setMessages([...newMessages, { role: "assistant", content: data.content }]);
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
       setMessages([
         ...newMessages,
-        { role: "assistant", content: "Sorry, I ran into an error. Please try again." },
+        { role: "assistant", content: `Error: ${msg}` },
       ]);
     } finally {
       setLoading(false);
