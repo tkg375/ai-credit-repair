@@ -229,7 +229,7 @@ function RegisterForm() {
                 placeholder="Start typing your address..."
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                autoComplete="street-address"
+                autoComplete="off"
                 required
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               />
@@ -253,6 +253,7 @@ function RegisterForm() {
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   required
+                  autoComplete="off"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
                 />
               </div>
@@ -265,6 +266,7 @@ function RegisterForm() {
                   onChange={(e) => setState(e.target.value)}
                   maxLength={2}
                   required
+                  autoComplete="off"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition uppercase"
                 />
               </div>
@@ -276,6 +278,7 @@ function RegisterForm() {
                   value={zip}
                   onChange={(e) => setZip(e.target.value)}
                   required
+                  autoComplete="off"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
                 />
               </div>
