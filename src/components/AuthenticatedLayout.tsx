@@ -2,6 +2,37 @@
 
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
+
+function BetaBanner() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem("beta_banner_dismissed");
+    if (!dismissed) setVisible(true);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white text-sm px-4 py-2.5 flex items-center justify-between gap-4">
+      <p className="text-center flex-1 leading-snug">
+        <span className="font-semibold">Credit 800 is in early access.</span>{" "}
+        You may encounter occasional bugs as we improve the platform.{" "}
+        <a href="mailto:support@credit-800.com" className="underline font-medium hover:text-white/80 transition">
+          support@credit-800.com
+        </a>{" "}
+        — Thank you for your patience!
+      </p>
+      <button
+        onClick={() => { sessionStorage.setItem("beta_banner_dismissed", "1"); setVisible(false); }}
+        className="shrink-0 text-white/70 hover:text-white transition text-lg leading-none"
+        aria-label="Dismiss"
+      >
+        ×
+      </button>
+    </div>
+  );
+}
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
@@ -232,6 +263,7 @@ export function AuthenticatedLayout({
 
       {/* Main content */}
       <main className="flex-1 md:ml-56 pt-14 md:pt-0 min-h-screen">
+        <BetaBanner />
         {children}
       </main>
 
