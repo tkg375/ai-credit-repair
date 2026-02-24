@@ -37,11 +37,29 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Apply 20% referral discount if user was referred and hasn't used it yet
+    // Apply 20% referral discount only if:
+    // 1. User was referred by a code
+    // 2. They haven't used the discount yet
+    // 3. The referrer is an active Pro subscriber
     const referredBy = userDoc?.data?.referredBy as string | undefined;
     const referralDiscountUsed = userDoc?.data?.referralDiscountUsed as boolean | undefined;
     const referralCouponId = process.env.STRIPE_REFERRAL_COUPON_ID;
-    const applyDiscount = !!(referredBy && !referralDiscountUsed && referralCouponId);
+
+    let applyDiscount = false;
+    if (referredBy && !referralDiscountUsed && referralCouponId) {
+      // Look up the referrer and verify they are an active Pro subscriber
+      const referrals = await firestore.query("referrals", [
+        { field: "referralCode", op: "EQUAL", value: referredBy },
+      ]);
+      if (referrals.length > 0) {
+        const referrerId = referrals[0].data.referrerId as string;
+        const referrerDoc = await firestore.getDoc("users", referrerId);
+        const referrerStatus = referrerDoc?.data?.subscriptionStatus as string | undefined;
+        if (referrerStatus === "active" || referrerStatus === "trialing") {
+          applyDiscount = true;
+        }
+      }
+    }
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
