@@ -29,7 +29,7 @@ Do NOT:
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
+  if (!apiKey || apiKey === "sk-your-openai-key-here") {
     return NextResponse.json({ error: "AI not configured" }, { status: 500 });
   }
 
