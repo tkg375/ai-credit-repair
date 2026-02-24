@@ -188,7 +188,7 @@ function RegisterForm() {
             <p className="text-red-500 text-sm text-center mb-4 bg-red-50 py-2 px-4 rounded-lg">{error}</p>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Full Legal Name *</label>
               <input
@@ -220,6 +220,9 @@ function RegisterForm() {
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               />
             </div>
+            {/* Hidden honeypot to absorb Chrome autofill before real address fields */}
+            <input type="text" name="address_fake" style={{ display: "none" }} readOnly tabIndex={-1} />
+
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Street Address *</label>
               <input
@@ -229,7 +232,7 @@ function RegisterForm() {
                 placeholder="Start typing your address..."
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                autoComplete="off"
+                autoComplete="new-password"
                 required
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               />
