@@ -20,36 +20,43 @@ export default function PrivacyPolicy() {
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <h1 className="text-3xl sm:text-4xl font-bold mb-6">Privacy Policy</h1>
-        <p className="text-slate-500 mb-8">Last updated: February 6, 2025</p>
+        <p className="text-slate-500 mb-8">Last updated: February 24, 2026</p>
 
         <div className="prose prose-slate max-w-none space-y-6">
           <section>
             <h2 className="text-xl font-semibold mb-3">1. Introduction</h2>
             <p className="text-slate-600 leading-relaxed">
               Credit 800 (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy
-              explains how we collect, use, disclose, and safeguard your information when you use our Service.
+              explains how we collect, use, disclose, and safeguard your information when you use our Service at credit-800.com.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mb-3">2. Information We Collect</h2>
 
-            <h3 className="text-lg font-medium mt-4 mb-2">Personal Information</h3>
+            <h3 className="text-lg font-medium mt-4 mb-2">Account Information</h3>
             <p className="text-slate-600 leading-relaxed mb-3">When you create an account, we collect:</p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Email address</li>
-              <li>Password (encrypted)</li>
+              <li>Password (hashed — never stored in plain text)</li>
+              <li>Optional: full name and phone number (if added to your profile)</li>
             </ul>
 
             <h3 className="text-lg font-medium mt-4 mb-2">Credit Report Data</h3>
             <p className="text-slate-600 leading-relaxed mb-3">When you upload a credit report, we process:</p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Account information (creditor names, account numbers, balances)</li>
-              <li>Payment history</li>
-              <li>Public records</li>
-              <li>Inquiries</li>
+              <li>Payment history and derogatory marks</li>
+              <li>Public records and collections</li>
+              <li>Hard and soft inquiries</li>
               <li>Personal identifying information contained in the report</li>
             </ul>
+
+            <h3 className="text-lg font-medium mt-4 mb-2">Payment Information</h3>
+            <p className="text-slate-600 leading-relaxed">
+              Payments are processed by Stripe. We do not store your full card number, CVV, or billing details.
+              We receive only a tokenized reference and last-four digits from Stripe for display purposes.
+            </p>
 
             <h3 className="text-lg font-medium mt-4 mb-2">Usage Data</h3>
             <p className="text-slate-600 leading-relaxed mb-3">We automatically collect:</p>
@@ -67,9 +74,10 @@ export default function PrivacyPolicy() {
             <p className="text-slate-600 leading-relaxed mb-3">We use your information to:</p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Provide and maintain the Service</li>
-              <li>Analyze your credit report and identify potential disputes</li>
+              <li>Analyze your credit report and identify potential disputes using AI</li>
               <li>Generate personalized dispute letters and action plans</li>
-              <li>Communicate with you about the Service</li>
+              <li>Process subscription payments and manage billing</li>
+              <li>Send transactional emails (analysis complete, dispute mailed, subscription receipts)</li>
               <li>Improve and optimize the Service</li>
               <li>Detect and prevent fraud or abuse</li>
             </ul>
@@ -78,9 +86,10 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-xl font-semibold mb-3">4. AI Processing</h2>
             <p className="text-slate-600 leading-relaxed">
-              We use artificial intelligence services to analyze your credit report data. This processing
-              occurs on secure servers. The AI analysis helps identify disputable items and generate
-              customized dispute letters. We do not use your credit report data to train AI models.
+              We use artificial intelligence services (including Google Gemini and OpenAI) to analyze your
+              credit report data and generate dispute letters. This processing occurs on secure servers.
+              We do not use your credit report data to train AI models. AI-generated content is always
+              presented for your review before any action is taken.
             </p>
           </section>
 
@@ -90,7 +99,8 @@ export default function PrivacyPolicy() {
               Your data is stored using industry-standard security measures:
             </p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
-              <li>Credit reports are stored in encrypted cloud storage</li>
+              <li>Credit report PDFs are stored in encrypted AWS S3 cloud storage</li>
+              <li>Account data is stored in Google Firebase Firestore with access controls</li>
               <li>Passwords are hashed and never stored in plain text</li>
               <li>All data transmission uses TLS encryption</li>
               <li>Access to data is restricted to authorized personnel only</li>
@@ -101,9 +111,9 @@ export default function PrivacyPolicy() {
             <h2 className="text-xl font-semibold mb-3">6. Data Retention</h2>
             <p className="text-slate-600 leading-relaxed">
               We retain your account information and credit report data for as long as your account is active.
-              You can delete your account and all associated data at any time through the Service.
+              You may request deletion of your account and associated data by contacting us at support@credit-800.com.
               After account deletion, we may retain certain information as required by law or for legitimate
-              business purposes.
+              business purposes for up to 90 days.
             </p>
           </section>
 
@@ -113,7 +123,10 @@ export default function PrivacyPolicy() {
               We do not sell your personal information. We may share your information with:
             </p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
-              <li><strong>Service Providers:</strong> Third-party companies that help us operate the Service (cloud hosting, AI processing)</li>
+              <li><strong>Stripe:</strong> For payment processing and subscription management</li>
+              <li><strong>Lob:</strong> For physical USPS mailing of dispute letters (name and mailing address only)</li>
+              <li><strong>AWS:</strong> For cloud infrastructure, file storage, and email delivery (SES)</li>
+              <li><strong>Google Firebase / Gemini / OpenAI:</strong> For authentication, data storage, and AI analysis</li>
               <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
               <li><strong>Business Transfers:</strong> In connection with a merger, acquisition, or sale of assets</li>
             </ul>
@@ -124,19 +137,23 @@ export default function PrivacyPolicy() {
             <p className="text-slate-600 leading-relaxed mb-3">You have the right to:</p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Access your personal information</li>
-              <li>Correct inaccurate information</li>
-              <li>Delete your account and data</li>
-              <li>Export your data</li>
-              <li>Opt out of marketing communications</li>
+              <li>Correct inaccurate information via your profile page</li>
+              <li>Request deletion of your account and data</li>
+              <li>Opt out of non-transactional email communications</li>
+              <li>Cancel your subscription at any time</li>
             </ul>
+            <p className="text-slate-600 leading-relaxed mt-3">
+              To exercise any of these rights, contact us at{" "}
+              <a href="mailto:support@credit-800.com" className="text-teal-600 hover:text-teal-500">support@credit-800.com</a>.
+            </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mb-3">9. Cookies and Tracking</h2>
             <p className="text-slate-600 leading-relaxed">
-              We use essential cookies to maintain your session and preferences. We do not use
-              third-party advertising cookies. You can configure your browser to reject cookies,
-              but this may affect the functionality of the Service.
+              We use essential cookies to maintain your authentication session. We do not use
+              third-party advertising or tracking cookies. You can configure your browser to reject cookies,
+              but this will prevent you from staying logged in.
             </p>
           </section>
 
@@ -144,32 +161,34 @@ export default function PrivacyPolicy() {
             <h2 className="text-xl font-semibold mb-3">10. Children&apos;s Privacy</h2>
             <p className="text-slate-600 leading-relaxed">
               The Service is not intended for users under 18 years of age. We do not knowingly collect
-              personal information from children under 18.
+              personal information from children under 18. If you believe a minor has created an account,
+              contact us immediately at support@credit-800.com.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">11. California Privacy Rights</h2>
+            <h2 className="text-xl font-semibold mb-3">11. California Privacy Rights (CCPA)</h2>
             <p className="text-slate-600 leading-relaxed">
               If you are a California resident, you have additional rights under the California Consumer
               Privacy Act (CCPA), including the right to know what personal information we collect,
               the right to delete your information, and the right to opt out of the sale of personal
-              information (which we do not do).
+              information. We do not sell personal information.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mb-3">12. Changes to This Policy</h2>
             <p className="text-slate-600 leading-relaxed">
-              We may update this Privacy Policy from time to time. We will notify you of any changes
-              by posting the new Privacy Policy on this page and updating the &quot;Last updated&quot; date.
+              We may update this Privacy Policy from time to time. We will notify you of material changes
+              by email or by posting the updated policy on this page with a new &quot;Last updated&quot; date.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mb-3">13. Contact Us</h2>
             <p className="text-slate-600 leading-relaxed">
-              If you have any questions about this Privacy Policy, please contact us through the Service.
+              If you have any questions about this Privacy Policy, please contact us at{" "}
+              <a href="mailto:support@credit-800.com" className="text-teal-600 hover:text-teal-500">support@credit-800.com</a>.
             </p>
           </section>
         </div>

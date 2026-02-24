@@ -20,13 +20,13 @@ export default function TermsOfService() {
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <h1 className="text-3xl sm:text-4xl font-bold mb-6">Terms of Service</h1>
-        <p className="text-slate-500 mb-8">Last updated: February 6, 2025</p>
+        <p className="text-slate-500 mb-8">Last updated: February 24, 2026</p>
 
         <div className="prose prose-slate max-w-none space-y-6">
           <section>
             <h2 className="text-xl font-semibold mb-3">1. Acceptance of Terms</h2>
             <p className="text-slate-600 leading-relaxed">
-              By accessing or using Credit 800 (&quot;the Service&quot;), you agree to be bound by these Terms of Service.
+              By accessing or using Credit 800 (&quot;the Service&quot;), operated by Credit 800 LLC, you agree to be bound by these Terms of Service.
               If you do not agree to these terms, please do not use the Service.
             </p>
           </section>
@@ -34,33 +34,46 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-semibold mb-3">2. Description of Service</h2>
             <p className="text-slate-600 leading-relaxed">
-              Credit 800 is an educational tool that helps users understand their credit reports and provides
-              AI-generated suggestions for potential disputes. The Service analyzes uploaded credit reports,
-              identifies potentially disputable items, and generates template dispute letters based on the
-              Fair Credit Reporting Act (FCRA) and other applicable laws.
+              Credit 800 is an AI-powered educational platform that helps users understand their credit reports,
+              identify potentially disputable items, generate FCRA-compliant dispute letter templates, track disputes,
+              and learn credit-building strategies. The Service also offers optional physical mail delivery of dispute
+              letters via USPS through a third-party mailing partner.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mb-3">3. Not a Credit Repair Organization</h2>
             <p className="text-slate-600 leading-relaxed mb-3">
-              <strong>Credit 800 is NOT a credit repair organization as defined by the Credit Repair Organizations Act (CROA).</strong>
-              We do not:
+              <strong>Credit 800 is NOT a credit repair organization as defined by the Credit Repair Organizations Act (CROA).</strong> We do not:
             </p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Guarantee removal of any items from your credit report</li>
-              <li>Promise to improve your credit score</li>
-              <li>Submit disputes on your behalf</li>
-              <li>Charge fees for credit repair services</li>
+              <li>Promise to improve your credit score by any specific amount</li>
+              <li>Submit disputes on your behalf or act as your agent</li>
+              <li>Provide legal advice</li>
             </ul>
             <p className="text-slate-600 leading-relaxed mt-3">
-              The Service is an educational tool that provides information and templates. You are solely
-              responsible for reviewing, editing, and submitting any dispute letters.
+              The Service provides educational information and letter templates. You are solely responsible for
+              reviewing, editing, and submitting any dispute letters. Any results are not guaranteed.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">4. User Responsibilities</h2>
+            <h2 className="text-xl font-semibold mb-3">4. Subscription and Billing</h2>
+            <p className="text-slate-600 leading-relaxed mb-3">
+              Credit 800 offers a free tier and a Pro subscription plan billed monthly at $19.99/month.
+            </p>
+            <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
+              <li>Subscriptions automatically renew each month unless cancelled</li>
+              <li>You may cancel at any time; access continues through the end of the current billing period</li>
+              <li>No refunds are issued for partial billing periods</li>
+              <li>Payments are processed securely by Stripe. Credit 800 does not store your payment card information</li>
+              <li>We reserve the right to change subscription pricing with 30 days&apos; notice</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-3">5. User Responsibilities</h2>
             <p className="text-slate-600 leading-relaxed mb-3">You agree to:</p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Provide accurate information when using the Service</li>
@@ -68,21 +81,22 @@ export default function TermsOfService() {
               <li>Review all AI-generated content before use</li>
               <li>Not rely solely on the Service for credit-related decisions</li>
               <li>Comply with all applicable laws when submitting disputes</li>
+              <li>Not use the Service to file false or fraudulent disputes</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">5. AI-Generated Content Disclaimer</h2>
+            <h2 className="text-xl font-semibold mb-3">6. AI-Generated Content Disclaimer</h2>
             <p className="text-slate-600 leading-relaxed">
               The Service uses artificial intelligence to analyze credit reports and generate dispute letters.
-              AI-generated content may contain errors, inaccuracies, or may not be appropriate for your specific
+              AI-generated content may contain errors or inaccuracies and may not be appropriate for your specific
               situation. You should always review, verify, and customize any AI-generated content before use.
               Credit 800 is not responsible for any consequences resulting from the use of AI-generated content.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">6. No Guarantee of Results</h2>
+            <h2 className="text-xl font-semibold mb-3">7. No Guarantee of Results</h2>
             <p className="text-slate-600 leading-relaxed">
               We make no guarantees regarding the outcome of any disputes you may file. Success in credit
               disputes depends on many factors outside our control, including the accuracy of information
@@ -91,7 +105,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">7. Privacy and Data Security</h2>
+            <h2 className="text-xl font-semibold mb-3">8. Privacy and Data Security</h2>
             <p className="text-slate-600 leading-relaxed">
               Your use of the Service is also governed by our <Link href="/privacy" className="text-teal-600 hover:text-teal-500">Privacy Policy</Link>.
               We take reasonable measures to protect your personal information, but no method of transmission
@@ -100,7 +114,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">8. Limitation of Liability</h2>
+            <h2 className="text-xl font-semibold mb-3">9. Limitation of Liability</h2>
             <p className="text-slate-600 leading-relaxed">
               TO THE MAXIMUM EXTENT PERMITTED BY LAW, CREDIT 800 SHALL NOT BE LIABLE FOR ANY INDIRECT,
               INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES,
@@ -110,18 +124,28 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">9. Modifications to Terms</h2>
+            <h2 className="text-xl font-semibold mb-3">10. Modifications to Terms</h2>
             <p className="text-slate-600 leading-relaxed">
               We reserve the right to modify these Terms of Service at any time. We will notify users of
-              any material changes by posting the updated terms on the Service. Your continued use of the
-              Service after such changes constitutes acceptance of the new terms.
+              any material changes by email or by posting the updated terms on the Service. Your continued
+              use of the Service after such changes constitutes acceptance of the new terms.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">10. Contact Information</h2>
+            <h2 className="text-xl font-semibold mb-3">11. Governing Law</h2>
             <p className="text-slate-600 leading-relaxed">
-              If you have any questions about these Terms of Service, please contact us through the Service.
+              These Terms are governed by the laws of the United States. Any disputes arising from these
+              Terms or your use of the Service shall be resolved through binding arbitration, except where
+              prohibited by law.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-3">12. Contact Information</h2>
+            <p className="text-slate-600 leading-relaxed">
+              If you have any questions about these Terms of Service, please contact us at{" "}
+              <a href="mailto:support@credit-800.com" className="text-teal-600 hover:text-teal-500">support@credit-800.com</a>.
             </p>
           </section>
         </div>
