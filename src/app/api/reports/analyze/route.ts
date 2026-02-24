@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser, getLastAuthError } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
 import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
+import { getUserSubscription } from "@/lib/subscription";
+import { getLimiters } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 // Analyze route now just triggers Lambda — returns well within API Gateway 29s limit
@@ -32,6 +34,26 @@ export async function POST(req: NextRequest) {
 
   try {
     const { reportId, simulateData } = await req.json();
+
+    // Rate limit real uploads: free=1/day, pro=3/day (skip for simulated data)
+    if (!simulateData) {
+      try {
+        const sub = await getUserSubscription(user.uid);
+        const { free, pro } = getLimiters();
+        const limiter = sub.isPro ? pro : free;
+        const { success, reset } = await limiter.limit(user.uid);
+        if (!success) {
+          const resetAt = new Date(reset).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+          return NextResponse.json(
+            { error: `Daily upload limit reached. You can upload again after ${resetAt}.`, reset },
+            { status: 429 }
+          );
+        }
+      } catch (rlErr) {
+        // Fail open — don't block uploads if rate limiter is unavailable
+        console.warn("[analyze] Rate limiter unavailable, skipping:", rlErr);
+      }
+    }
 
     // If simulating, create sample report items with full removal analysis
     if (simulateData) {

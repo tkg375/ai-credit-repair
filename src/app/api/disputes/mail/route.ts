@@ -3,11 +3,17 @@ import { getAuthUser } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
 import { sendLetter, letterToHtml, type LobAddress } from "@/lib/lob";
 import { sendDisputeMailedEmail } from "@/lib/email";
+import { getUserSubscription } from "@/lib/subscription";
 
 export async function POST(request: NextRequest) {
   const user = await getAuthUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const sub = await getUserSubscription(user.uid);
+  if (!sub.isPro) {
+    return NextResponse.json({ error: "Pro subscription required to mail dispute letters." }, { status: 403 });
   }
 
   const body = await request.json();
@@ -65,8 +71,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Add Stripe payment check here before mailing.
-
     // Build recipient address (use manual override if provided, otherwise DB)
     const creditorName = (dispute.data.creditorName as string) || "Creditor";
     let toAddress: LobAddress;
@@ -99,6 +103,15 @@ export async function POST(request: NextRequest) {
       address_state: fromAddress.address_state,
       address_zip: fromAddress.address_zip,
     };
+
+    // Guard against unfilled placeholder addresses
+    const addressFields = [toAddress.address_line1, toAddress.address_city, toAddress.address_state, toAddress.address_zip, senderAddress.address_line1];
+    if (addressFields.some(f => f?.includes("["))) {
+      return NextResponse.json(
+        { error: "Letter contains unfilled address placeholders. Please update your profile and creditor address before mailing." },
+        { status: 400 }
+      );
+    }
 
     // Convert letter text to HTML
     const html = letterToHtml(letterContent);

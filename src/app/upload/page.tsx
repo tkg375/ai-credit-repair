@@ -69,6 +69,7 @@ export default function UploadPage() {
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState("");
+  const [timedOut, setTimedOut] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -193,6 +194,9 @@ export default function UploadPage() {
 
       if (!analyzeRes.ok) {
         const errorData = await analyzeRes.json().catch(() => ({}));
+        if (analyzeRes.status === 429) {
+          throw new Error(errorData.error || "Daily upload limit reached. Please try again tomorrow.");
+        }
         throw new Error(errorData.details || errorData.error || "Failed to start analysis");
       }
 
@@ -206,7 +210,7 @@ export default function UploadPage() {
       await new Promise<void>((resolve, reject) => {
         const poll = async () => {
           if (Date.now() - startTime > MAX_WAIT) {
-            reject(new Error("Analysis is taking longer than expected. Check back on your dashboard — it will appear when complete."));
+            reject(new Error("__TIMEOUT__"));
             return;
           }
 
@@ -246,11 +250,11 @@ export default function UploadPage() {
       });
 
       if (!planRes.ok) {
-        // Plan generation is best-effort — don't block redirect on failure
         console.warn("Plan generation failed, continuing to dashboard");
+        setProgress("Report analyzed! Action plan generation failed — your disputes are still ready to view.");
+      } else {
+        setProgress("Complete! Redirecting to dashboard...");
       }
-
-      setProgress("Complete! Redirecting to dashboard...");
 
       // Redirect to dashboard
       setTimeout(() => {
@@ -259,7 +263,11 @@ export default function UploadPage() {
     } catch (err) {
       console.error("Upload error:", err);
       const message = err instanceof Error ? err.message : String(err);
-      setError(`Failed to process report: ${message}`);
+      if (message === "__TIMEOUT__") {
+        setTimedOut(true);
+      } else {
+        setError(`Failed to process report: ${message}`);
+      }
       setUploading(false);
       setAnalyzing(false);
     }
@@ -458,6 +466,27 @@ export default function UploadPage() {
               </button>
             </div>
           </>
+        ) : timedOut ? (
+          <div className="text-center py-10 sm:py-16">
+            <div className="w-16 sm:w-20 h-16 sm:h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">Still Processing</h2>
+            <p className="text-slate-600 mb-2">
+              Your report is taking longer than usual to analyze. This can happen with larger reports.
+            </p>
+            <p className="text-slate-500 text-sm mb-6">
+              Analysis continues in the background — check your dashboard in a few minutes.
+            </p>
+            <Link
+              href="/dashboard"
+              className="inline-block px-6 py-3 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 text-white rounded-xl font-medium"
+            >
+              Go to Dashboard
+            </Link>
+          </div>
         ) : (
           <div className="text-center py-10 sm:py-16">
             <div className="w-16 sm:w-20 h-16 sm:h-20 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
