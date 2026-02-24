@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 
 const SYSTEM_PROMPT = `You are an expert credit repair advisor for Credit 800, an AI-powered credit repair platform. You help users understand and improve their credit scores.
 
@@ -28,7 +27,7 @@ Do NOT:
 - Make up specific statistics`;
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: "AI not configured" }, { status: 500 });
   }
@@ -53,19 +52,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No valid messages" }, { status: 400 });
     }
 
-    const openai = new OpenAI({ apiKey });
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      max_tokens: 1024,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        ...validMessages,
-      ],
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 1024,
+        system: SYSTEM_PROMPT,
+        messages: validMessages,
+      }),
     });
 
-    const content = response.choices[0]?.message?.content;
+    const data = await res.json();
 
+    if (!res.ok) {
+      console.error("Anthropic error:", data);
+      return NextResponse.json({ error: "AI error" }, { status: 502 });
+    }
+
+    const content = data.content?.[0]?.text;
     if (!content) {
       return NextResponse.json({ error: "No response from AI" }, { status: 502 });
     }
