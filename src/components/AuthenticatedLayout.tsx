@@ -156,6 +156,9 @@ export function AuthenticatedLayout({
               Sign Out
             </button>
           </div>
+          <a href="mailto:support@credit-800.com" className="block text-center text-xs text-slate-400 hover:text-teal-600 transition px-2 pb-1">
+            support@credit-800.com
+          </a>
         </div>
       </aside>
 

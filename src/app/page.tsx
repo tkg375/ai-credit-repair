@@ -232,6 +232,7 @@ export default function Home() {
             <div className="flex items-center gap-4">
               <Link href="/terms" className="hover:text-slate-700 transition">Terms</Link>
               <Link href="/privacy" className="hover:text-slate-700 transition">Privacy</Link>
+              <a href="mailto:support@credit-800.com" className="hover:text-slate-700 transition">support@credit-800.com</a>
             </div>
           </div>
           <p className="text-center text-xs text-slate-400 mt-4">
