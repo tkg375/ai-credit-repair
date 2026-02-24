@@ -10,13 +10,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const priceId = process.env.STRIPE_PRO_PRICE_ID;
+  const priceId = process.env["STRIPE_PRO_PRICE_ID"];
   if (!priceId) {
     console.error("[checkout] STRIPE_PRO_PRICE_ID is not set");
     return NextResponse.json({ error: "Price not configured" }, { status: 500 });
   }
 
-  if (!process.env.STRIPE_SECRET_KEY) {
+  if (!process.env["STRIPE_SECRET_KEY"]) {
     console.error("[checkout] STRIPE_SECRET_KEY is not set");
     return NextResponse.json({ error: "Stripe not configured" }, { status: 500 });
   }

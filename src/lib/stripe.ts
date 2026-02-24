@@ -4,7 +4,7 @@ let _stripe: Stripe | null = null;
 
 export function getStripe(): Stripe {
   if (!_stripe) {
-    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    _stripe = new Stripe(process.env["STRIPE_SECRET_KEY"]!);
   }
   return _stripe;
 }
@@ -29,7 +29,7 @@ export const PLANS = {
   pro: {
     name: "Pro",
     price: 1999, // $19.99 in cents
-    priceId: process.env.STRIPE_PRO_PRICE_ID || "",
+    priceId: process.env["STRIPE_PRO_PRICE_ID"] || "",
     features: [
       "Unlimited dispute letters",
       "Escalation letters (Round 2/3)",
