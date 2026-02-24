@@ -48,11 +48,10 @@ export function Logo({ className = "" }: { className?: string }) {
             </stop>
           </linearGradient>
 
-          {/* Strong glow for 800 */}
-          <filter id={ids.glow} x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+          {/* Subtle glow for 800 — keep text crisp */}
+          <filter id={ids.glow} x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1" result="coloredBlur" />
             <feMerge>
-              <feMergeNode in="coloredBlur" />
               <feMergeNode in="coloredBlur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
@@ -229,10 +228,9 @@ export function LogoIcon({ className = "" }: { className?: string }) {
           </stop>
         </linearGradient>
 
-        <filter id={ids.glow} x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+        <filter id={ids.glow} x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1" result="coloredBlur" />
           <feMerge>
-            <feMergeNode in="coloredBlur" />
             <feMergeNode in="coloredBlur" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
