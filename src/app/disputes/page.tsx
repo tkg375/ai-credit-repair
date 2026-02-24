@@ -738,6 +738,12 @@ export default function DisputesPage() {
   const activeDisputes = disputes.filter((d) => d.status !== "RESOLVED" && d.status !== "REJECTED");
   const historyDisputes = disputes.filter((d) => d.status === "RESOLVED" || d.status === "REJECTED");
 
+  const daysSinceSent = (dispute: Dispute): number => {
+    const ref = dispute.mailedAt || (dispute.createdAt instanceof Date ? dispute.createdAt.toISOString() : String(dispute.createdAt));
+    if (!ref) return 0;
+    return Math.floor((Date.now() - new Date(ref).getTime()) / (1000 * 60 * 60 * 24));
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
@@ -1553,22 +1559,32 @@ export default function DisputesPage() {
                     </Link>
                   )
                 )}
-                {(selectedDispute.status === "SENT" || selectedDispute.status === "UNDER_INVESTIGATION") && (
-                  <button
-                    onClick={() => handleEscalate(selectedDispute.id)}
-                    disabled={escalating === selectedDispute.id}
-                    className="flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-medium hover:from-amber-400 hover:to-orange-400 transition disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {escalating === selectedDispute.id ? (
-                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Escalating...</>
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-                        Escalate (Round 2)
-                      </>
-                    )}
-                  </button>
-                )}
+                {(selectedDispute.status === "SENT" || selectedDispute.status === "UNDER_INVESTIGATION") && (() => {
+                  const days = daysSinceSent(selectedDispute);
+                  const canEscalate = days >= 30;
+                  const daysLeft = 30 - days;
+                  return canEscalate ? (
+                    <button
+                      onClick={() => handleEscalate(selectedDispute.id)}
+                      disabled={escalating === selectedDispute.id}
+                      className="flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-medium hover:from-amber-400 hover:to-orange-400 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {escalating === selectedDispute.id ? (
+                        <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Escalating...</>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                          Escalate (Round 2)
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <div className="flex-1 py-3 bg-slate-100 text-slate-500 rounded-xl font-medium flex items-center justify-center gap-2 text-sm cursor-not-allowed" title="Must wait 30 days after sending before escalating">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      Escalate in {daysLeft}d
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>

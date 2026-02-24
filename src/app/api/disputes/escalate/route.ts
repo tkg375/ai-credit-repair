@@ -17,6 +17,18 @@ export async function POST(req: NextRequest) {
   if (!dispute.exists) return NextResponse.json({ error: "Dispute not found" }, { status: 404 });
   if (dispute.data.userId !== user.uid) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
+  // Enforce 30-day minimum before escalation
+  const sentDate = (dispute.data.mailedAt as string) || (dispute.data.createdAt as string);
+  if (sentDate) {
+    const daysSinceSent = Math.floor((Date.now() - new Date(sentDate).getTime()) / (1000 * 60 * 60 * 24));
+    if (daysSinceSent < 30) {
+      return NextResponse.json(
+        { error: `Escalation not available yet. You must wait at least 30 days after sending. ${30 - daysSinceSent} day(s) remaining.` },
+        { status: 400 }
+      );
+    }
+  }
+
   // Fetch user profile for address block
   let consumerAddress = "[Your Address]\n[City, State ZIP]";
   let consumerName = user.email?.split("@")[0] || "Consumer";
