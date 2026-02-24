@@ -1,6 +1,7 @@
 import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 
 const FROM_EMAIL = "Credit 800 <noreply@credit-800.com>";
+const REPLY_TO = "support@credit-800.com";
 
 function getSesClient() {
   const region = process.env.S3_REGION || "us-east-1";
@@ -28,6 +29,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
     await client.send(
       new SendEmailCommand({
         FromEmailAddress: FROM_EMAIL,
+        ReplyToAddresses: [REPLY_TO],
         Destination: { ToAddresses: [to] },
         Content: {
           Simple: {
