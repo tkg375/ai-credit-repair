@@ -120,7 +120,7 @@ export default function SubscriptionPage() {
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
-      else alert("Failed to start checkout. Please try again.");
+      else alert(`Checkout error: ${data.error || "Unknown error"}`);
     } catch {
       alert("Failed to start checkout.");
     } finally {
