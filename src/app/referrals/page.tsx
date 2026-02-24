@@ -58,7 +58,7 @@ export default function ReferralsPage() {
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 bg-clip-text text-transparent">
             Refer & Earn
           </h1>
-          <p className="text-slate-500 mt-2">Share Credit 800 with friends and both of you get rewarded.</p>
+          <p className="text-slate-500 mt-2">Refer friends who subscribe to Pro and get 20% off your next month.</p>
         </div>
 
         {/* How it Works */}
@@ -71,11 +71,11 @@ export default function ReferralsPage() {
             </div>
             <div className="text-center">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2 text-lg font-bold">2</div>
-              <p className="text-sm">They sign up using your code</p>
+              <p className="text-sm">They sign up and subscribe to Pro using your code</p>
             </div>
             <div className="text-center">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2 text-lg font-bold">3</div>
-              <p className="text-sm">You both get 1 free month of Pro!</p>
+              <p className="text-sm">You get 20% off your next month — $4 back per referral</p>
             </div>
           </div>
         </div>
@@ -84,14 +84,14 @@ export default function ReferralsPage() {
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
             <p className="text-2xl font-bold text-teal-600">{referredCount}</p>
-            <p className="text-xs text-slate-500">Friends Referred</p>
+            <p className="text-xs text-slate-500">Pro Referrals</p>
           </div>
           <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
             <p className="text-2xl font-bold text-teal-600">{rewards}</p>
-            <p className="text-xs text-slate-500">Free Months Earned</p>
+            <p className="text-xs text-slate-500">Discounts Earned</p>
           </div>
           <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
-            <p className="text-2xl font-bold text-slate-900">${(rewards * 19.99).toFixed(0)}</p>
+            <p className="text-2xl font-bold text-slate-900">${(rewards * 4).toFixed(0)}</p>
             <p className="text-xs text-slate-500">Total Saved</p>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function ReferralsPage() {
           <h3 className="font-semibold mb-3">Share With Friends</h3>
           <div className="flex flex-wrap gap-3">
             <a
-              href={`sms:?body=I've been using Credit 800 to fix my credit score. Use my referral code ${referralCode} to get a free month of Pro! ${referralLink}`}
+              href={`sms:?body=I've been using Credit 800 to fix my credit score. Sign up with my referral code ${referralCode} and subscribe to Pro: ${referralLink}`}
               className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition"
             >
               Text Message
@@ -145,7 +145,7 @@ export default function ReferralsPage() {
               Email
             </a>
             <a
-              href={`https://twitter.com/intent/tweet?text=Fixing my credit with @Credit800! Use my code ${referralCode} to get a free month of Pro: ${referralLink}`}
+              href={`https://twitter.com/intent/tweet?text=Fixing my credit with Credit 800! Sign up with my code ${referralCode} and subscribe to Pro: ${referralLink}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-medium hover:bg-slate-900 transition"
