@@ -9,12 +9,18 @@ export async function POST(req: NextRequest) {
   const { issue, page } = await req.json();
   if (!issue?.trim()) return NextResponse.json({ error: "Issue description is required" }, { status: 400 });
 
-  await sendIssueReport({
-    userId: user.uid,
-    userEmail: user.email || "unknown",
-    issue: issue.trim(),
-    page,
-  });
+  try {
+    await sendIssueReport({
+      userId: user.uid,
+      userEmail: user.email || "unknown",
+      issue: issue.trim(),
+      page,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[issue report] failed to send email:", msg);
+    return NextResponse.json({ error: `Failed to send report: ${msg}` }, { status: 500 });
+  }
 
   return NextResponse.json({ success: true });
 }

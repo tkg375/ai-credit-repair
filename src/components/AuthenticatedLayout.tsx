@@ -12,21 +12,27 @@ function ReportIssueModal({ onClose }: { onClose: () => void }) {
   const [issue, setIssue] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!issue.trim() || !user) return;
     setSubmitting(true);
+    setError("");
     try {
-      await fetch("/api/support/issue", {
+      const res = await fetch("/api/support/issue", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
         body: JSON.stringify({ issue, page: window.location.pathname }),
       });
-      setSubmitted(true);
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Something went wrong. Please try again.");
+      } else {
+        setSubmitted(true);
+      }
     } catch {
-      // still show success — don't block the user
-      setSubmitted(true);
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setSubmitting(false);
     }
@@ -55,6 +61,9 @@ function ReportIssueModal({ onClose }: { onClose: () => void }) {
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <p className="text-sm text-slate-500">Describe the issue you&apos;re experiencing. Your account ID will be included automatically so we can investigate.</p>
+            {error && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2">{error}</p>
+            )}
             <textarea
               value={issue}
               onChange={(e) => setIssue(e.target.value)}

@@ -176,12 +176,23 @@ export async function sendIssueReport(params: {
   userEmail: string;
   issue: string;
   page?: string;
-}) {
+}): Promise<void> {
   const { userId, userEmail, issue, page } = params;
-  await sendEmail(
-    REPLY_TO,
-    `[Issue Report] from ${userEmail}`,
-    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+
+  const client = getSesClient();
+  if (!client) throw new Error("Email service not configured (missing AWS credentials)");
+
+  await client.send(
+    new SendEmailCommand({
+      FromEmailAddress: FROM_EMAIL,
+      ReplyToAddresses: [REPLY_TO],
+      Destination: { ToAddresses: [REPLY_TO] },
+      Content: {
+        Simple: {
+          Subject: { Data: `[Issue Report] from ${userEmail}`, Charset: "UTF-8" },
+          Body: {
+            Html: {
+              Data: `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
       <div style="background:linear-gradient(135deg,#f59e0b,#ef4444);padding:24px;border-radius:12px;margin-bottom:24px">
         <h1 style="color:white;margin:0;font-size:22px">Issue Report</h1>
         <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">A user has reported a problem</p>
@@ -197,6 +208,13 @@ export async function sendIssueReport(params: {
         <p style="margin:0;white-space:pre-wrap;color:#1e293b">${issue.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
       </div>
       <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 Issue Tracker · Reply to this email to respond to the user.</p>
-    </body></html>`
+    </body></html>`,
+              Charset: "UTF-8",
+            },
+          },
+        },
+      },
+    })
   );
 }
+
