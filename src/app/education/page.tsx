@@ -103,11 +103,11 @@ export default function EducationPage() {
             <div key={mod.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
               <button
                 onClick={() => setExpandedModule(expandedModule === mod.id ? null : mod.id)}
-                className="w-full p-5 text-left flex items-start gap-4 hover:bg-slate-50 transition"
+                className="w-full p-4 sm:p-5 text-left flex items-start gap-3 sm:gap-4 hover:bg-slate-50 transition"
               >
-                <span className="text-2xl flex-shrink-0">{mod.icon}</span>
+                <span className="text-xl sm:text-2xl flex-shrink-0 mt-0.5">{mod.icon}</span>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
                     <h3 className="font-semibold text-sm">{mod.title}</h3>
                     {completed.includes(mod.id) && (
                       <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Completed</span>

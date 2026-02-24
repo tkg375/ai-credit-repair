@@ -123,16 +123,16 @@ export default function BureausPage() {
         ) : (
           <>
             {/* Summary Cards */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
               {BUREAUS.map(bureau => {
                 const bureauList = bureauItems(bureau);
                 return (
-                  <div key={bureau} className="bg-white rounded-xl border border-slate-200 p-4">
-                    <p className="text-sm font-semibold text-slate-700 mb-1">{bureau}</p>
-                    <p className="text-2xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">
+                  <div key={bureau} className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4">
+                    <p className="text-xs sm:text-sm font-semibold text-slate-700 mb-1">{bureau}</p>
+                    <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">
                       {bureauList.length}
                     </p>
-                    <p className="text-xs text-slate-500">negative items</p>
+                    <p className="text-xs text-slate-500">items</p>
                     <p className="text-xs text-red-600 mt-1">{bureauList.filter(i => i.isDisputable).length} disputable</p>
                   </div>
                 );
@@ -152,8 +152,8 @@ export default function BureausPage() {
               </div>
             )}
 
-            {/* Side-by-Side Table */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+            {/* Side-by-Side Table — desktop */}
+            <div className="hidden sm:block bg-white rounded-2xl border border-slate-200 overflow-hidden">
               <div className="grid grid-cols-4 gap-0 border-b border-slate-200 bg-slate-50">
                 <div className="px-4 py-3 text-sm font-semibold text-slate-600">Creditor</div>
                 {BUREAUS.map(b => (
@@ -203,6 +203,47 @@ export default function BureausPage() {
                   );
                 })}
               </div>
+            </div>
+
+            {/* Mobile card view */}
+            <div className="sm:hidden space-y-3">
+              {Object.entries(grouped).map(([key, bureauMap]) => {
+                const allItems = Object.values(bureauMap).flat();
+                const name = allItems[0]?.creditorName || key;
+                const missingBureaus = BUREAUS.filter(b => !bureauMap[b]?.length);
+                return (
+                  <div key={key} className={`bg-white rounded-xl border p-4 ${missingBureaus.length > 0 ? "border-amber-200 bg-amber-50/30" : "border-slate-200"}`}>
+                    <p className="font-semibold text-sm text-slate-800 mb-1">{name}</p>
+                    {missingBureaus.length > 0 && (
+                      <p className="text-xs text-amber-600 mb-2">Missing from: {missingBureaus.join(", ")}</p>
+                    )}
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {BUREAUS.map(bureau => {
+                        const entry = bureauMap[bureau]?.[0];
+                        return (
+                          <div key={bureau} className="text-center">
+                            <p className="text-xs font-medium text-slate-500 mb-1">{bureau.slice(0, 3)}</p>
+                            {entry ? (
+                              <div>
+                                <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                                  entry.status.includes("COLLECTION") ? "bg-red-100 text-red-700" :
+                                  entry.status.includes("CHARGE") ? "bg-orange-100 text-orange-700" :
+                                  "bg-amber-100 text-amber-700"
+                                }`}>
+                                  {entry.status.replace(/_/g, " ").split(" ")[0]}
+                                </span>
+                                {entry.balance > 0 && <p className="text-xs text-slate-600 mt-0.5">${entry.balance.toLocaleString()}</p>}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-slate-400">—</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             <p className="text-xs text-slate-400 mt-4 text-center">

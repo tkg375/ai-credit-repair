@@ -81,17 +81,17 @@ export default function ReferralsPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
-            <p className="text-2xl font-bold text-teal-600">{referredCount}</p>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8">
+          <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-teal-600">{referredCount}</p>
             <p className="text-xs text-slate-500">Pro Referrals</p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
-            <p className="text-2xl font-bold text-teal-600">{rewards}</p>
-            <p className="text-xs text-slate-500">Discounts Earned</p>
+          <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-teal-600">{rewards}</p>
+            <p className="text-xs text-slate-500">Discounts</p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
-            <p className="text-2xl font-bold text-slate-900">${(rewards * 4).toFixed(0)}</p>
+          <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-slate-900">${(rewards * 4).toFixed(0)}</p>
             <p className="text-xs text-slate-500">Total Saved</p>
           </div>
         </div>
@@ -112,16 +112,16 @@ export default function ReferralsPage() {
           </div>
 
           <h3 className="font-semibold mb-3">Referral Link</h3>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             <input
               type="text"
               readOnly
               value={referralLink}
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-600"
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-600 min-w-0"
             />
             <button
               onClick={() => handleCopy(referralLink)}
-              className="px-4 py-3 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition"
+              className="px-4 py-3 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition sm:flex-shrink-0"
             >
               Copy Link
             </button>

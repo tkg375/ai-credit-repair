@@ -195,33 +195,35 @@ export default function VaultPage() {
         ) : (
           <div className="space-y-3">
             {filtered.map((doc) => (
-              <div key={doc.id} className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
-                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{doc.name}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">{categoryLabels[doc.category] || doc.category}</span>
-                    <span className="text-xs text-slate-400">{formatSize(doc.size)}</span>
-                    <span className="text-xs text-slate-400">{new Date(doc.uploadedAt).toLocaleDateString()}</span>
+              <div key={doc.id} className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{doc.name}</p>
+                    <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                      <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">{categoryLabels[doc.category] || doc.category}</span>
+                      <span className="text-xs text-slate-400">{formatSize(doc.size)}</span>
+                      <span className="text-xs text-slate-400">{new Date(doc.uploadedAt).toLocaleDateString()}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 sm:flex-shrink-0">
                   <a
                     href={doc.blobUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-1.5 text-xs text-teal-600 border border-teal-200 rounded-lg hover:bg-teal-50 transition"
+                    className="flex-1 sm:flex-none text-center px-3 py-1.5 text-xs text-teal-600 border border-teal-200 rounded-lg hover:bg-teal-50 transition"
                   >
                     Download
                   </a>
                   <button
                     onClick={() => handleDelete(doc.id)}
                     disabled={deleting === doc.id}
-                    className="px-3 py-1.5 text-xs text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition disabled:opacity-50"
+                    className="flex-1 sm:flex-none px-3 py-1.5 text-xs text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition disabled:opacity-50"
                   >
                     {deleting === doc.id ? "..." : "Delete"}
                   </button>

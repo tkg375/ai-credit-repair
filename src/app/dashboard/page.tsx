@@ -207,24 +207,24 @@ export default function Dashboard() {
         <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Dashboard</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition">
+          <Link href="/scores" className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition block">
             <p className="text-sm text-slate-500 mb-1">Latest Score</p>
             <p className="text-4xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">
               {latestScore ?? "---"}
             </p>
-          </div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition">
+          </Link>
+          <Link href="/disputes" className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition block">
             <p className="text-sm text-slate-500 mb-1">Disputable Items</p>
             <p className="text-4xl font-bold text-amber-500">
               {disputableCount}
             </p>
-          </div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition">
+          </Link>
+          <Link href="/disputes" className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition block">
             <p className="text-sm text-slate-500 mb-1">Active Disputes</p>
             <p className="text-4xl font-bold text-emerald-500">
               {activeDisputes}
             </p>
-          </div>
+          </Link>
         </div>
 
         <section className="mb-12">
