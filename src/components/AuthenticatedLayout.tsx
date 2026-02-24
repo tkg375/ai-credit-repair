@@ -37,7 +37,6 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
 import { NotificationBell } from "@/components/NotificationBell";
-import { ChatWidget } from "@/components/ChatWidget";
 
 type NavItem = "dashboard" | "upload" | "tools" | "disputes" | "plan" | "scores" | "simulator" | "education" | "vault" | "payoff" | "recommendations" | "cfpb" | "referrals" | "pricing" | "utilization" | "bureaus" | "profile" | "calendar" | "investing";
 
@@ -268,7 +267,6 @@ export function AuthenticatedLayout({
       </main>
 
       {/* Floating AI Chat Widget */}
-      <ChatWidget />
     </div>
   );
 }
