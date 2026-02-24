@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
-import { stripe, PLANS } from "@/lib/stripe";
+import { stripe } from "@/lib/stripe";
 import { firestore } from "@/lib/firebase-admin";
 
 export async function POST(req: NextRequest) {
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const priceId = PLANS.pro.priceId;
+  const priceId = process.env.STRIPE_PRO_PRICE_ID;
   if (!priceId) {
     console.error("[checkout] STRIPE_PRO_PRICE_ID is not set");
     return NextResponse.json({ error: "Price not configured" }, { status: 500 });
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       mode: "subscription",
       payment_method_types: ["card"],
       customer_update: { name: "auto", address: "auto" },
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: priceId as string, quantity: 1 }],
       success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/dashboard?upgraded=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/pricing`,
       metadata: { firebaseUid: user.uid },
