@@ -1,18 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
-
-declare global {
-  interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    google: any;
-    initAddressAutocomplete?: () => void;
-  }
-}
 
 function RegisterForm() {
   const { signUp } = useAuth();
@@ -32,56 +24,11 @@ function RegisterForm() {
   const [referralCode, setReferralCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const addressInputRef = useRef<HTMLInputElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const autocompleteRef = useRef<any>(null);
 
   useEffect(() => {
     const ref = searchParams.get("ref");
     if (ref) setReferralCode(ref.toUpperCase());
   }, [searchParams]);
-
-  // Load Google Maps Places Autocomplete
-  useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!apiKey || !addressInputRef.current) return;
-
-    const initAutocomplete = () => {
-      if (!addressInputRef.current || !window.google?.maps?.places) return;
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(
-        addressInputRef.current,
-        { types: ["address"], componentRestrictions: { country: "us" } }
-      );
-      autocompleteRef.current.addListener("place_changed", () => {
-        const place = autocompleteRef.current?.getPlace();
-        if (!place?.address_components) return;
-        let streetNum = "", route = "", cityVal = "", stateVal = "", zipVal = "";
-        for (const c of place.address_components) {
-          const t = c.types[0];
-          if (t === "street_number") streetNum = c.long_name;
-          if (t === "route") route = c.short_name;
-          if (t === "locality") cityVal = c.long_name;
-          if (t === "administrative_area_level_1") stateVal = c.short_name;
-          if (t === "postal_code") zipVal = c.long_name;
-        }
-        setAddress(`${streetNum} ${route}`.trim());
-        setCity(cityVal);
-        setState(stateVal);
-        setZip(zipVal);
-      });
-    };
-
-    if (window.google?.maps?.places) {
-      initAutocomplete();
-    } else if (!document.getElementById("gmaps-script")) {
-      window.initAddressAutocomplete = initAutocomplete;
-      const script = document.createElement("script");
-      script.id = "gmaps-script";
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initAddressAutocomplete`;
-      script.async = true;
-      document.head.appendChild(script);
-    }
-  }, []);
 
   // ZIP code auto-fill (free fallback — no API key needed)
   useEffect(() => {
@@ -220,19 +167,14 @@ function RegisterForm() {
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               />
             </div>
-            {/* Hidden honeypot to absorb Chrome autofill before real address fields */}
-            <input type="text" name="address_fake" style={{ display: "none" }} readOnly tabIndex={-1} />
-
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Street Address *</label>
               <input
-                ref={addressInputRef}
                 type="text"
-                id="address-autocomplete"
-                placeholder="Start typing your address..."
+                placeholder="123 Main St"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                autoComplete="new-password"
+                autoComplete="off"
                 required
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               />
