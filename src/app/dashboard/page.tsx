@@ -17,6 +17,16 @@ interface Dispute {
   status: string;
 }
 
+interface ReportChanges {
+  isFirstReport: boolean;
+  newItems: { creditorName: string; accountType: string; balance: number; status: string }[];
+  removedItems: { creditorName: string; accountType: string; balance: number }[];
+  balanceChanges: { creditorName: string; oldBalance: number; newBalance: number; delta: number }[];
+  statusChanges: { creditorName: string; oldStatus: string; newStatus: string }[];
+  totalBalanceDelta: number;
+  createdAt: string;
+}
+
 // Firestore REST API helpers
 function firestoreValueToJs(val: Record<string, unknown>): unknown {
   if ("stringValue" in val) return val.stringValue;
@@ -110,6 +120,7 @@ export default function Dashboard() {
   const [latestScore, setLatestScore] = useState<number | null>(null);
   const [disputableCount, setDisputableCount] = useState(0);
   const [disputes, setDisputes] = useState<Dispute[]>([]);
+  const [latestChanges, setLatestChanges] = useState<ReportChanges | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -143,6 +154,26 @@ export default function Dashboard() {
             status: d.status as string,
           }))
         );
+
+        // Load most recent report changes (skip first-report entries)
+        const changesDocs = await queryCollection(user!.idToken, "reportChanges", user!.uid);
+        const meaningfulChanges = changesDocs
+          .filter((c: Record<string, unknown>) => !c.isFirstReport)
+          .sort((a: Record<string, unknown>, b: Record<string, unknown>) =>
+            new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime()
+          );
+        if (meaningfulChanges.length > 0) {
+          const c = meaningfulChanges[0] as Record<string, unknown>;
+          setLatestChanges({
+            isFirstReport: false,
+            newItems: (c.newItems as ReportChanges["newItems"]) ?? [],
+            removedItems: (c.removedItems as ReportChanges["removedItems"]) ?? [],
+            balanceChanges: (c.balanceChanges as ReportChanges["balanceChanges"]) ?? [],
+            statusChanges: (c.statusChanges as ReportChanges["statusChanges"]) ?? [],
+            totalBalanceDelta: c.totalBalanceDelta as number ?? 0,
+            createdAt: c.createdAt as string,
+          });
+        }
 
       } catch (err) {
         console.error("Failed to load dashboard data:", err);
@@ -249,6 +280,95 @@ export default function Dashboard() {
             </div>
           )}
         </section>
+
+        {latestChanges && (
+          <section className="mb-12">
+            <h2 className="text-xl font-semibold mb-4">Changes Since Last Report</h2>
+            {(() => {
+              const isImprovement = latestChanges.removedItems.length > 0 || latestChanges.totalBalanceDelta < -100;
+              const hasNewNegatives = latestChanges.newItems.filter(i => i.status !== "CURRENT").length > 0;
+              const cardBg = hasNewNegatives ? "bg-red-50 border-red-200" : isImprovement ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200";
+              const badgeColor = hasNewNegatives ? "bg-red-100 text-red-700" : isImprovement ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700";
+              const balanceDeltaStr = latestChanges.totalBalanceDelta >= 0
+                ? `+$${latestChanges.totalBalanceDelta.toLocaleString()}`
+                : `-$${Math.abs(latestChanges.totalBalanceDelta).toLocaleString()}`;
+              const balanceColor = latestChanges.totalBalanceDelta <= 0 ? "text-emerald-600" : "text-red-600";
+              return (
+                <div className={`border rounded-2xl p-6 shadow-sm ${cardBg}`}>
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    {latestChanges.newItems.length > 0 && (
+                      <span className="text-sm px-3 py-1 rounded-full font-medium bg-red-100 text-red-700">
+                        +{latestChanges.newItems.length} new item{latestChanges.newItems.length !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                    {latestChanges.removedItems.length > 0 && (
+                      <span className="text-sm px-3 py-1 rounded-full font-medium bg-emerald-100 text-emerald-700">
+                        -{latestChanges.removedItems.length} item{latestChanges.removedItems.length !== 1 ? "s" : ""} removed
+                      </span>
+                    )}
+                    {latestChanges.balanceChanges.length > 0 && (
+                      <span className={`text-sm px-3 py-1 rounded-full font-medium ${badgeColor}`}>
+                        {latestChanges.balanceChanges.length} balance change{latestChanges.balanceChanges.length !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                    {latestChanges.statusChanges.length > 0 && (
+                      <span className="text-sm px-3 py-1 rounded-full font-medium bg-slate-100 text-slate-600">
+                        {latestChanges.statusChanges.length} status change{latestChanges.statusChanges.length !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-500">Total balance change</p>
+                      <p className={`text-2xl font-bold ${balanceColor}`}>{balanceDeltaStr}</p>
+                    </div>
+                    <Link
+                      href="/disputes"
+                      className="px-4 py-2 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-sm rounded-lg font-medium hover:from-lime-400 hover:to-teal-500 transition"
+                    >
+                      View Disputes
+                    </Link>
+                  </div>
+                  {latestChanges.newItems.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-red-200">
+                      <p className="text-xs font-semibold text-red-700 mb-2">NEW ITEMS</p>
+                      <div className="space-y-1">
+                        {latestChanges.newItems.slice(0, 3).map((item, i) => (
+                          <div key={i} className="flex items-center justify-between text-sm">
+                            <span className="text-slate-700">{item.creditorName}</span>
+                            <span className="text-red-600 font-medium">${item.balance.toLocaleString()}</span>
+                          </div>
+                        ))}
+                        {latestChanges.newItems.length > 3 && (
+                          <p className="text-xs text-slate-500">+{latestChanges.newItems.length - 3} more</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {latestChanges.removedItems.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-emerald-200">
+                      <p className="text-xs font-semibold text-emerald-700 mb-2">REMOVED ITEMS</p>
+                      <div className="space-y-1">
+                        {latestChanges.removedItems.slice(0, 3).map((item, i) => (
+                          <div key={i} className="flex items-center justify-between text-sm">
+                            <span className="text-slate-700">{item.creditorName}</span>
+                            <span className="text-emerald-600 font-medium line-through">${item.balance.toLocaleString()}</span>
+                          </div>
+                        ))}
+                        {latestChanges.removedItems.length > 3 && (
+                          <p className="text-xs text-slate-500">+{latestChanges.removedItems.length - 3} more</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-xs text-slate-400 mt-4">
+                    Compared {new Date(latestChanges.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </p>
+                </div>
+              );
+            })()}
+          </section>
+        )}
 
       </main>
     </AuthenticatedLayout>

@@ -7,4 +7,6 @@ export const COLLECTIONS = {
   disputes: "disputes",
   creditScores: "creditScores",
   actionPlans: "actionPlans",
+  reportChanges: "reportChanges",
+  notifications: "notifications",
 } as const;

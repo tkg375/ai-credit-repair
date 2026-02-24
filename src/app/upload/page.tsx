@@ -256,6 +256,13 @@ export default function UploadPage() {
         setProgress("Complete! Redirecting to dashboard...");
       }
 
+      // Fire-and-forget change detection — compare against previous report
+      fetch("/api/reports/compare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
+        body: JSON.stringify({ reportId }),
+      }).catch(() => {});
+
       // Redirect to dashboard
       setTimeout(() => {
         router.push("/dashboard");

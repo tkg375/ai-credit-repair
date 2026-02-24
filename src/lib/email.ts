@@ -171,6 +171,78 @@ export async function sendWelcomeEmail(to: string, name: string) {
   );
 }
 
+export async function sendCreditChangesEmail(
+  to: string,
+  name: string,
+  changes: {
+    newItems: { creditorName: string; accountType: string; balance: number; status: string }[];
+    removedItems: { creditorName: string; accountType: string; balance: number }[];
+    balanceChanges: { creditorName: string; oldBalance: number; newBalance: number; delta: number }[];
+    statusChanges: { creditorName: string; oldStatus: string; newStatus: string }[];
+    totalBalanceDelta: number;
+  }
+) {
+  const improved = changes.removedItems.length > 0 || changes.totalBalanceDelta < -100;
+  const newNegatives = changes.newItems.filter(i => i.status !== "CURRENT").length;
+  const balanceDeltaStr = changes.totalBalanceDelta >= 0
+    ? `+$${changes.totalBalanceDelta.toLocaleString()}`
+    : `-$${Math.abs(changes.totalBalanceDelta).toLocaleString()}`;
+  const balanceColor = changes.totalBalanceDelta <= 0 ? "#15803d" : "#b91c1c";
+
+  const summaryRows = [
+    changes.newItems.length > 0
+      ? `<tr><td style="padding:10px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">New items</td><td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:bold;color:#b91c1c">+${changes.newItems.length}</td></tr>`
+      : "",
+    changes.removedItems.length > 0
+      ? `<tr><td style="padding:10px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Items removed</td><td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:bold;color:#15803d">-${changes.removedItems.length}</td></tr>`
+      : "",
+    changes.balanceChanges.length > 0
+      ? `<tr><td style="padding:10px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Balance changes</td><td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:bold">${changes.balanceChanges.length} account${changes.balanceChanges.length !== 1 ? "s" : ""}</td></tr>`
+      : "",
+    `<tr><td style="padding:10px;color:#64748b;font-size:14px">Total balance change</td><td style="padding:10px;font-weight:bold;color:${balanceColor}">${balanceDeltaStr}</td></tr>`,
+  ].filter(Boolean).join("");
+
+  const headerBg = improved && newNegatives === 0
+    ? "linear-gradient(135deg,#84cc16,#14b8a6)"
+    : "linear-gradient(135deg,#f59e0b,#ef4444)";
+  const headerTitle = improved && newNegatives === 0 ? "Credit Report Improved" : "Changes Detected on Your Report";
+  const headerSub = improved && newNegatives === 0
+    ? "Good news — your latest report shows positive changes"
+    : `${newNegatives > 0 ? `${newNegatives} new negative item${newNegatives !== 1 ? "s" : ""} detected` : "Review the changes on your report"}`;
+
+  await sendEmail(
+    to,
+    `Credit report changes detected — ${changes.newItems.length > 0 ? `${changes.newItems.length} new item${changes.newItems.length !== 1 ? "s" : ""}` : changes.removedItems.length > 0 ? `${changes.removedItems.length} item${changes.removedItems.length !== 1 ? "s" : ""} removed` : "balance update"}`,
+    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+      <div style="background:${headerBg};padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:24px">${headerTitle}</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">${headerSub}</p>
+      </div>
+      <p>Hi ${name || "there"},</p>
+      <p>We compared your latest credit report upload to your previous one. Here's what changed:</p>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">
+        ${summaryRows}
+      </table>
+      ${changes.newItems.length > 0 ? `
+      <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:16px;margin:16px 0">
+        <p style="margin:0 0 8px;font-weight:bold;color:#b91c1c">New Items (${changes.newItems.length})</p>
+        <ul style="margin:0;padding-left:20px;color:#7f1d1d;font-size:14px;line-height:1.8">
+          ${changes.newItems.map(i => `<li>${i.creditorName} — ${i.accountType} ($${i.balance.toLocaleString()})</li>`).join("")}
+        </ul>
+      </div>` : ""}
+      ${changes.removedItems.length > 0 ? `
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:16px 0">
+        <p style="margin:0 0 8px;font-weight:bold;color:#15803d">Items No Longer Showing (${changes.removedItems.length})</p>
+        <ul style="margin:0;padding-left:20px;color:#166534;font-size:14px;line-height:1.8">
+          ${changes.removedItems.map(i => `<li>${i.creditorName} — ${i.accountType}</li>`).join("")}
+        </ul>
+      </div>` : ""}
+      <a href="https://credit-800.com/dashboard" style="display:inline-block;background:linear-gradient(135deg,#84cc16,#14b8a6);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:8px 0">View Full Report →</a>
+      <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 · Not a credit repair organization. Educational tool only.</p>
+    </body></html>`
+  );
+}
+
 export async function sendIssueReport(params: {
   userId: string;
   userEmail: string;
