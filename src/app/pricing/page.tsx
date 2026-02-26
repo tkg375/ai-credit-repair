@@ -34,6 +34,7 @@ const proFeatures = [
   "Smart notifications",
   "Card recommendations",
   "Referral rewards",
+  "Mail disputes via USPS",
 ];
 
 const freeFeatures = [

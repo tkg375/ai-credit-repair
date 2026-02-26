@@ -13,6 +13,7 @@ const proFeatures = [
   "Utilization tracker",
   "Bureau comparison",
   "Priority AI analysis",
+  "Mail disputes via USPS",
 ];
 
 export function ProGate({ children, feature }: { children: ReactNode; feature?: string }) {
