@@ -205,6 +205,85 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Pricing */}
+      <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4">Simple, Transparent Pricing</h2>
+        <p className="text-slate-600 text-center mb-8 sm:mb-12 max-w-2xl mx-auto text-sm sm:text-base">
+          Start free and upgrade when you're ready. No hidden fees, cancel anytime.
+        </p>
+        <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          {/* Free */}
+          <div className="border border-slate-200 rounded-2xl p-6">
+            <h3 className="text-lg font-semibold mb-1">Free</h3>
+            <p className="text-3xl font-bold mb-1">$0</p>
+            <p className="text-sm text-slate-400 mb-6">Forever free</p>
+            <ul className="space-y-2 mb-8">
+              {[
+                "3 dispute letters per month",
+                "Basic credit tools",
+                "1 credit report upload",
+                "Education modules",
+                "Score tracking (manual)",
+                "Card recommendations",
+              ].map((f) => (
+                <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
+                  <svg className="w-4 h-4 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/register"
+              className="block text-center px-6 py-3 border border-slate-300 hover:border-slate-400 text-slate-700 rounded-lg font-medium transition text-sm"
+            >
+              Get Started Free
+            </Link>
+          </div>
+
+          {/* Pro */}
+          <div className="border-2 border-teal-500 rounded-2xl p-6 relative">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+              Most Popular
+            </span>
+            <h3 className="text-lg font-semibold mb-1">Pro</h3>
+            <p className="text-3xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent mb-1">$19.99</p>
+            <p className="text-sm text-slate-400 mb-6">per month</p>
+            <ul className="space-y-2 mb-8">
+              {[
+                "Unlimited dispute letters",
+                "Round 2/3 escalation letters",
+                "CFPB complaint generator",
+                "Credit score simulator",
+                "Document vault (unlimited)",
+                "Debt payoff optimizer",
+                "Priority AI analysis",
+                "Score tracking & charts",
+                "Smart notifications",
+                "Card recommendations",
+                "Referral rewards",
+                "Mail disputes via USPS",
+              ].map((f) => (
+                <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
+                  <svg className="w-4 h-4 text-teal-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/register"
+              className="block text-center px-6 py-3 bg-gradient-to-r from-lime-500 to-teal-600 hover:from-lime-400 hover:to-teal-500 text-white rounded-lg font-medium transition text-sm"
+            >
+              Start Free, Upgrade Anytime
+            </Link>
+          </div>
+        </div>
+        <p className="text-xs text-slate-400 text-center mt-6">Cancel anytime. You keep access until the end of your billing period.</p>
+      </section>
+
       {/* CTA */}
       <section className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 py-12 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
