@@ -3,9 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import { OnboardingModal } from "@/components/OnboardingModal";
+
+const LineChart = dynamic(() => import("recharts").then((m) => m.LineChart), { ssr: false });
+const Line = dynamic(() => import("recharts").then((m) => m.Line), { ssr: false });
+const XAxis = dynamic(() => import("recharts").then((m) => m.XAxis), { ssr: false });
+const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), { ssr: false });
+const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
+const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), { ssr: false });
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
 const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
@@ -15,6 +23,15 @@ interface Dispute {
   bureau: string;
   reason: string;
   status: string;
+  outcome: "won" | "denied" | null;
+  mailedAt: string | null;
+}
+
+interface ActionStep {
+  title: string;
+  description: string;
+  impact: "HIGH" | "MEDIUM" | "LOW";
+  actionUrl?: string;
 }
 
 interface ReportChanges {
@@ -114,12 +131,66 @@ async function queryCollection(
     .map((item: { document: { name: string; fields?: Record<string, Record<string, unknown>> } }) => parseDocument(item.document));
 }
 
+async function checkDeadlines(
+  idToken: string,
+  uid: string,
+  disputes: Dispute[]
+) {
+  try {
+    // Find SENT disputes where mailedAt + 30 days is within 5 days or already past
+    const approaching = disputes.filter((d) => {
+      if (d.status !== "SENT" || !d.mailedAt) return false;
+      const daysSince = (Date.now() - new Date(d.mailedAt).getTime()) / (1000 * 60 * 60 * 24);
+      return daysSince >= 25; // within 5 days of 30-day deadline
+    });
+
+    if (approaching.length === 0) return;
+
+    // Fetch existing deadline_warning notifications to avoid duplicates
+    const existingRes = await fetch("/api/notifications", {
+      headers: { Authorization: `Bearer ${idToken}` },
+    });
+    const existingData = existingRes.ok ? await existingRes.json() : { notifications: [] };
+    const existingUrls = new Set(
+      (existingData.notifications || [])
+        .filter((n: { type: string; actionUrl?: string }) => n.type === "deadline_warning")
+        .map((n: { actionUrl?: string }) => n.actionUrl)
+    );
+
+    for (const dispute of approaching) {
+      const actionUrl = `/disputes#deadline-${dispute.id}`;
+      if (existingUrls.has(actionUrl)) continue;
+
+      const daysSince = Math.floor((Date.now() - new Date(dispute.mailedAt!).getTime()) / (1000 * 60 * 60 * 24));
+      const daysLeft = 30 - daysSince;
+
+      await fetch("/api/notifications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          type: "deadline_warning",
+          title: daysLeft <= 0 ? "Bureau response overdue!" : `Bureau response due in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
+          message: `Your dispute with ${dispute.bureau} ${daysLeft <= 0 ? "has passed the 30-day response window" : `expires in ${daysLeft} days`}. Consider escalating.`,
+          actionUrl,
+        }),
+      });
+    }
+  } catch {
+    // non-blocking — ignore errors
+  }
+}
+
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const [scoreHistory, setScoreHistory] = useState<{ score: number; recordedAt: string }[]>([]);
   const [latestScore, setLatestScore] = useState<number | null>(null);
   const [disputableCount, setDisputableCount] = useState(0);
   const [disputes, setDisputes] = useState<Dispute[]>([]);
+  const [actionPlan, setActionPlan] = useState<{ steps: ActionStep[] } | null>(null);
   const [latestChanges, setLatestChanges] = useState<ReportChanges | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -132,10 +203,19 @@ export default function Dashboard() {
 
     async function loadDashboard() {
       try {
-        // Load latest score
-        const scores = await queryCollection(user!.idToken, "creditScores", user!.uid, "recordedAt", 1);
+        // Load score history (up to 10 entries for chart)
+        const scores = await queryCollection(user!.idToken, "creditScores", user!.uid, "recordedAt", 10);
         if (scores.length > 0) {
-          setLatestScore(scores[0].score as number);
+          const sorted = [...scores].sort(
+            (a, b) => new Date(a.recordedAt as string).getTime() - new Date(b.recordedAt as string).getTime()
+          );
+          setScoreHistory(
+            sorted.map((s: Record<string, unknown>) => ({
+              score: s.score as number,
+              recordedAt: s.recordedAt as string,
+            }))
+          );
+          setLatestScore(sorted[sorted.length - 1].score as number);
         }
 
         // Load disputable items count
@@ -144,16 +224,17 @@ export default function Dashboard() {
         ]);
         setDisputableCount(items.length);
 
-        // Load recent disputes
+        // Load recent disputes (with outcome and mailedAt)
         const disputeDocs = await queryCollection(user!.idToken, "disputes", user!.uid, "createdAt", 10);
-        setDisputes(
-          disputeDocs.map((d: Record<string, unknown> & { id: string }) => ({
-            id: d.id,
-            bureau: d.bureau as string,
-            reason: d.reason as string,
-            status: d.status as string,
-          }))
-        );
+        const mappedDisputes: Dispute[] = disputeDocs.map((d: Record<string, unknown> & { id: string }) => ({
+          id: d.id,
+          bureau: d.bureau as string,
+          reason: d.reason as string,
+          status: d.status as string,
+          outcome: (d.outcome as "won" | "denied") || null,
+          mailedAt: (d.mailedAt as string) || null,
+        }));
+        setDisputes(mappedDisputes);
 
         // Load most recent report changes (skip first-report entries)
         const changesDocs = await queryCollection(user!.idToken, "reportChanges", user!.uid);
@@ -175,6 +256,15 @@ export default function Dashboard() {
           });
         }
 
+        // Fire-and-forget: health report trigger
+        fetch("/api/users/health-report", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${user!.idToken}` },
+        }).catch(() => {});
+
+        // Fire-and-forget: check deadlines (uses mappedDisputes directly)
+        checkDeadlines(user!.idToken, user!.uid, mappedDisputes);
+
       } catch (err) {
         console.error("Failed to load dashboard data:", err);
       } finally {
@@ -182,7 +272,25 @@ export default function Dashboard() {
       }
     }
 
+    // Fire-and-forget: load action plan
+    async function loadActionPlan() {
+      try {
+        const res = await fetch("/api/plans", {
+          headers: { Authorization: `Bearer ${user!.idToken}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.plan?.steps) {
+            setActionPlan({ steps: data.plan.steps as ActionStep[] });
+          }
+        }
+      } catch {
+        // non-blocking
+      }
+    }
+
     loadDashboard();
+    loadActionPlan();
   }, [user, authLoading, router]);
 
   if (authLoading || loading) {
@@ -199,6 +307,19 @@ export default function Dashboard() {
   const activeDisputes = disputes.filter(
     (d) => d.status === "SENT" || d.status === "UNDER_INVESTIGATION"
   ).length;
+
+  // Score chart data
+  const firstScore = scoreHistory.length > 1 ? scoreHistory[0].score : null;
+  const scoreChange = firstScore !== null && latestScore !== null ? latestScore - firstScore : null;
+  const chartData = scoreHistory.map((s) => ({
+    date: new Date(s.recordedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    score: s.score,
+  }));
+
+  // Win rate data
+  const wonCount = disputes.filter((d) => d.outcome === "won").length;
+  const deniedCount = disputes.filter((d) => d.outcome === "denied").length;
+  const winRate = wonCount + deniedCount > 0 ? Math.round((wonCount / (wonCount + deniedCount)) * 100) : null;
 
   return (
     <AuthenticatedLayout activeNav="dashboard">
@@ -226,6 +347,118 @@ export default function Dashboard() {
             </p>
           </Link>
         </div>
+
+        {/* Score Progress Chart (Feature 1) */}
+        {scoreHistory.length > 1 && (
+          <section className="mb-8 sm:mb-12">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+                <h2 className="text-xl font-semibold">Score Progress</h2>
+                {scoreChange !== null && (
+                  <span className={`inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full ${
+                    scoreChange >= 0 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
+                  }`}>
+                    {scoreChange >= 0 ? "▲" : "▼"} {Math.abs(scoreChange)} pts
+                    <span className="font-normal text-xs">({firstScore} → {latestScore})</span>
+                  </span>
+                )}
+              </div>
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                    <XAxis dataKey="date" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                    <YAxis domain={[300, 850]} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "13px" }}
+                      formatter={(v: number) => [v, "Score"]}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="score"
+                      stroke="#14b8a6"
+                      strokeWidth={2.5}
+                      dot={{ fill: "#14b8a6", r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* AI Coach / Next Steps (Feature 2) */}
+        {actionPlan && actionPlan.steps.length > 0 && (
+          <section className="mb-8 sm:mb-12">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-lg flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-semibold">Your Next Steps</h2>
+              </div>
+              <div className="space-y-3">
+                {actionPlan.steps.slice(0, 3).map((step, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                    <span className={`mt-0.5 shrink-0 text-xs font-bold px-2 py-0.5 rounded-full ${
+                      step.impact === "HIGH"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : step.impact === "MEDIUM"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-slate-200 text-slate-600"
+                    }`}>
+                      {step.impact}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-slate-800">{step.title}</p>
+                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{step.description}</p>
+                    </div>
+                    {step.actionUrl ? (
+                      <Link
+                        href={step.actionUrl}
+                        className="shrink-0 text-xs px-3 py-1.5 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-lg font-medium hover:opacity-90 transition"
+                      >
+                        Start
+                      </Link>
+                    ) : (
+                      <Link
+                        href="/disputes"
+                        className="shrink-0 text-xs px-3 py-1.5 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-lg font-medium hover:opacity-90 transition"
+                      >
+                        Start
+                      </Link>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Win Rate Widget (Feature 3) */}
+        {winRate !== null && (
+          <section className="mb-8 sm:mb-12">
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <h2 className="text-xl font-semibold mb-4">Dispute Results</h2>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-3xl font-bold text-emerald-600">{wonCount}</p>
+                  <p className="text-sm text-slate-500 mt-1">Won</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-red-500">{deniedCount}</p>
+                  <p className="text-sm text-slate-500 mt-1">Denied</p>
+                </div>
+                <div>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">{winRate}%</p>
+                  <p className="text-sm text-slate-500 mt-1">Win Rate</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="mb-12">
           <div className="flex items-center justify-between mb-4">
@@ -263,18 +496,26 @@ export default function Dashboard() {
                     <p className="font-medium">{d.bureau}</p>
                     <p className="text-sm text-slate-500">{d.reason}</p>
                   </div>
-                  <span
-                    className={`text-xs px-3 py-1 rounded-full font-medium ${
-                      d.status === "RESOLVED"
-                        ? "bg-emerald-100 text-emerald-700"
-                        : d.status === "SENT" ||
-                            d.status === "UNDER_INVESTIGATION"
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    {d.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {d.outcome === "won" && (
+                      <span className="text-xs px-2 py-1 rounded-full font-medium bg-emerald-100 text-emerald-700">Won</span>
+                    )}
+                    {d.outcome === "denied" && (
+                      <span className="text-xs px-2 py-1 rounded-full font-medium bg-red-100 text-red-700">Denied</span>
+                    )}
+                    <span
+                      className={`text-xs px-3 py-1 rounded-full font-medium ${
+                        d.status === "RESOLVED"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : d.status === "SENT" ||
+                              d.status === "UNDER_INVESTIGATION"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {d.status}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>

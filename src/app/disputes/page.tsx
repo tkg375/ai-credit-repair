@@ -51,6 +51,32 @@ interface Dispute {
   mailedAt: string | null;
   mailTracking: { barcode?: string; status?: string; lastUpdate?: string } | null;
   resolvedAt: Date | null;
+  outcome: "won" | "denied" | null;
+  escalationRound: number | null;
+  escalatedToId: string | null;
+}
+
+function estimateScoreImpact(item: ReportItem): string {
+  const type = (item.accountType || "").toLowerCase();
+  const status = (item.status || "").toLowerCase();
+  if (type.includes("collection") || status.includes("collection")) return "~20-50 pts";
+  if (type.includes("charge") || status.includes("charge") || status.includes("written")) return "~10-35 pts";
+  if (type.includes("bankruptcy") || status.includes("bankruptcy")) return "~30-80 pts";
+  if (status.includes("late") || status.includes("delinquent")) return "~5-15 pts";
+  if (type.includes("utilization") || type.includes("revolving")) return "~10-40 pts";
+  if (type.includes("judgment") || type.includes("lien") || status.includes("judgment")) return "~15-45 pts";
+  if (status.includes("default")) return "~10-30 pts";
+  return "~5-20 pts";
+}
+
+function getDeadlineChip(dispute: Dispute): { label: string; color: string } | null {
+  if (dispute.status !== "SENT" || !dispute.mailedAt) return null;
+  const daysSince = Math.floor((Date.now() - new Date(dispute.mailedAt).getTime()) / (1000 * 60 * 60 * 24));
+  const daysLeft = 30 - daysSince;
+  if (daysLeft <= 0) return { label: `${Math.abs(daysLeft)}d overdue`, color: "bg-red-100 text-red-700" };
+  if (daysLeft <= 5) return { label: `${daysLeft}d left`, color: "bg-orange-100 text-orange-700" };
+  if (daysLeft <= 10) return { label: `${daysLeft}d left`, color: "bg-amber-100 text-amber-700" };
+  return { label: `${daysLeft}d left`, color: "bg-slate-100 text-slate-600" };
 }
 
 function firestoreValueToJs(val: Record<string, unknown>): unknown {
@@ -170,6 +196,7 @@ export default function DisputesPage() {
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
   const [bulkGenerating, setBulkGenerating] = useState(false);
   const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+  const [settingOutcome, setSettingOutcome] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -258,13 +285,75 @@ export default function DisputesPage() {
                 lastUpdate: (mailTrackingData.lastUpdate as string) || undefined,
               } : null,
               resolvedAt: (d.resolvedAt as Date) || null,
+              outcome: (d.outcome as "won" | "denied") || null,
+              escalationRound: (d.escalationRound as number) || null,
+              escalatedToId: (d.escalatedToId as string) || null,
             };
           })
         );
+
+        // Fire-and-forget: check escalation notifications
+        checkEscalationNotifications(user!.idToken, disputeDocs);
+
       } catch (err) {
         console.error("Failed to load data:", err);
       } finally {
         setLoading(false);
+      }
+    }
+
+    async function checkEscalationNotifications(idToken: string, disputeDocs: Record<string, unknown>[]) {
+      try {
+        const now = Date.now();
+        // Find SENT disputes with no escalatedToId and 30+ days since sent
+        const eligible = disputeDocs.filter((d) => {
+          if (d.status !== "SENT") return false;
+          if (d.escalatedToId) return false;
+          const ref = (d.mailedAt as string) || (d.createdAt instanceof Date ? d.createdAt.toISOString() : String(d.createdAt));
+          if (!ref) return false;
+          const daysSince = (now - new Date(ref).getTime()) / (1000 * 60 * 60 * 24);
+          return daysSince >= 30;
+        });
+        if (eligible.length === 0) return;
+
+        // Fetch existing escalation_ready notifications to dedupe
+        const existingRes = await fetch("/api/notifications", {
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
+        const existingData = existingRes.ok ? await existingRes.json() : { notifications: [] };
+        const existingUrls = new Set(
+          (existingData.notifications || [])
+            .filter((n: { type: string }) => n.type === "escalation_ready")
+            .map((n: { actionUrl?: string }) => n.actionUrl)
+        );
+
+        for (const d of eligible) {
+          const actionUrl = `/disputes#escalate-${d.id}`;
+          if (existingUrls.has(actionUrl)) continue;
+
+          const escalationRound = (d.escalationRound as number) || null;
+          const round = escalationRound === 2 ? 3 : 2;
+
+          await fetch("/api/notifications", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+            body: JSON.stringify({
+              type: "escalation_ready",
+              title: `Round ${round} escalation available`,
+              message: `Your dispute with ${d.creditorName} has no response after 30 days. Escalate now.`,
+              actionUrl,
+            }),
+          });
+
+          // Send escalation ready email
+          fetch("/api/disputes/notify-escalation", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+            body: JSON.stringify({ disputeId: d.id }),
+          }).catch(() => {});
+        }
+      } catch {
+        // non-blocking
       }
     }
 
@@ -319,6 +408,9 @@ export default function DisputesPage() {
           mailedAt: null,
           mailTracking: null,
           resolvedAt: null,
+          outcome: null,
+          escalationRound: null,
+          escalatedToId: null,
         },
         ...prev,
       ]);
@@ -453,13 +545,41 @@ export default function DisputesPage() {
     }
   };
 
+  const handleSetOutcome = async (disputeId: string, outcome: "won" | "denied") => {
+    if (!user) return;
+    const dispute = disputes.find(d => d.id === disputeId);
+    if (!dispute) return;
+
+    // Toggle off if already set
+    const newOutcome = dispute.outcome === outcome ? null : outcome;
+
+    setSettingOutcome(disputeId);
+    try {
+      const docUrl = `${FIRESTORE_BASE}/disputes/${disputeId}?updateMask.fieldPaths=outcome`;
+      await fetch(docUrl, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
+        body: JSON.stringify({
+          fields: newOutcome
+            ? { outcome: { stringValue: newOutcome } }
+            : { outcome: { nullValue: null } },
+        }),
+      });
+      setDisputes(prev => prev.map(d => d.id === disputeId ? { ...d, outcome: newOutcome } : d));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSettingOutcome(null);
+    }
+  };
+
   const handleEscalate = async (disputeId: string) => {
     if (!user) return;
     const dispute = disputes.find(d => d.id === disputeId);
     if (!dispute) return;
 
-    // Determine round: check if already escalated once
-    const round = 2; // For now always round 2; round 3 can be triggered from the escalated dispute
+    // Derive round from existing escalationRound
+    const round = dispute.escalationRound === 2 ? 3 : 2;
 
     setEscalating(disputeId);
     try {
@@ -472,12 +592,12 @@ export default function DisputesPage() {
       if (!res.ok) throw new Error(data.error || "Failed to escalate");
 
       // Add the new escalation dispute to the list
-      const newDispute = {
+      const newDispute: Dispute = {
         id: data.disputeId,
         itemId: dispute.itemId,
         creditorName: dispute.creditorName,
         bureau: dispute.bureau,
-        reason: `[Round 2] Method of Verification Demand`,
+        reason: `[Round ${round}] Method of Verification Demand`,
         status: "DRAFT",
         letterContent: data.letterContent,
         createdAt: new Date(),
@@ -489,10 +609,13 @@ export default function DisputesPage() {
         mailedAt: null,
         mailTracking: null,
         resolvedAt: null,
+        outcome: null,
+        escalationRound: round,
+        escalatedToId: null,
       };
-      setDisputes(prev => [newDispute, ...prev]);
+      setDisputes(prev => [newDispute, ...prev.map(d => d.id === disputeId ? { ...d, escalatedToId: data.disputeId } : d)]);
       setSelectedDispute(newDispute);
-      alert("Round 2 escalation letter created! Review and mail it to apply more pressure.");
+      alert(`Round ${round} escalation letter created! Review and mail it to apply more pressure.`);
     } catch (err) {
       console.error(err);
       alert(err instanceof Error ? err.message : "Failed to escalate dispute.");
@@ -943,6 +1066,9 @@ export default function DisputesPage() {
                           }`}>
                             {item.status}
                           </span>
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-lime-100 text-lime-700">
+                            {estimateScoreImpact(item)} if removed
+                          </span>
                         </div>
                         {item.disputeReason && (
                           <p className="mt-3 text-sm text-amber-700 bg-amber-50 px-3 py-2 rounded-lg">
@@ -1170,6 +1296,20 @@ export default function DisputesPage() {
                           <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusColor(dispute.status)}`}>
                             {dispute.status.replace("_", " ")}
                           </span>
+                          {(() => {
+                            const chip = getDeadlineChip(dispute);
+                            return chip ? (
+                              <span className={`text-xs px-2 py-1 rounded-full font-medium ${chip.color}`}>
+                                {chip.label}
+                              </span>
+                            ) : null;
+                          })()}
+                          {dispute.outcome === "won" && (
+                            <span className="text-xs px-2 py-1 rounded-full font-medium bg-emerald-100 text-emerald-700">Won</span>
+                          )}
+                          {dispute.outcome === "denied" && (
+                            <span className="text-xs px-2 py-1 rounded-full font-medium bg-red-100 text-red-700">Denied</span>
+                          )}
                           {dispute.mailStatus && (
                             <span className={`text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 ${getMailStatusColor(dispute.mailStatus)}`}>
                               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1180,6 +1320,34 @@ export default function DisputesPage() {
                           )}
                         </div>
                         <p className="text-sm text-slate-600">{dispute.reason}</p>
+                        {/* Outcome toggle buttons for SENT/active disputes */}
+                        {(dispute.status === "SENT" || dispute.status === "UNDER_INVESTIGATION") && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="text-xs text-slate-400">Outcome:</span>
+                            <button
+                              onClick={() => handleSetOutcome(dispute.id, "won")}
+                              disabled={settingOutcome === dispute.id}
+                              className={`text-xs px-2.5 py-1 rounded-full font-medium border transition ${
+                                dispute.outcome === "won"
+                                  ? "bg-emerald-500 text-white border-emerald-500"
+                                  : "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+                              }`}
+                            >
+                              Won
+                            </button>
+                            <button
+                              onClick={() => handleSetOutcome(dispute.id, "denied")}
+                              disabled={settingOutcome === dispute.id}
+                              className={`text-xs px-2.5 py-1 rounded-full font-medium border transition ${
+                                dispute.outcome === "denied"
+                                  ? "bg-red-500 text-white border-red-500"
+                                  : "border-red-300 text-red-600 hover:bg-red-50"
+                              }`}
+                            >
+                              Denied
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <div className="flex gap-2 shrink-0">
                         <button
@@ -1254,6 +1422,12 @@ export default function DisputesPage() {
                           <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusColor(dispute.status)}`}>
                             {dispute.status.replace("_", " ")}
                           </span>
+                          {dispute.outcome === "won" && (
+                            <span className="text-xs px-2 py-1 rounded-full font-medium bg-emerald-100 text-emerald-700">Won</span>
+                          )}
+                          {dispute.outcome === "denied" && (
+                            <span className="text-xs px-2 py-1 rounded-full font-medium bg-red-100 text-red-700">Denied</span>
+                          )}
                         </div>
                         <p className="text-sm text-slate-500">{dispute.reason}</p>
                         <div className="flex flex-wrap gap-3 mt-2 text-xs text-slate-400">
@@ -1263,6 +1437,32 @@ export default function DisputesPage() {
                           {dispute.createdAt && (
                             <span>Created: {new Date(dispute.createdAt).toLocaleDateString()}</span>
                           )}
+                        </div>
+                        {/* Outcome toggle for history */}
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="text-xs text-slate-400">Outcome:</span>
+                          <button
+                            onClick={() => handleSetOutcome(dispute.id, "won")}
+                            disabled={settingOutcome === dispute.id}
+                            className={`text-xs px-2.5 py-1 rounded-full font-medium border transition ${
+                              dispute.outcome === "won"
+                                ? "bg-emerald-500 text-white border-emerald-500"
+                                : "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+                            }`}
+                          >
+                            Won
+                          </button>
+                          <button
+                            onClick={() => handleSetOutcome(dispute.id, "denied")}
+                            disabled={settingOutcome === dispute.id}
+                            className={`text-xs px-2.5 py-1 rounded-full font-medium border transition ${
+                              dispute.outcome === "denied"
+                                ? "bg-red-500 text-white border-red-500"
+                                : "border-red-300 text-red-600 hover:bg-red-50"
+                            }`}
+                          >
+                            Denied
+                          </button>
                         </div>
                       </div>
                       <div className="flex gap-2 shrink-0">
@@ -1559,29 +1759,30 @@ export default function DisputesPage() {
                     </Link>
                   )
                 )}
-                {(selectedDispute.status === "SENT" || selectedDispute.status === "UNDER_INVESTIGATION") && (() => {
+                {(selectedDispute.status === "SENT" || selectedDispute.status === "UNDER_INVESTIGATION") && !selectedDispute.escalatedToId && (() => {
                   const days = daysSinceSent(selectedDispute);
                   const canEscalate = days >= 30;
                   const daysLeft = 30 - days;
+                  const round = selectedDispute.escalationRound === 2 ? 3 : 2;
                   return canEscalate ? (
                     <button
                       onClick={() => handleEscalate(selectedDispute.id)}
                       disabled={escalating === selectedDispute.id}
-                      className="flex-1 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-medium hover:from-amber-400 hover:to-orange-400 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="flex-1 py-3 border-2 border-purple-500 text-purple-700 bg-purple-50 rounded-xl font-medium hover:bg-purple-100 transition disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {escalating === selectedDispute.id ? (
-                        <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Escalating...</>
+                        <><div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />Escalating...</>
                       ) : (
                         <>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-                          Escalate (Round 2)
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                          Round {round}
                         </>
                       )}
                     </button>
                   ) : (
                     <div className="flex-1 py-3 bg-slate-100 text-slate-500 rounded-xl font-medium flex items-center justify-center gap-2 text-sm cursor-not-allowed" title="Must wait 30 days after sending before escalating">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                      Escalate in {daysLeft}d
+                      Round {round} in {daysLeft}d
                     </div>
                   );
                 })()}

@@ -243,6 +243,99 @@ export async function sendCreditChangesEmail(
   );
 }
 
+export async function sendEscalationReadyEmail(
+  to: string,
+  name: string,
+  creditorName: string,
+  bureau: string,
+  round: number
+) {
+  await sendEmail(
+    to,
+    `Time to escalate your dispute with ${creditorName} — Round ${round} available`,
+    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+      <div style="background:linear-gradient(135deg,#a855f7,#7c3aed);padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:24px">Round ${round} Escalation Ready</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">30 days have passed — it's time to apply more pressure</p>
+      </div>
+      <p>Hi ${name || "there"},</p>
+      <p>Your Round 1 dispute letter to <strong>${creditorName}</strong> (${bureau}) was sent over 30 days ago with no satisfactory response.</p>
+      <div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:16px;margin:16px 0">
+        <p style="margin:0 0 8px;font-weight:bold;color:#7c3aed">What Round ${round} does:</p>
+        <ul style="margin:0;color:#581c87;font-size:14px;padding-left:20px;line-height:1.8">
+          ${round === 2 ? `<li>Demands the exact <em>method of verification</em> used — something bureaus often can't provide</li>
+          <li>Cites FCRA § 611(a)(7) — failure to provide this is a violation</li>
+          <li>Increases pressure significantly, often leading to deletion</li>` : `<li>Escalates to a formal FCRA willful non-compliance notice</li>
+          <li>References prior disputes and lack of proper verification</li>
+          <li>Puts the bureau on notice of potential legal action</li>`}
+        </ul>
+      </div>
+      <p>Log in to generate your Round ${round} letter and send it now.</p>
+      <a href="https://credit-800.com/disputes" style="display:inline-block;background:linear-gradient(135deg,#a855f7,#7c3aed);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:8px 0">Escalate Now →</a>
+      <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 · Not a credit repair organization. Educational tool only.</p>
+    </body></html>`
+  );
+}
+
+export async function sendHealthReportEmail(
+  to: string,
+  name: string,
+  stats: {
+    latestScore: number | null;
+    scoreChange: number | null;
+    sentCount: number;
+    resolvedCount: number;
+    disputableCount: number;
+  }
+) {
+  const scoreDisplay = stats.latestScore ? String(stats.latestScore) : "—";
+  const changeDisplay = stats.scoreChange !== null
+    ? (stats.scoreChange >= 0 ? `+${stats.scoreChange}` : String(stats.scoreChange))
+    : "—";
+  const changeColor = stats.scoreChange !== null && stats.scoreChange > 0 ? "#15803d" : stats.scoreChange !== null && stats.scoreChange < 0 ? "#b91c1c" : "#64748b";
+
+  await sendEmail(
+    to,
+    `Your monthly Credit 800 health report — ${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}`,
+    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+      <div style="background:linear-gradient(135deg,#84cc16,#14b8a6);padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:24px">Monthly Credit Health Report</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</p>
+      </div>
+      <p>Hi ${name || "there"}, here's a summary of your credit repair progress this month:</p>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">
+        <tr style="background:#f8fafc">
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Latest Credit Score</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-weight:bold;font-size:18px">${scoreDisplay}</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Score Change (30 days)</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-weight:bold;color:${changeColor}">${changeDisplay} pts</td>
+        </tr>
+        <tr style="background:#f8fafc">
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Active Disputes</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-weight:bold">${stats.sentCount}</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Disputes Resolved</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-weight:bold;color:#15803d">${stats.resolvedCount}</td>
+        </tr>
+        <tr style="background:#f8fafc">
+          <td style="padding:12px 16px;color:#64748b;font-size:14px">Items Still to Dispute</td>
+          <td style="padding:12px 16px;font-weight:bold;color:#d97706">${stats.disputableCount}</td>
+        </tr>
+      </table>
+      ${stats.disputableCount > 0 ? `<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:16px;margin:16px 0">
+        <p style="margin:0;font-size:14px;color:#92400e">You still have <strong>${stats.disputableCount} disputable item${stats.disputableCount !== 1 ? "s" : ""}</strong> on your report. Each one removed can boost your score by 10-80 points.</p>
+      </div>` : `<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:16px 0">
+        <p style="margin:0;font-size:14px;color:#166534">Great work — all identified items have been disputed. Keep uploading new reports to catch any new items.</p>
+      </div>`}
+      <a href="https://credit-800.com/dashboard" style="display:inline-block;background:linear-gradient(135deg,#84cc16,#14b8a6);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:8px 0">View My Dashboard →</a>
+      <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 · Not a credit repair organization. Educational tool only.<br>You're receiving this because you have an active Credit 800 account.</p>
+    </body></html>`
+  );
+}
+
 export async function sendIssueReport(params: {
   userId: string;
   userEmail: string;

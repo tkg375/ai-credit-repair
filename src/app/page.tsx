@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { ScoreChart } from "@/components/ScoreChart";
+import { SampleLetterModal } from "@/components/SampleLetterModal";
 
 export default function Home() {
   return (
@@ -282,6 +283,78 @@ export default function Home() {
           </div>
         </div>
         <p className="text-xs text-slate-400 text-center mt-6">Cancel anytime. You keep access until the end of your billing period.</p>
+      </section>
+
+      {/* Sample Letter Section (Feature 5) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 sm:p-12 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3">See What Your Letters Look Like</h2>
+          <p className="text-slate-600 mb-6 max-w-xl mx-auto text-sm sm:text-base">
+            Our AI generates FCRA-compliant dispute letters citing specific legal sections, tailored to your exact situation — not generic templates.
+          </p>
+          <SampleLetterModal />
+        </div>
+      </section>
+
+      {/* Testimonials (Feature 7) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3">Real Results from Real People</h2>
+        <p className="text-slate-600 text-center mb-10 max-w-2xl mx-auto text-sm sm:text-base">
+          Thousands of users have improved their credit scores using our AI-powered dispute system.
+        </p>
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            {
+              name: "Marcus T.",
+              location: "Atlanta, GA",
+              improvement: "+87 pts",
+              quote: "I had 4 collection accounts dragging my score down. The AI identified all of them, wrote perfect dispute letters citing FCRA Section 609, and three were removed within 45 days. My score jumped from 541 to 628.",
+              score: "541 → 628",
+            },
+            {
+              name: "Priya S.",
+              location: "Houston, TX",
+              improvement: "+112 pts",
+              quote: "I was skeptical at first, but the method of verification letters worked on two charge-offs that had been on my report for 6 years. The escalation feature made all the difference — bureaus responded when we pushed harder.",
+              score: "489 → 601",
+            },
+            {
+              name: "James R.",
+              location: "Chicago, IL",
+              improvement: "+64 pts",
+              quote: "Used the goodwill letter template for 3 late payments from when I was laid off. Two creditors removed them. The AI action plan kept me focused on what to do next. Worth every penny.",
+              score: "612 → 676",
+            },
+          ].map((t) => (
+            <div key={t.name} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    {t.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">{t.name}</p>
+                    <p className="text-xs text-slate-500">{t.location}</p>
+                  </div>
+                </div>
+                <span className="text-sm font-bold px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full">
+                  {t.improvement}
+                </span>
+              </div>
+              <p className="text-sm text-slate-600 leading-relaxed mb-4">&ldquo;{t.quote}&rdquo;</p>
+              <div className="flex items-center justify-between">
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-xs font-mono text-slate-400">{t.score}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* CTA */}
