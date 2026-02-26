@@ -37,18 +37,27 @@ export interface PostGridLetter {
   date_created: string;
 }
 
-/** Convert our internal address shape to PostGrid's API format. */
-function toPostGridAddress(addr: PostGridAddress): Record<string, unknown> {
-  const parts = addr.name.trim().split(/\s+/);
-  return {
-    firstName: parts[0] ?? "",
-    lastName: parts.slice(1).join(" ") || "",
+/** Convert our internal address shape to PostGrid's API format.
+ *  Use companyName for organizations (to), firstName/lastName for individuals (from). */
+function toPostGridAddress(addr: PostGridAddress, type: "person" | "company" = "company"): Record<string, unknown> {
+  const base = {
     addressLine1: addr.address_line1,
     addressLine2: addr.address_line2 || "",
     city: addr.address_city,
     provinceOrState: addr.address_state,
     postalOrZip: addr.address_zip,
     countryCode: "US",
+  };
+
+  if (type === "company") {
+    return { ...base, companyName: addr.name };
+  }
+
+  const parts = addr.name.trim().split(/\s+/);
+  return {
+    ...base,
+    firstName: parts[0] ?? "",
+    lastName: parts.slice(1).join(" ") || "",
   };
 }
 
@@ -93,8 +102,8 @@ export async function sendLetter(options: {
       "x-api-key": getApiKey(),
     },
     body: JSON.stringify({
-      to: toPostGridAddress(options.to),
-      from: toPostGridAddress(options.from),
+      to: toPostGridAddress(options.to, "company"),
+      from: toPostGridAddress(options.from, "person"),
       html: options.html,
       description: options.description || "Credit dispute letter",
       color: false,

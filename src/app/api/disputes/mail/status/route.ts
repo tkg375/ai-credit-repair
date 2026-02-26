@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "This dispute has not been mailed" }, { status: 400 });
     }
 
-    // Fetch letter from Lob
+    // Fetch letter from PostGrid
     const letter = await getLetter(mailJobId);
     const mailStatus = deriveStatus(letter.status, letter.tracking_events);
 
