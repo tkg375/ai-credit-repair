@@ -370,7 +370,7 @@ export default function Dashboard() {
                     <YAxis domain={[300, 850]} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                     <Tooltip
                       contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "13px" }}
-                      formatter={(v: number) => [v, "Score"]}
+                      formatter={(v: any) => [v, "Score"]}
                     />
                     <Line
                       type="monotone"
