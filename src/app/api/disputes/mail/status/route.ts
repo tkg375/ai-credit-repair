@@ -1,20 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
-import { getLetter } from "@/lib/lob";
+import { getLetter } from "@/lib/postgrid";
 
-/** Map Lob tracking events to a simple status string. */
-function deriveStatus(trackingEvents: { name: string }[]): string {
-  if (trackingEvents.length === 0) return "SUBMITTED";
+/** Map PostGrid letter status to a simple status string. */
+function deriveStatus(status: string, trackingEvents: { name: string }[]): string {
+  if (status === "delivered") return "DELIVERED";
+  if (status === "returned_to_sender") return "RETURNED";
+  if (status === "re-routed") return "RE_ROUTED";
+  if (status === "in_local_area" || status === "processed_for_delivery") return "OUT_FOR_DELIVERY";
+  if (status === "in_transit" || status === "printing") return "IN_TRANSIT";
 
-  // Use the most recent event (last in array)
-  const latest = trackingEvents[trackingEvents.length - 1].name;
-
-  if (latest === "Delivered") return "DELIVERED";
-  if (latest === "Returned to Sender") return "RETURNED";
-  if (latest === "Re-Routed") return "RE_ROUTED";
-  if (latest === "Processed for Delivery" || latest === "In Local Area") return "OUT_FOR_DELIVERY";
-  if (latest === "In Transit" || latest === "Mailed") return "IN_TRANSIT";
+  // Fallback to tracking event names
+  if (trackingEvents.length > 0) {
+    const latest = trackingEvents[trackingEvents.length - 1].name;
+    if (latest === "Delivered") return "DELIVERED";
+    if (latest === "Returned to Sender") return "RETURNED";
+    if (latest === "Re-Routed") return "RE_ROUTED";
+    if (latest === "Processed for Delivery" || latest === "In Local Area") return "OUT_FOR_DELIVERY";
+    if (latest === "In Transit" || latest === "Mailed") return "IN_TRANSIT";
+  }
 
   return "SUBMITTED";
 }
@@ -49,7 +54,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch letter from Lob
     const letter = await getLetter(mailJobId);
-    const mailStatus = deriveStatus(letter.tracking_events);
+    const mailStatus = deriveStatus(letter.status, letter.tracking_events);
 
     // Get latest tracking event details
     const latestEvent = letter.tracking_events.length > 0

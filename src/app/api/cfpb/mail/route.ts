@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
-import { sendLetter, letterToHtml, type LobAddress } from "@/lib/lob";
+import { sendLetter, letterToHtml, type PostGridAddress } from "@/lib/postgrid";
 
 // CFPB mailing address
-const CFPB_ADDRESS: LobAddress = {
+const CFPB_ADDRESS: PostGridAddress = {
   name: "Consumer Financial Protection Bureau",
   address_line1: "PO Box 27170",
   address_line2: "",
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   const user = await getAuthUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!process.env.LOB_API_KEY) {
+  if (!process.env.POSTGRID_API_KEY) {
     return NextResponse.json({ error: "Mail service is not configured." }, { status: 503 });
   }
 

@@ -11,7 +11,7 @@ frontend:
         - echo "STRIPE_PRO_PRICE_ID=$STRIPE_PRO_PRICE_ID" >> .env.production.local
         - echo "STRIPE_WEBHOOK_SECRET=$STRIPE_WEBHOOK_SECRET" >> .env.production.local
         - echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env.production.local
-        - echo "LOB_API_KEY=$LOB_API_KEY" >> .env.production.local
+        - echo "POSTGRID_API_KEY=$POSTGRID_API_KEY" >> .env.production.local
         - echo "OWNER_NOTIFICATION_EMAIL=$OWNER_NOTIFICATION_EMAIL" >> .env.production.local
         - echo "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY" >> .env.production.local
         - npm run build

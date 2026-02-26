@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
-import { sendLetter, letterToHtml, type LobAddress } from "@/lib/lob";
+import { sendLetter, letterToHtml, type PostGridAddress } from "@/lib/postgrid";
 import { sendDisputeMailedEmail } from "@/lib/email";
 import { getUserSubscription } from "@/lib/subscription";
 
@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "fromAddress is required with name, address_line1, address_city, address_state, and address_zip" }, { status: 400 });
   }
 
-  // Fail fast if Lob is not configured
-  if (!process.env.LOB_API_KEY) {
+  // Fail fast if PostGrid is not configured
+  if (!process.env.POSTGRID_API_KEY) {
     return NextResponse.json(
       { error: "Mail service is not configured. Please contact support." },
       { status: 503 }
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     // Build recipient address (use manual override if provided, otherwise DB)
     const creditorName = (dispute.data.creditorName as string) || "Creditor";
-    let toAddress: LobAddress;
+    let toAddress: PostGridAddress;
     if (manualToAddress?.address_line1) {
       toAddress = {
         name: manualToAddress.name || creditorName,
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build sender address from request
-    const senderAddress: LobAddress = {
+    const senderAddress: PostGridAddress = {
       name: fromAddress.name,
       address_line1: fromAddress.address_line1,
       address_line2: fromAddress.address_line2 || "",
@@ -116,8 +116,8 @@ export async function POST(request: NextRequest) {
     // Convert letter text to HTML
     const html = letterToHtml(letterContent);
 
-    // Send via Lob (single API call!)
-    console.log(`[mail] Sending letter for dispute ${disputeId} via Lob...`);
+    // Send via PostGrid
+    console.log(`[mail] Sending letter for dispute ${disputeId} via PostGrid...`);
     const letter = await sendLetter({
       to: toAddress,
       from: senderAddress,
