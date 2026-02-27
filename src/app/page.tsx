@@ -30,29 +30,41 @@ export default function Home() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-16 pb-12 sm:pb-16">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
+              <div className="inline-flex items-center gap-2 bg-white/20 border border-white/30 rounded-full px-3 py-1 mb-4 sm:mb-6">
+                <span className="w-2 h-2 bg-lime-300 rounded-full animate-pulse" />
+                <span className="text-white text-xs font-medium">All-in-One Financial Hub</span>
+              </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-white">
-                Fix Your Credit
+                Your Finances.
                 <br />
-                <span className="text-white/90">With AI</span>
+                <span className="text-white/90">One Platform.</span>
               </h1>
               <p className="mt-4 sm:mt-6 text-base sm:text-lg text-lime-100 max-w-xl leading-relaxed">
-                Upload your credit report. Our AI analyzes every line item, finds
-                disputable inaccuracies, generates FCRA-compliant dispute letters,
-                and builds a personalized plan to raise your score.
+                Credit repair, budget tracking, debt payoff, loan readiness, goals, and more — all powered by AI. Fix your credit and build real financial health from one dashboard.
               </p>
               <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Link
                   href="/register"
                   className="px-6 py-3 bg-white text-teal-600 hover:bg-lime-50 rounded-lg font-medium transition text-center"
                 >
-                  Start Free Analysis
+                  Get Started Free
                 </Link>
                 <a
                   href="#how-it-works"
                   className="px-6 py-3 border border-white/50 hover:border-white text-white rounded-lg font-medium transition text-center"
                 >
-                  How It Works
+                  See What's Inside
                 </a>
+              </div>
+              <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
+                {["Credit Disputes", "Budget Tracker", "Loan Readiness", "Goals", "Debt Payoff", "Letter Templates"].map((t) => (
+                  <span key={t} className="text-xs text-lime-200 flex items-center gap-1.5">
+                    <svg className="w-3 h-3 text-lime-300" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    {t}
+                  </span>
+                ))}
               </div>
             </div>
             <div className="hidden lg:block">
@@ -64,26 +76,29 @@ export default function Home() {
 
       {/* How It Works */}
       <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-16">How It Works</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3">Everything You Need in One Place</h2>
+        <p className="text-slate-500 text-center mb-8 sm:mb-16 max-w-2xl mx-auto text-sm sm:text-base">
+          From fixing your credit to tracking your budget to preparing for a loan — Credit 800 handles your full financial picture.
+        </p>
         <div className="grid md:grid-cols-3 gap-8">
           {[
             {
               step: "01",
-              title: "Upload Your Report",
+              title: "Fix Your Credit",
               description:
-                "Upload your credit report from Equifax, Experian, or TransUnion. We securely parse every account and tradeline.",
+                "Upload your credit report. Our AI finds disputable inaccuracies, generates FCRA-compliant letters, and builds a personalized action plan to raise your score.",
             },
             {
               step: "02",
-              title: "AI Analysis",
+              title: "Manage Your Finances",
               description:
-                "Our AI cross-references your data against FCRA rules, identifies inaccuracies, outdated items, and potential disputes.",
+                "Track your monthly budget, set financial goals, monitor your net worth, and plan your debt payoff — all from one dashboard.",
             },
             {
               step: "03",
-              title: "Dispute & Improve",
+              title: "Get Loan Ready",
               description:
-                "Get AI-generated dispute letters citing specific legal sections, plus a personalized action plan to boost your score.",
+                "See exactly how ready you are for a mortgage, auto loan, or credit card. Know your DTI, what's holding you back, and what to fix first.",
             },
           ].map((item) => (
             <div
@@ -105,40 +120,49 @@ export default function Home() {
       {/* Features */}
       <section className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 py-12 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-16 text-white">
-            What We Help With
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 text-white">
+            A Full Financial Toolkit
           </h2>
+          <p className="text-lime-100 text-center mb-8 sm:mb-16 max-w-2xl mx-auto text-sm sm:text-base">
+            Every tool you need to improve your credit, manage your money, and build toward your goals.
+          </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                title: "Debt Validation Letters",
-                description:
-                  "Force collectors to prove they own the debt. They have 30 days to respond or must stop collecting.",
+                title: "AI Credit Dispute Engine",
+                description: "Upload your report and get FCRA-compliant dispute letters citing specific legal sections, tailored to each inaccuracy.",
               },
               {
-                title: "Pay-for-Delete Negotiation",
-                description:
-                  "Negotiate to pay 30-50% of the balance in exchange for complete removal from your credit reports.",
+                title: "Budget Tracker",
+                description: "Log income and expenses by category, visualize monthly spending with charts, and stay on top of your finances.",
               },
               {
-                title: "Statute of Limitations Tracker",
-                description:
-                  "Check if your debt is past the SOL. Time-barred debts can't be sued for — know your rights.",
+                title: "Loan Readiness Score",
+                description: "See how ready you are for a mortgage, auto loan, or credit card based on your credit score and debt-to-income ratio.",
               },
               {
-                title: "Method of Verification",
-                description:
-                  "After a dispute, demand HOW the bureau verified the debt. Often leads to deletion.",
+                title: "Goals Tracker",
+                description: "Set credit score, savings, net worth, and debt payoff goals. Track progress with visual bars and get notified when you hit them.",
               },
               {
-                title: "Goodwill Letters",
-                description:
-                  "Request removal of late payments based on your positive history with the creditor.",
+                title: "Letter Templates Library",
+                description: "7 professional dispute and debt letter templates — goodwill, pay-for-delete, cease & desist, debt validation, and more.",
               },
               {
-                title: "Original Contract Request",
-                description:
-                  "Demand the original signed contract. Debt buyers often can't produce this documentation.",
+                title: "Credit Freeze Manager",
+                description: "Track your freeze status across all 3 bureaus, store your PINs securely, and get direct links to freeze or unfreeze instantly.",
+              },
+              {
+                title: "Debt Payoff Optimizer",
+                description: "Choose avalanche or snowball method. See exact payoff timelines and interest savings for every account.",
+              },
+              {
+                title: "Score Simulator",
+                description: "Simulate what happens to your score when you pay off a card, open a new account, or resolve a collection.",
+              },
+              {
+                title: "Smart Notifications",
+                description: "Get alerted when your score changes, a goal is reached, or a dispute deadline is approaching.",
               },
             ].map((feature) => (
               <div
@@ -159,11 +183,10 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
-            Free Credit Repair Tools
+            Free Financial Tools — No Sign Up Required
           </h2>
           <p className="text-slate-300 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
-            Access our complete toolkit: debt validation letters, pay-for-delete templates,
-            statute of limitations calculator, goodwill letters, and more — all free.
+            Try our free toolkit: debt validation letters, pay-for-delete templates, statute of limitations calculator, goodwill letters, and more.
           </p>
           <Link
             href="/tools"
@@ -254,16 +277,16 @@ export default function Home() {
             <ul className="space-y-2 mb-8">
               {[
                 "Unlimited dispute letters",
-                "Round 2/3 escalation letters",
-                "CFPB complaint generator",
+                "Budget tracker & spending charts",
+                "Goals tracker with notifications",
+                "Loan readiness calculator",
+                "Letter templates library",
+                "Credit freeze manager",
+                "Debt payoff optimizer",
                 "Credit score simulator",
                 "Document vault (unlimited)",
-                "Debt payoff optimizer",
+                "CFPB complaint generator",
                 "Priority AI analysis",
-                "Score tracking & charts",
-                "Smart notifications",
-                "Card recommendations",
-                "Referral rewards",
                 "Mail disputes via USPS",
               ].map((f) => (
                 <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
@@ -361,11 +384,10 @@ export default function Home() {
       <section className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 py-12 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-white">
-            Ready to Take Control of Your Credit?
+            Take Control of Your Entire Financial Life
           </h2>
           <p className="text-lime-100 mb-6 sm:mb-8 max-w-xl mx-auto text-sm sm:text-base">
-            Upload your credit report and get an AI analysis in minutes. No credit
-            card required to start.
+            Credit repair, budgeting, goals, loan readiness — one platform, one login. Start free in minutes.
           </p>
           <Link
             href="/register"
