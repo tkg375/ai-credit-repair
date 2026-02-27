@@ -667,6 +667,18 @@ export default function PortfolioPage() {
   return (
     <AuthenticatedLayout activeNav="portfolio">
       <ProGate feature="Portfolio Manager">
+        <div className="relative">
+          <div className="absolute inset-0 z-10 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+            <div className="text-center px-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-slate-800 mb-2">Coming Soon</h2>
+              <p className="text-slate-500 text-sm max-w-xs">Portfolio Manager is under active development and will be available shortly.</p>
+            </div>
+          </div>
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
           {/* Header */}
           <div className="flex items-start justify-between mb-8 gap-4">
@@ -945,6 +957,7 @@ export default function PortfolioPage() {
             </div>
           </div>
         )}
+      </div>{/* end relative wrapper */}
       </ProGate>
     </AuthenticatedLayout>
   );
