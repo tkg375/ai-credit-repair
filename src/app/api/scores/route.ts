@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore } from "@/lib/firebase-admin";
+import { createNotification } from "@/lib/notifications";
 
 export async function GET(req: NextRequest) {
   const user = await getAuthUser();
@@ -35,6 +36,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Score must be between 300 and 850" }, { status: 400 });
     }
 
+    // Fetch previous scores to detect significant change
+    const prevScores = await firestore.query("creditScores", [
+      { field: "userId", op: "EQUAL", value: user.uid },
+    ]);
+
+    const sorted = prevScores.sort((a, b) => {
+      const aDate = a.data.recordedAt ? new Date(a.data.recordedAt as string).getTime() : 0;
+      const bDate = b.data.recordedAt ? new Date(b.data.recordedAt as string).getTime() : 0;
+      return bDate - aDate;
+    });
+
     const docId = await firestore.addDoc("creditScores", {
       userId: user.uid,
       score,
@@ -44,6 +56,20 @@ export async function POST(req: NextRequest) {
       factors: factors || null,
       createdAt: new Date().toISOString(),
     });
+
+    // Notify on significant score change (±10 pts)
+    if (sorted.length > 0) {
+      const lastScore = sorted[0].data.score as number;
+      const delta = score - lastScore;
+      if (Math.abs(delta) >= 10) {
+        createNotification(user.uid, {
+          type: "score_change",
+          title: "Credit Score Update",
+          message: `Your score ${delta > 0 ? "increased" : "decreased"} by ${Math.abs(delta)} points (${lastScore} → ${score})`,
+          actionUrl: "/scores",
+        }).catch(() => {});
+      }
+    }
 
     return NextResponse.json({ id: docId, score });
   } catch (error) {

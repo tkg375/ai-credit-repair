@@ -9,4 +9,10 @@ export const COLLECTIONS = {
   actionPlans: "actionPlans",
   reportChanges: "reportChanges",
   notifications: "notifications",
+  portfolioAccounts: "portfolioAccounts",
+  portfolioSnapshots: "portfolioSnapshots",
+  plaidItems: "plaidItems",
+  budgetEntries: "budgetEntries",
+  goals: "goals",
+  creditFreezes: "creditFreezes",
 } as const;

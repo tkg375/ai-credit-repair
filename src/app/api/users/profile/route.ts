@@ -37,6 +37,21 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ success: true });
 }
 
+export async function PATCH(request: NextRequest) {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const body = await request.json();
+  const allowed = ["monthlyIncome", "fullName", "dateOfBirth", "address", "address2", "city", "state", "zip", "phone"];
+  const updates: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+  for (const key of allowed) {
+    if (body[key] !== undefined) updates[key] = body[key];
+  }
+
+  await firestore.updateDoc(COLLECTIONS.users, user.uid, updates);
+  return NextResponse.json({ success: true });
+}
+
 export async function GET() {
   const user = await getAuthUser();
   if (!user) {
