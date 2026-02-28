@@ -296,6 +296,12 @@ export default function Dashboard() {
           headers: { Authorization: `Bearer ${user!.idToken}` },
         }).catch(() => {});
 
+        // Fire-and-forget: weekly progress email
+        fetch("/api/users/weekly-report", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${user!.idToken}` },
+        }).catch(() => {});
+
         // Fire-and-forget: check deadlines (uses mappedDisputes directly)
         checkDeadlines(user!.idToken, user!.uid, mappedDisputes);
 

@@ -21,6 +21,33 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password);
+
+      // signIn saves to localStorage synchronously before returning
+      let idToken: string | null = null;
+      try {
+        const stored = localStorage.getItem("creditai_auth");
+        if (stored) idToken = JSON.parse(stored).idToken || null;
+      } catch { /* ignore */ }
+
+      if (idToken) {
+        try {
+          const profileRes = await fetch("/api/users/profile", {
+            headers: { Authorization: `Bearer ${idToken}` },
+          });
+          if (profileRes.ok) {
+            const profileData = await profileRes.json();
+            if (profileData.profile?.twoFactorEnabled) {
+              await fetch("/api/auth/2fa/send", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${idToken}` },
+              });
+              router.push("/verify-2fa");
+              return;
+            }
+          }
+        } catch { /* proceed to dashboard if check fails */ }
+      }
+
       router.push("/dashboard");
     } catch {
       setError("Invalid email or password.");

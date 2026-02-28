@@ -336,6 +336,83 @@ export async function sendHealthReportEmail(
   );
 }
 
+export async function sendOTPEmail(to: string, name: string, code: string) {
+  await sendEmail(
+    to,
+    `Your Credit 800 verification code: ${code}`,
+    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+      <div style="background:linear-gradient(135deg,#84cc16,#14b8a6);padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:24px">Two-Factor Verification</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Your Credit 800 sign-in code</p>
+      </div>
+      <p>Hi ${name || "there"},</p>
+      <p>Use the code below to complete your sign-in. This code expires in <strong>10 minutes</strong>.</p>
+      <div style="background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:24px;margin:24px 0;text-align:center">
+        <p style="margin:0;font-size:40px;font-weight:bold;letter-spacing:12px;font-family:monospace;color:#0f172a">${code}</p>
+      </div>
+      <p style="color:#64748b;font-size:14px">If you didn't request this code, you can safely ignore this email. Someone may have typed your email by mistake.</p>
+      <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 · This code is valid for 10 minutes only.</p>
+    </body></html>`
+  );
+}
+
+export async function sendWeeklyProgressEmail(
+  to: string,
+  name: string,
+  stats: {
+    scoresThisWeek: number;
+    latestScore: number | null;
+    disputesSentThisWeek: number;
+    goalsCompletedThisWeek: number;
+    upcomingDeadlines: { creditorName: string; daysLeft: number }[];
+  }
+) {
+  const scoreDisplay = stats.latestScore ? String(stats.latestScore) : "—";
+
+  const deadlinesHtml = stats.upcomingDeadlines.length > 0
+    ? `<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:16px;margin:16px 0">
+        <p style="margin:0 0 8px;font-weight:bold;color:#92400e">Upcoming Response Deadlines</p>
+        <ul style="margin:0;padding-left:20px;color:#78350f;font-size:14px;line-height:1.8">
+          ${stats.upcomingDeadlines.map(d => `<li>${d.creditorName} — ${d.daysLeft} day${d.daysLeft !== 1 ? "s" : ""} left</li>`).join("")}
+        </ul>
+      </div>`
+    : "";
+
+  await sendEmail(
+    to,
+    `Your weekly Credit 800 progress — ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+      <div style="background:linear-gradient(135deg,#84cc16,#14b8a6);padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:24px">Weekly Progress Update</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Here's what happened with your credit this week</p>
+      </div>
+      <p>Hi ${name || "there"},</p>
+      <p>Here's your weekly summary from Credit 800:</p>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">
+        <tr style="background:#f8fafc">
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Latest Credit Score</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-weight:bold;font-size:18px">${scoreDisplay}</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Scores Logged This Week</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-weight:bold">${stats.scoresThisWeek}</td>
+        </tr>
+        <tr style="background:#f8fafc">
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Disputes Sent This Week</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-weight:bold;color:${stats.disputesSentThisWeek > 0 ? "#0f172a" : "#94a3b8"}">${stats.disputesSentThisWeek}</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;color:#64748b;font-size:14px">Goals Completed This Week</td>
+          <td style="padding:12px 16px;font-weight:bold;color:${stats.goalsCompletedThisWeek > 0 ? "#15803d" : "#94a3b8"}">${stats.goalsCompletedThisWeek}</td>
+        </tr>
+      </table>
+      ${deadlinesHtml}
+      <a href="https://credit-800.com/dashboard" style="display:inline-block;background:linear-gradient(135deg,#84cc16,#14b8a6);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:8px 0">View My Dashboard →</a>
+      <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 · Weekly progress digest. Not a credit repair organization. Educational tool only.</p>
+    </body></html>`
+  );
+}
+
 export async function sendIssueReport(params: {
   userId: string;
   userEmail: string;

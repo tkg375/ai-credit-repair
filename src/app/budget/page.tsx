@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import { ProGate } from "@/components/ProGate";
+import { downloadCSV } from "@/lib/export-csv";
 
 const BarChart = dynamic(() => import("recharts").then((m) => m.BarChart), { ssr: false });
 const Bar = dynamic(() => import("recharts").then((m) => m.Bar), { ssr: false });
@@ -148,12 +149,33 @@ export default function BudgetPage() {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold">Budget Tracker</h1>
-          <button
-            onClick={() => setShowModal(true)}
-            className="px-4 py-2 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition"
-          >
-            + Add Entry
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                const allEntries = entries.map(e => ({
+                  type: e.type,
+                  category: e.category,
+                  amount: e.amount,
+                  date: e.date,
+                  note: e.note,
+                }));
+                downloadCSV("budget.csv", allEntries);
+              }}
+              disabled={entries.length === 0}
+              className="px-3 py-2 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition disabled:opacity-40 flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Export CSV
+            </button>
+            <button
+              onClick={() => setShowModal(true)}
+              className="px-4 py-2 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition"
+            >
+              + Add Entry
+            </button>
+          </div>
         </div>
 
         <ProGate feature="Budget Tracker">
