@@ -20,7 +20,7 @@ export default function PrivacyPolicy() {
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <h1 className="text-3xl sm:text-4xl font-bold mb-6">Privacy Policy</h1>
-        <p className="text-slate-500 mb-8">Last updated: February 24, 2026</p>
+        <p className="text-slate-500 mb-8">Last updated: February 27, 2026</p>
 
         <div className="prose prose-slate max-w-none space-y-6">
           <section>
@@ -39,7 +39,8 @@ export default function PrivacyPolicy() {
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Email address</li>
               <li>Password (hashed — never stored in plain text)</li>
-              <li>Optional: full name and phone number (if added to your profile)</li>
+              <li>Optional: full name, phone number, date of birth, and mailing address (if added to your profile)</li>
+              <li>Temporary two-factor authentication codes (stored in hashed form, auto-deleted after use or expiry)</li>
             </ul>
 
             <h3 className="text-lg font-medium mt-4 mb-2">Credit Report Data</h3>
@@ -50,6 +51,21 @@ export default function PrivacyPolicy() {
               <li>Public records and collections</li>
               <li>Hard and soft inquiries</li>
               <li>Personal identifying information contained in the report</li>
+            </ul>
+
+            <h3 className="text-lg font-medium mt-4 mb-2">Financial & Budget Data</h3>
+            <p className="text-slate-600 leading-relaxed mb-3">If you use budget or debt payoff features, we store:</p>
+            <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
+              <li>Budget entries (category, amount, date)</li>
+              <li>Debt accounts and balances you manually enter</li>
+              <li>Credit scores you log manually</li>
+            </ul>
+
+            <h3 className="text-lg font-medium mt-4 mb-2">Identity Monitoring Data</h3>
+            <p className="text-slate-600 leading-relaxed mb-3">If you use identity monitoring, we:</p>
+            <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
+              <li>Send your email address to Have I Been Pwned to check for known data breaches</li>
+              <li>Cache the breach check result (breach names, dates, data types exposed) in your account for display purposes</li>
             </ul>
 
             <h3 className="text-lg font-medium mt-4 mb-2">Payment Information</h3>
@@ -77,7 +93,7 @@ export default function PrivacyPolicy() {
               <li>Analyze your credit report and identify potential disputes using AI</li>
               <li>Generate personalized dispute letters and action plans</li>
               <li>Process subscription payments and manage billing</li>
-              <li>Send transactional emails (analysis complete, dispute mailed, subscription receipts)</li>
+              <li>Send transactional emails (analysis complete, dispute mailed, subscription receipts, two-factor authentication codes, weekly progress summaries)</li>
               <li>Improve and optimize the Service</li>
               <li>Detect and prevent fraud or abuse</li>
             </ul>
@@ -86,8 +102,8 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-xl font-semibold mb-3">4. AI Processing</h2>
             <p className="text-slate-600 leading-relaxed">
-              We use artificial intelligence services (including Google Gemini and OpenAI) to analyze your
-              credit report data and generate dispute letters. This processing occurs on secure servers.
+              We use artificial intelligence services (including Anthropic Claude, Google Gemini, and OpenAI) to analyze your
+              credit report data, generate dispute letters, and parse bureau response documents. This processing occurs on secure servers.
               We do not use your credit report data to train AI models. AI-generated content is always
               presented for your review before any action is taken.
             </p>
@@ -124,9 +140,10 @@ export default function PrivacyPolicy() {
             </p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li><strong>Stripe:</strong> For payment processing and subscription management</li>
-              <li><strong>Lob:</strong> For physical USPS mailing of dispute letters (name and mailing address only)</li>
+              <li><strong>PostGrid:</strong> For physical USPS mailing and mail tracking of dispute letters (name and mailing address only)</li>
               <li><strong>AWS:</strong> For cloud infrastructure, file storage, and email delivery (SES)</li>
-              <li><strong>Google Firebase / Gemini / OpenAI:</strong> For authentication, data storage, and AI analysis</li>
+              <li><strong>Google Firebase / Gemini / OpenAI / Anthropic:</strong> For authentication, data storage, and AI analysis</li>
+              <li><strong>Have I Been Pwned:</strong> For identity monitoring — your email address is sent to check against known breach databases</li>
               <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
               <li><strong>Business Transfers:</strong> In connection with a merger, acquisition, or sale of assets</li>
             </ul>
@@ -139,6 +156,7 @@ export default function PrivacyPolicy() {
               <li>Access your personal information</li>
               <li>Correct inaccurate information via your profile page</li>
               <li>Request deletion of your account and data</li>
+              <li>Export your disputes, scores, and budget data as CSV from within the app</li>
               <li>Opt out of non-transactional email communications</li>
               <li>Cancel your subscription at any time</li>
             </ul>

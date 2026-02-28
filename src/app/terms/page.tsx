@@ -20,7 +20,7 @@ export default function TermsOfService() {
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <h1 className="text-3xl sm:text-4xl font-bold mb-6">Terms of Service</h1>
-        <p className="text-slate-500 mb-8">Last updated: February 24, 2026</p>
+        <p className="text-slate-500 mb-8">Last updated: February 27, 2026</p>
 
         <div className="prose prose-slate max-w-none space-y-6">
           <section>
@@ -36,8 +36,10 @@ export default function TermsOfService() {
             <p className="text-slate-600 leading-relaxed">
               Credit 800 is an AI-powered educational platform that helps users understand their credit reports,
               identify potentially disputable items, generate FCRA-compliant dispute letter templates, track disputes,
-              and learn credit-building strategies. The Service also offers optional physical mail delivery of dispute
-              letters via USPS through a third-party mailing partner.
+              and learn credit-building strategies. Additional features include credit score tracking, debt payoff planning,
+              budget management, identity monitoring, credit builder product recommendations, weekly progress summaries,
+              two-factor authentication, and optional physical mail delivery of dispute letters via USPS through a
+              third-party mailing partner.
             </p>
           </section>
 
@@ -105,7 +107,18 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">8. Privacy and Data Security</h2>
+            <h2 className="text-xl font-semibold mb-3">8. Credit Builder Product Recommendations</h2>
+            <p className="text-slate-600 leading-relaxed">
+              The Service may display curated secured credit cards, credit-builder loans, and similar financial
+              products. Credit 800 may receive referral compensation if you apply for or open an account with a
+              featured provider. Product listings are provided for informational purposes only and do not constitute
+              financial advice. Always review the full terms of any financial product before applying. Credit 800 is
+              not responsible for the terms, availability, or accuracy of third-party product offerings.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-3">9. Privacy and Data Security</h2>
             <p className="text-slate-600 leading-relaxed">
               Your use of the Service is also governed by our <Link href="/privacy" className="text-teal-600 hover:text-teal-500">Privacy Policy</Link>.
               We take reasonable measures to protect your personal information, but no method of transmission
@@ -114,7 +127,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">9. Limitation of Liability</h2>
+            <h2 className="text-xl font-semibold mb-3">10. Limitation of Liability</h2>
             <p className="text-slate-600 leading-relaxed">
               TO THE MAXIMUM EXTENT PERMITTED BY LAW, CREDIT 800 SHALL NOT BE LIABLE FOR ANY INDIRECT,
               INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES,
@@ -124,7 +137,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">10. Modifications to Terms</h2>
+            <h2 className="text-xl font-semibold mb-3">11. Modifications to Terms</h2>
             <p className="text-slate-600 leading-relaxed">
               We reserve the right to modify these Terms of Service at any time. We will notify users of
               any material changes by email or by posting the updated terms on the Service. Your continued
@@ -133,7 +146,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">11. Governing Law</h2>
+            <h2 className="text-xl font-semibold mb-3">12. Governing Law</h2>
             <p className="text-slate-600 leading-relaxed">
               These Terms are governed by the laws of the United States. Any disputes arising from these
               Terms or your use of the Service shall be resolved through binding arbitration, except where
@@ -142,7 +155,7 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">12. Contact Information</h2>
+            <h2 className="text-xl font-semibold mb-3">13. Contact Information</h2>
             <p className="text-slate-600 leading-relaxed">
               If you have any questions about these Terms of Service, please contact us at{" "}
               <a href="mailto:support@credit-800.com" className="text-teal-600 hover:text-teal-500">support@credit-800.com</a>.
