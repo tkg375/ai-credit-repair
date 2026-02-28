@@ -71,6 +71,18 @@ export default function MonitoringPage() {
 
   return (
     <AuthenticatedLayout activeNav="monitoring">
+      <div className="relative">
+        <div className="absolute inset-0 z-10 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="text-center px-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Coming Later This Year</h2>
+            <p className="text-slate-500 text-sm max-w-xs">Identity Monitoring is under active development and will be available soon.</p>
+          </div>
+        </div>
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">Identity Monitoring</h1>
@@ -200,6 +212,7 @@ export default function MonitoringPage() {
           Credit 800 checks for breaches but cannot remove your data from compromised services.
         </p>
       </main>
+      </div>
     </AuthenticatedLayout>
   );
 }
