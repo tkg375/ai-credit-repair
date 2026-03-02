@@ -138,31 +138,51 @@ export async function getLetter(letterId: string): Promise<PostGridLetter> {
   return normalizeLetter(data);
 }
 
-/** Convert plain text letter content to simple HTML for PostGrid. */
+/** Convert plain text letter content to properly structured HTML for PostGrid. */
 export function letterToHtml(text: string): string {
-  const escaped = text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  function escapeHtml(s: string): string {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
 
-  return `<html>
+  // Split on blank lines to get logical blocks (address blocks, paragraphs, etc.)
+  const blocks = text.split(/\n{2,}/);
+
+  const htmlBlocks = blocks
+    .map((block) => {
+      const trimmed = block.trim();
+      if (!trimmed) return "";
+      // Within a block, preserve line breaks (for address lines, bullet lists, etc.)
+      const lines = trimmed.split("\n").map(escapeHtml).join("<br>");
+      return `<p>${lines}</p>`;
+    })
+    .filter(Boolean);
+
+  return `<!DOCTYPE html>
+<html>
 <head>
 <meta charset="UTF-8">
 <style>
-  @page { size: letter; margin: 0.75in; }
   body {
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 10.5px;
-    line-height: 1.4;
-    color: #000;
-    margin: 0;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #000000;
+    margin: 0.75in;
     padding: 0;
+  }
+  p {
+    margin: 0 0 10pt 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 </style>
 </head>
 <body>
-<div style="white-space: pre-wrap; font-family: Arial, Helvetica, sans-serif; font-size: 10.5px; line-height: 1.4;">${escaped}</div>
+${htmlBlocks.join("\n")}
 </body>
 </html>`;
 }
