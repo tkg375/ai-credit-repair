@@ -235,12 +235,19 @@ export default function Home() {
         <p className="text-slate-600 text-center mb-8 sm:mb-12 max-w-2xl mx-auto text-sm sm:text-base">
           Everything included for one low price. Cancel anytime.
         </p>
-        <div className="max-w-sm mx-auto">
-          <div className="border-2 border-teal-500 rounded-2xl p-6 relative">
-            <h3 className="text-lg font-semibold mb-1">Pro Plan — All Features</h3>
-            <p className="text-3xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent mb-1">$5</p>
-            <p className="text-sm text-slate-400 mb-6">per month</p>
-            <ul className="space-y-2 mb-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="border-2 border-teal-500 rounded-2xl p-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-1">Everything Included</h3>
+                <p className="text-slate-500 text-sm">One subscription. Every feature. No limits.</p>
+              </div>
+              <div className="text-left sm:text-right">
+                <span className="text-4xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">$5</span>
+                <span className="text-slate-400 text-sm ml-1">/ month</span>
+              </div>
+            </div>
+            <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-3 mb-8">
               {[
                 "Unlimited dispute letters",
                 "Budget tracker & spending charts",
@@ -255,8 +262,8 @@ export default function Home() {
                 "Priority AI analysis",
                 "Mail disputes via USPS ($2/letter)",
               ].map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
-                  <svg className="w-4 h-4 text-teal-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
+                  <svg className="w-4 h-4 text-teal-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
                   {f}

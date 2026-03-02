@@ -17,7 +17,7 @@ export const stripe = new Proxy({} as Stripe, {
 
 export const PLANS = {
   pro: {
-    name: "Pro",
+    name: "Credit 800",
     price: 500, // $5.00 in cents
     priceId: process.env["STRIPE_PRO_PRICE_ID"] || "",
     features: [

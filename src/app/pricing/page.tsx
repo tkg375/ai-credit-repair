@@ -145,7 +145,7 @@ export default function SubscriptionPage() {
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-xl font-bold">{isSubscribed ? "Pro Plan" : "No Active Plan"}</h2>
+                <h2 className="text-xl font-bold">{isSubscribed ? "Credit 800 Subscription" : "No Active Subscription"}</h2>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge.color}`}>
                   {badge.label}
                 </span>
@@ -252,36 +252,34 @@ export default function SubscriptionPage() {
           </div>
         </div>
 
-        {/* Plan Details */}
-        <div className="max-w-md mx-auto">
-          <div className={`bg-white rounded-2xl border p-5 ${isSubscribed ? "border-teal-400 ring-1 ring-teal-400" : "border-slate-200"}`}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold">Pro Plan — Everything Included</h3>
-              {isSubscribed && <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">Current</span>}
-            </div>
-            <p className="text-2xl font-bold mb-4 bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">
-              $5 <span className="text-sm font-normal text-slate-400">/ mo</span>
-            </p>
-            <ul className="space-y-1.5">
-              {proFeatures.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
-                  <svg className="w-3.5 h-3.5 text-teal-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            {!isSubscribed && (
-              <button
-                onClick={handleUpgrade}
-                disabled={upgrading}
-                className="w-full mt-4 py-2.5 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl font-medium hover:opacity-90 transition disabled:opacity-50 text-sm"
-              >
-                {upgrading ? "Loading..." : "Subscribe Now"}
-              </button>
-            )}
+        {/* What's Included */}
+        <div className={`bg-white rounded-2xl border p-6 ${isSubscribed ? "border-teal-400 ring-1 ring-teal-400" : "border-slate-200"}`}>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold text-slate-900">Everything Included</h3>
+            {isSubscribed && <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">Your Plan</span>}
           </div>
+          <p className="text-2xl font-bold mb-5 bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">
+            $5 <span className="text-sm font-normal text-slate-400">/ month</span>
+          </p>
+          <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-2.5">
+            {proFeatures.map((f) => (
+              <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
+                <svg className="w-3.5 h-3.5 text-teal-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                {f}
+              </li>
+            ))}
+          </ul>
+          {!isSubscribed && (
+            <button
+              onClick={handleUpgrade}
+              disabled={upgrading}
+              className="w-full mt-6 py-2.5 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl font-medium hover:opacity-90 transition disabled:opacity-50 text-sm"
+            >
+              {upgrading ? "Loading..." : "Subscribe Now"}
+            </button>
+          )}
         </div>
 
         <p className="text-xs text-slate-400 text-center mt-6">

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { useSubscription } from "@/lib/use-subscription";
 
-const proFeatures = [
+const features = [
   "Unlimited dispute letters",
   "AI score simulator",
   "CFPB complaint generator",
@@ -31,7 +31,7 @@ export function ProGate({ children, feature }: { children: ReactNode; feature?: 
 
   return (
     <div className="flex items-center justify-center min-h-[70vh] px-4">
-      <div className="w-full max-w-md text-center">
+      <div className="w-full max-w-lg text-center">
         {/* Lock icon */}
         <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-gradient-to-br from-lime-100 to-teal-100 flex items-center justify-center">
           <svg className="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,23 +41,25 @@ export function ProGate({ children, feature }: { children: ReactNode; feature?: 
         </div>
 
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          {feature ? `${feature} is a Pro Feature` : "Pro Feature"}
+          {feature ? `${feature} Requires a Subscription` : "Subscription Required"}
         </h2>
         <p className="text-slate-500 text-sm mb-8">
-          Upgrade to Pro to unlock this and all other premium tools.
+          Subscribe to unlock every tool on the platform.
         </p>
 
-        {/* Feature list */}
-        <ul className="text-left space-y-2 mb-8 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-          {proFeatures.map((f) => (
-            <li key={f} className="flex items-center gap-3 text-sm text-slate-700">
-              <svg className="w-4 h-4 text-teal-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-              </svg>
-              {f}
-            </li>
-          ))}
-        </ul>
+        {/* Feature grid */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-6">
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-3 text-left">
+            {features.map((f) => (
+              <li key={f} className="flex items-start gap-2 text-sm text-slate-700">
+                <svg className="w-4 h-4 text-teal-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         {/* Pricing */}
         <div className="mb-6">
@@ -69,7 +71,7 @@ export function ProGate({ children, feature }: { children: ReactNode; feature?: 
           href="/pricing"
           className="block w-full py-3 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 hover:from-lime-400 hover:via-teal-400 hover:to-cyan-500 text-white rounded-xl font-medium transition text-sm"
         >
-          Upgrade to Pro
+          Subscribe Now
         </Link>
         <p className="text-xs text-slate-400 mt-3">Cancel anytime. No long-term commitment.</p>
       </div>
