@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useSubscription } from "@/lib/use-subscription";
 import { Logo } from "@/components/Logo";
 import { NotificationBell } from "@/components/NotificationBell";
 
@@ -196,10 +198,21 @@ export function AuthenticatedLayout({
   children: ReactNode;
 }) {
   const { user, signOut } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { isPro, loading: subLoading } = useSubscription();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [profilePhone, setProfilePhone] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
+
+  // Redirect unsubscribed users to the subscription page
+  useEffect(() => {
+    if (subLoading) return;
+    if (!isPro && pathname !== "/pricing") {
+      router.replace("/pricing");
+    }
+  }, [isPro, subLoading, pathname, router]);
 
   useEffect(() => {
     if (!user) return;
@@ -245,6 +258,15 @@ export function AuthenticatedLayout({
       ))}
     </nav>
   );
+
+  // Show spinner while checking subscription or while redirect is in progress
+  if (subLoading || (!isPro && pathname !== "/pricing")) {
+    return (
+      <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-white items-center justify-center">
+        <div className="w-10 h-10 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-white text-slate-900">

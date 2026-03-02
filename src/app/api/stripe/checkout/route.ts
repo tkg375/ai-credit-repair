@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
       customer_update: { name: "auto", address: "auto" },
       line_items: [{ price: priceId as string, quantity: 1 }],
       ...(applyDiscount && { discounts: [{ coupon: referralCouponId! }] }),
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/dashboard?upgraded=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/pricing`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/pricing`,
       metadata: { firebaseUid: user.uid },
     });
