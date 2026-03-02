@@ -47,7 +47,7 @@ export default function Home() {
                   href="/register"
                   className="px-6 py-3 bg-white text-teal-600 hover:bg-lime-50 rounded-lg font-medium transition text-center"
                 >
-                  Get Started Free
+                  Get Started
                 </Link>
                 <a
                   href="#how-it-works"
@@ -179,20 +179,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Free Tools CTA */}
+      {/* Tools CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
-            Free Financial Tools — No Sign Up Required
+            Financial Tools Built for Your Situation
           </h2>
           <p className="text-slate-300 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
-            Try our free toolkit: debt validation letters, pay-for-delete templates, statute of limitations calculator, goodwill letters, and more.
+            Debt validation letters, pay-for-delete templates, statute of limitations calculator, goodwill letters, and more — all included with your subscription.
           </p>
           <Link
-            href="/tools"
+            href="/register"
             className="inline-block px-6 sm:px-8 py-3 bg-gradient-to-r from-lime-500 to-teal-600 hover:from-lime-400 hover:to-teal-500 text-white rounded-lg font-medium transition"
           >
-            Access Free Tools
+            Get Started
           </Link>
         </div>
       </section>
@@ -233,46 +233,12 @@ export default function Home() {
       <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4">Simple, Transparent Pricing</h2>
         <p className="text-slate-600 text-center mb-8 sm:mb-12 max-w-2xl mx-auto text-sm sm:text-base">
-          Start free and upgrade when you're ready. No hidden fees, cancel anytime.
+          Everything included for one low price. Cancel anytime.
         </p>
-        <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
-          {/* Free */}
-          <div className="border border-slate-200 rounded-2xl p-6">
-            <h3 className="text-lg font-semibold mb-1">Free</h3>
-            <p className="text-3xl font-bold mb-1">$0</p>
-            <p className="text-sm text-slate-400 mb-6">Forever free</p>
-            <ul className="space-y-2 mb-8">
-              {[
-                "3 dispute letters per month",
-                "Basic credit tools",
-                "1 credit report upload",
-                "Education modules",
-                "Score tracking (manual)",
-                "Card recommendations",
-              ].map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
-                  <svg className="w-4 h-4 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/register"
-              className="block text-center px-6 py-3 border border-slate-300 hover:border-slate-400 text-slate-700 rounded-lg font-medium transition text-sm"
-            >
-              Get Started Free
-            </Link>
-          </div>
-
-          {/* Pro */}
+        <div className="max-w-sm mx-auto">
           <div className="border-2 border-teal-500 rounded-2xl p-6 relative">
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-              Most Popular
-            </span>
-            <h3 className="text-lg font-semibold mb-1">Pro</h3>
-            <p className="text-3xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent mb-1">$19.99</p>
+            <h3 className="text-lg font-semibold mb-1">Pro Plan — All Features</h3>
+            <p className="text-3xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent mb-1">$5</p>
             <p className="text-sm text-slate-400 mb-6">per month</p>
             <ul className="space-y-2 mb-8">
               {[
@@ -287,7 +253,7 @@ export default function Home() {
                 "Document vault (unlimited)",
                 "CFPB complaint generator",
                 "Priority AI analysis",
-                "Mail disputes via USPS",
+                "Mail disputes via USPS ($2/letter)",
               ].map((f) => (
                 <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
                   <svg className="w-4 h-4 text-teal-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,7 +267,7 @@ export default function Home() {
               href="/register"
               className="block text-center px-6 py-3 bg-gradient-to-r from-lime-500 to-teal-600 hover:from-lime-400 hover:to-teal-500 text-white rounded-lg font-medium transition text-sm"
             >
-              Start Free, Upgrade Anytime
+              Get Started
             </Link>
           </div>
         </div>
@@ -387,13 +353,13 @@ export default function Home() {
             Take Control of Your Entire Financial Life
           </h2>
           <p className="text-lime-100 mb-6 sm:mb-8 max-w-xl mx-auto text-sm sm:text-base">
-            Credit repair, budgeting, goals, loan readiness — one platform, one login. Start free in minutes.
+            Credit repair, budgeting, goals, loan readiness — one platform, one login. Get started in minutes.
           </p>
           <Link
             href="/register"
             className="inline-block px-6 sm:px-8 py-3 bg-white text-teal-600 hover:bg-slate-100 rounded-lg font-medium transition"
           >
-            Get Started Free
+            Get Started
           </Link>
         </div>
       </section>

@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
           }
         }
         const subscriberEmail = session.customer_details?.email || "unknown";
-        const amount = session.amount_total ?? 1999;
+        const amount = session.amount_total ?? 500;
         // Email the customer a confirmation
         if (session.customer_details?.email) {
           await sendProUpgradeEmail(session.customer_details.email, amount);

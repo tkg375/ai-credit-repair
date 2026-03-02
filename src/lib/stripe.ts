@@ -16,19 +16,9 @@ export const stripe = new Proxy({} as Stripe, {
 });
 
 export const PLANS = {
-  free: {
-    name: "Free",
-    price: 0,
-    features: [
-      "3 dispute letters per month",
-      "Basic credit tools",
-      "1 credit report upload",
-      "Education modules",
-    ],
-  },
   pro: {
     name: "Pro",
-    price: 1999, // $19.99 in cents
+    price: 500, // $5.00 in cents
     priceId: process.env["STRIPE_PRO_PRICE_ID"] || "",
     features: [
       "Unlimited dispute letters",
@@ -41,6 +31,7 @@ export const PLANS = {
       "Priority AI analysis",
       "Score tracking & charts",
       "Smart notifications",
+      "Mail disputes via USPS ($2/letter)",
     ],
   },
 } as const;

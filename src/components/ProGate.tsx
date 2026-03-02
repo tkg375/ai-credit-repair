@@ -13,7 +13,7 @@ const proFeatures = [
   "Utilization tracker",
   "Bureau comparison",
   "Priority AI analysis",
-  "Mail disputes via USPS",
+  "Mail disputes via USPS ($2/letter)",
 ];
 
 export function ProGate({ children, feature }: { children: ReactNode; feature?: string }) {
@@ -61,7 +61,7 @@ export function ProGate({ children, feature }: { children: ReactNode; feature?: 
 
         {/* Pricing */}
         <div className="mb-6">
-          <span className="text-3xl font-bold text-slate-900">$19.99</span>
+          <span className="text-3xl font-bold text-slate-900">$5</span>
           <span className="text-slate-400 text-sm"> / month</span>
         </div>
 

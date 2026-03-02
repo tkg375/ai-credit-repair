@@ -63,7 +63,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-semibold mb-3">4. Subscription and Billing</h2>
             <p className="text-slate-600 leading-relaxed mb-3">
-              Credit 800 offers a free tier and a Pro subscription plan billed monthly at $19.99/month.
+              Credit 800 offers a subscription plan billed monthly at $5/month. A subscription is required to access the platform. USPS physical mailing of dispute letters incurs an additional $2 per letter charged at the time of mailing.
             </p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Subscriptions automatically renew each month unless cancelled</li>

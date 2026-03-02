@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 
 interface SubscriptionData {
-  plan: "free" | "pro";
+  plan: "none" | "pro";
   status: string;
   currentPeriodEnd?: string;
   cancelAtPeriodEnd?: boolean;
@@ -34,16 +34,7 @@ const proFeatures = [
   "Smart notifications",
   "Card recommendations",
   "Referral rewards",
-  "Mail disputes via USPS",
-];
-
-const freeFeatures = [
-  "3 dispute letters per month",
-  "Basic credit tools",
-  "1 credit report upload",
-  "Education modules",
-  "Score tracking (manual)",
-  "Card recommendations",
+  "Mail disputes via USPS ($2/letter)",
 ];
 
 function statusBadge(status: string, cancelAtPeriodEnd?: boolean) {
@@ -53,7 +44,7 @@ function statusBadge(status: string, cancelAtPeriodEnd?: boolean) {
     case "trialing": return { label: "Trial", color: "bg-teal-100 text-teal-700" };
     case "past_due": return { label: "Past Due", color: "bg-red-100 text-red-700" };
     case "canceled": return { label: "Canceled", color: "bg-slate-100 text-slate-600" };
-    default: return { label: "Free", color: "bg-slate-100 text-slate-600" };
+    default: return { label: "No Plan", color: "bg-slate-100 text-slate-600" };
   }
 }
 
@@ -86,7 +77,7 @@ export default function SubscriptionPage() {
     })
       .then((r) => r.json())
       .then((d) => setSub(d))
-      .catch(() => setSub({ plan: "free", status: "none" }))
+      .catch(() => setSub({ plan: "none", status: "none" }))
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -138,6 +129,7 @@ export default function SubscriptionPage() {
   }
 
   const isPro = sub?.plan === "pro";
+  const isSubscribed = isPro;
   const badge = statusBadge(sub?.status ?? "none", sub?.cancelAtPeriodEnd);
 
   return (
@@ -149,22 +141,22 @@ export default function SubscriptionPage() {
         <p className="text-slate-500 mb-8 text-sm">Manage your plan, billing, and payment method</p>
 
         {/* Current Plan Card */}
-        <div className={`bg-white rounded-2xl border-2 p-6 mb-6 ${isPro ? "border-teal-400" : "border-slate-200"}`}>
+        <div className={`bg-white rounded-2xl border-2 p-6 mb-6 ${isSubscribed ? "border-teal-400" : "border-slate-200"}`}>
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-xl font-bold">{isPro ? "Pro Plan" : "Free Plan"}</h2>
+                <h2 className="text-xl font-bold">{isSubscribed ? "Pro Plan" : "No Active Plan"}</h2>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge.color}`}>
                   {badge.label}
                 </span>
               </div>
               <p className="text-slate-500 text-sm">
-                {isPro
-                  ? `$${((sub?.amount ?? 1999) / 100).toFixed(2)} / month`
-                  : "No charge"}
+                {isSubscribed
+                  ? `$${((sub?.amount ?? 500) / 100).toFixed(2)} / month`
+                  : "Subscribe to access all features"}
               </p>
             </div>
-            {isPro && (
+            {isSubscribed && (
               <div className="text-right">
                 <p className="text-xs text-slate-400">
                   {sub?.cancelAtPeriodEnd ? "Access until" : "Renews"}
@@ -181,7 +173,7 @@ export default function SubscriptionPage() {
           </div>
 
           {/* Payment Method */}
-          {isPro && (
+          {isSubscribed && (
             <div className="bg-slate-50 rounded-xl p-4 mb-4">
               <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Payment Method</p>
               {sub?.paymentMethod ? (
@@ -218,7 +210,7 @@ export default function SubscriptionPage() {
           )}
 
           {/* Last Invoice */}
-          {isPro && sub?.lastInvoiceAmount != null && (
+          {isSubscribed && sub?.lastInvoiceAmount != null && (
             <div className="text-xs text-slate-400 mb-4">
               Last payment: ${(sub.lastInvoiceAmount / 100).toFixed(2)} on{" "}
               {sub.lastInvoiceDate
@@ -229,13 +221,13 @@ export default function SubscriptionPage() {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-3">
-            {!isPro ? (
+            {!isSubscribed ? (
               <button
                 onClick={handleUpgrade}
                 disabled={upgrading}
                 className="px-6 py-2.5 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 text-white rounded-xl font-medium hover:opacity-90 transition disabled:opacity-50 text-sm"
               >
-                {upgrading ? "Loading..." : "Upgrade to Pro — $19.99/mo"}
+                {upgrading ? "Loading..." : "Subscribe — $5/mo"}
               </button>
             ) : (
               <>
@@ -260,37 +252,15 @@ export default function SubscriptionPage() {
           </div>
         </div>
 
-        {/* Plan Comparison */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          {/* Free */}
-          <div className={`bg-white rounded-2xl border p-5 ${!isPro ? "border-teal-400 ring-1 ring-teal-400" : "border-slate-200"}`}>
+        {/* Plan Details */}
+        <div className="max-w-md mx-auto">
+          <div className={`bg-white rounded-2xl border p-5 ${isSubscribed ? "border-teal-400 ring-1 ring-teal-400" : "border-slate-200"}`}>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold">Free</h3>
-              {!isPro && <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">Current</span>}
-            </div>
-            <p className="text-2xl font-bold mb-4">$0 <span className="text-sm font-normal text-slate-400">/ mo</span></p>
-            <ul className="space-y-1.5">
-              {freeFeatures.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
-                  <svg className="w-3.5 h-3.5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Pro */}
-          <div className={`bg-white rounded-2xl border p-5 ${isPro ? "border-teal-400 ring-1 ring-teal-400" : "border-slate-200"}`}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold">Pro</h3>
-              {isPro
-                ? <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">Current</span>
-                : <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Recommended</span>}
+              <h3 className="font-semibold">Pro Plan — Everything Included</h3>
+              {isSubscribed && <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">Current</span>}
             </div>
             <p className="text-2xl font-bold mb-4 bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">
-              $19.99 <span className="text-sm font-normal text-slate-400">/ mo</span>
+              $5 <span className="text-sm font-normal text-slate-400">/ mo</span>
             </p>
             <ul className="space-y-1.5">
               {proFeatures.map((f) => (
@@ -302,13 +272,13 @@ export default function SubscriptionPage() {
                 </li>
               ))}
             </ul>
-            {!isPro && (
+            {!isSubscribed && (
               <button
                 onClick={handleUpgrade}
                 disabled={upgrading}
                 className="w-full mt-4 py-2.5 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl font-medium hover:opacity-90 transition disabled:opacity-50 text-sm"
               >
-                {upgrading ? "Loading..." : "Upgrade to Pro"}
+                {upgrading ? "Loading..." : "Subscribe Now"}
               </button>
             )}
           </div>

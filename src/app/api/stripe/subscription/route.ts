@@ -18,7 +18,7 @@ export async function GET() {
       const manualStatus = userDoc?.data?.subscriptionStatus as string | undefined;
       const isPro = manualStatus === "active" || manualStatus === "trialing";
       return NextResponse.json({
-        plan: isPro ? "pro" : "free",
+        plan: isPro ? "pro" : "none",
         status: manualStatus ?? "none",
         subscription: null,
       });
@@ -34,11 +34,11 @@ export async function GET() {
     const latestInvoice = subscription.latest_invoice as Stripe.Invoice | null;
 
     return NextResponse.json({
-      plan: subscription.status === "active" || subscription.status === "trialing" ? "pro" : "free",
+      plan: subscription.status === "active" || subscription.status === "trialing" ? "pro" : "none",
       status: subscription.status,
       currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      amount: subscription.items.data[0]?.price?.unit_amount ?? 1999,
+      amount: subscription.items.data[0]?.price?.unit_amount ?? 500,
       currency: subscription.items.data[0]?.price?.currency ?? "usd",
       paymentMethod: card
         ? {
@@ -55,6 +55,6 @@ export async function GET() {
     });
   } catch (err) {
     console.error("Failed to fetch subscription:", err);
-    return NextResponse.json({ plan: "free", status: "error", subscription: null });
+    return NextResponse.json({ plan: "none", status: "error", subscription: null });
   }
 }
