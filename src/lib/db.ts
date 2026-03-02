@@ -15,4 +15,5 @@ export const COLLECTIONS = {
   budgetEntries: "budgetEntries",
   goals: "goals",
   creditFreezes: "creditFreezes",
+  creditorLetters: "creditorLetters",
 } as const;
