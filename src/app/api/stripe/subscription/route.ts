@@ -8,33 +8,44 @@ export async function GET() {
   const user = await getAuthUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // Fetch user doc first — used both for Stripe IDs and as the authoritative fallback
+  const userDoc = await firestore.getDoc("users", user.uid);
+  const manualStatus = userDoc?.data?.subscriptionStatus as string | undefined;
+  const manualIsPro = manualStatus === "active" || manualStatus === "trialing";
+  const customerId = userDoc?.data?.stripeCustomerId as string | undefined;
+  const subscriptionId = userDoc?.data?.stripeSubscriptionId as string | undefined;
+
+  // No Stripe IDs — rely solely on manually-set Firestore status
+  if (!subscriptionId || !customerId) {
+    return NextResponse.json({
+      plan: manualIsPro ? "pro" : "none",
+      status: manualStatus ?? "none",
+      subscription: null,
+    });
+  }
+
   try {
-    const userDoc = await firestore.getDoc("users", user.uid);
-    const customerId = userDoc?.data?.stripeCustomerId as string | undefined;
-    const subscriptionId = userDoc?.data?.stripeSubscriptionId as string | undefined;
-
-    if (!subscriptionId || !customerId) {
-      // Fall back to manually-set subscription status in Firestore
-      const manualStatus = userDoc?.data?.subscriptionStatus as string | undefined;
-      const isPro = manualStatus === "active" || manualStatus === "trialing";
-      return NextResponse.json({
-        plan: isPro ? "pro" : "none",
-        status: manualStatus ?? "none",
-        subscription: null,
-      });
-    }
-
     const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
       expand: ["default_payment_method", "latest_invoice"],
     }) as unknown as Stripe.Subscription & { current_period_end: number };
 
+    const stripeIsPro = subscription.status === "active" || subscription.status === "trialing";
+
+    // If Stripe says inactive but Firestore says active, trust Firestore
+    if (!stripeIsPro && manualIsPro) {
+      return NextResponse.json({
+        plan: "pro",
+        status: manualStatus,
+        subscription: null,
+      });
+    }
+
     const paymentMethod = subscription.default_payment_method as Stripe.PaymentMethod | null;
     const card = paymentMethod?.card;
-
     const latestInvoice = subscription.latest_invoice as Stripe.Invoice | null;
 
     return NextResponse.json({
-      plan: subscription.status === "active" || subscription.status === "trialing" ? "pro" : "none",
+      plan: stripeIsPro ? "pro" : "none",
       status: subscription.status,
       currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
@@ -54,7 +65,12 @@ export async function GET() {
         : null,
     });
   } catch (err) {
-    console.error("Failed to fetch subscription:", err);
-    return NextResponse.json({ plan: "none", status: "error", subscription: null });
+    console.error("Failed to fetch Stripe subscription:", err);
+    // Stripe call failed — fall back to Firestore status rather than blocking the user
+    return NextResponse.json({
+      plan: manualIsPro ? "pro" : "none",
+      status: manualStatus ?? "error",
+      subscription: null,
+    });
   }
 }
