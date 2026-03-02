@@ -309,16 +309,18 @@ export async function POST(req: NextRequest) {
       ]);
 
       if (existingItems.length > 0) {
+        const existingDisputable = existingItems.filter(i => i.data.isDisputable).length;
         // Items already exist, just update report status and return
         await firestore.updateDoc(COLLECTIONS.creditReports, reportId, {
           status: "ANALYZED",
           analyzedAt: new Date().toISOString(),
+          summary: { negativeItems: existingDisputable },
         });
 
         return NextResponse.json({
           success: true,
           itemsCreated: 0,
-          disputableItems: existingItems.filter(i => i.data.isDisputable).length,
+          disputableItems: existingDisputable,
           message: "Report already analyzed. Existing items preserved.",
         });
       }
@@ -337,15 +339,17 @@ export async function POST(req: NextRequest) {
       });
 
       // Update report status
+      const disputableCount = sampleItems.filter(i => i.isDisputable).length;
       await firestore.updateDoc(COLLECTIONS.creditReports, reportId, {
         status: "ANALYZED",
         analyzedAt: new Date().toISOString(),
+        summary: { negativeItems: disputableCount },
       });
 
       return NextResponse.json({
         success: true,
         itemsCreated: sampleItems.length,
-        disputableItems: sampleItems.filter(i => i.isDisputable).length,
+        disputableItems: disputableCount,
       });
     }
 

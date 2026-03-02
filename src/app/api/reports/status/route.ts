@@ -39,7 +39,8 @@ export async function GET(req: NextRequest) {
         const profileDoc = await firestore.getDoc(COLLECTIONS.users, user.uid).catch(() => null);
         const name = (profileDoc?.data?.fullName as string) || "";
         const bureau = (report.data.bureau as string) || "your";
-        const itemCount = (report.data.itemCount as number) || 0;
+        const summary = report.data.summary as { negativeItems?: number } | undefined;
+        const itemCount = summary?.negativeItems ?? (report.data.itemCount as number) ?? 0;
         await firestore.updateDoc(COLLECTIONS.creditReports, reportId, { analysisEmailSent: true });
         sendAnalysisCompleteEmail(user.email, name, itemCount, bureau).catch(() => {});
       } catch { /* non-blocking */ }
