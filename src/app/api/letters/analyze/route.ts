@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
-import { getObject } from "@/lib/s3";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 
@@ -45,20 +44,17 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return NextResponse.json({ error: "AI service not configured" }, { status: 503 });
 
-  let body: { s3Key: string; fileName: string; mimeType: string };
+  let body: { fileName: string; mimeType: string; base64: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { s3Key, fileName, mimeType } = body;
-  if (!s3Key || !fileName) return NextResponse.json({ error: "s3Key and fileName are required" }, { status: 400 });
+  const { fileName, mimeType, base64 } = body;
+  if (!fileName || !base64) return NextResponse.json({ error: "fileName and base64 are required" }, { status: 400 });
 
   try {
-    // Fetch file from S3
-    const bytes = await getObject(s3Key);
-    const base64 = Buffer.from(bytes).toString("base64");
     const fileMime = mimeType || "application/pdf";
     const isPdf = fileMime === "application/pdf" || fileName.toLowerCase().endsWith(".pdf");
 
@@ -80,7 +76,7 @@ export async function POST(request: NextRequest) {
         "anthropic-version": "2024-01-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 4096,
         messages: [
           {
@@ -110,7 +106,6 @@ export async function POST(request: NextRequest) {
     const letterId = await firestore.addDoc(COLLECTIONS.creditorLetters, {
       userId: user.uid,
       fileName,
-      s3Key,
       uploadedAt: new Date().toISOString(),
       creditorName: analysis.creditorName ?? null,
       letterDate: analysis.letterDate ?? null,

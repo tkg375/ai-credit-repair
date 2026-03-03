@@ -100,35 +100,30 @@ export default function AnalyzeLetterPage() {
   const handleAnalyze = async () => {
     if (!file || !user) return;
 
+    if (file.size > 4 * 1024 * 1024) {
+      setError("File is too large. Please use a file under 4 MB (compress or reduce scan resolution if needed).");
+      return;
+    }
+
     setPageState("analyzing");
     setError("");
 
     try {
-      // Step 1: get pre-signed S3 URL (bypasses Lambda body size limit)
-      const urlRes = await fetch("/api/letters/upload-url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
-        body: JSON.stringify({ fileName: file.name, mimeType: file.type }),
+      // Read file as base64 client-side
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result.split(",")[1]); // strip data URL prefix
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
-      if (!urlRes.ok) {
-        const d = await urlRes.json().catch(() => ({}));
-        throw new Error(d.error || "Failed to get upload URL");
-      }
-      const { uploadUrl, s3Key } = await urlRes.json();
 
-      // Step 2: upload directly to S3
-      const putRes = await fetch(uploadUrl, {
-        method: "PUT",
-        body: file,
-        headers: { "Content-Type": file.type || "application/pdf" },
-      });
-      if (!putRes.ok) throw new Error(`Upload failed: ${putRes.status}`);
-
-      // Step 3: analyze via S3 key
       const res = await fetch("/api/letters/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
-        body: JSON.stringify({ s3Key, fileName: file.name, mimeType: file.type }),
+        body: JSON.stringify({ fileName: file.name, mimeType: file.type, base64 }),
       });
 
       const data = await res.json();
