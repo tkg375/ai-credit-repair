@@ -68,11 +68,9 @@ function isValidFile(file: File): boolean {
 function AnalysisResults({
   analysis,
   onReset,
-  label,
 }: {
   analysis: LetterAnalysis;
   onReset: () => void;
-  label?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -84,26 +82,22 @@ function AnalysisResults({
   };
 
   return (
-    <div className="space-y-6">
-      {label && (
-        <p className="text-sm text-slate-500 italic">{label}</p>
-      )}
-
-      {/* Letter summary bar */}
-      <div className="flex flex-wrap items-center gap-3 p-4 bg-slate-50 rounded-xl text-sm">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Summary bar */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-slate-50 rounded-xl text-sm">
         {analysis.creditorName && (
-          <span className="font-medium text-slate-700">{analysis.creditorName}</span>
+          <span className="font-semibold text-slate-800">{analysis.creditorName}</span>
         )}
         <span className="px-2.5 py-1 bg-teal-100 text-teal-700 rounded-full text-xs font-medium">
           {LETTER_TYPE_LABELS[analysis.letterType] ?? analysis.letterType}
         </span>
         {analysis.amountClaimed !== null && (
-          <span className="text-slate-600">
+          <span className="text-slate-600 text-xs sm:text-sm">
             Amount: <strong>${analysis.amountClaimed.toLocaleString()}</strong>
           </span>
         )}
         {analysis.deadline && (
-          <span className="text-red-600 font-medium">
+          <span className="text-red-600 font-medium text-xs sm:text-sm">
             Deadline: {new Date(analysis.deadline).toLocaleDateString()}
           </span>
         )}
@@ -112,12 +106,12 @@ function AnalysisResults({
       {/* Key Claims & Demands */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6">
         <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
-          <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
           Key Claims &amp; Demands
         </h2>
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {analysis.keyClaimsAndDemands.map((claim, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
               <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
@@ -130,12 +124,12 @@ function AnalysisResults({
       {/* Your Legal Rights */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6">
         <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
-          <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-teal-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
           Your Legal Rights
         </h2>
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {analysis.yourLegalRights.map((right, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
               <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0" />
@@ -148,21 +142,21 @@ function AnalysisResults({
       {/* Recommended Actions */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6">
         <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
-          <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
           Recommended Actions
         </h2>
         <div className="space-y-3">
           {analysis.recommendedActions.map((item, i) => (
-            <div key={i} className="p-4 bg-slate-50 rounded-xl">
-              <div className="flex items-center gap-2 mb-1">
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${PRIORITY_STYLES[item.priority]}`}>
+            <div key={i} className="p-3 sm:p-4 bg-slate-50 rounded-xl">
+              <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ${PRIORITY_STYLES[item.priority]}`}>
                   {item.priority}
                 </span>
                 <span className="font-medium text-sm text-slate-800">{item.action}</span>
               </div>
-              <p className="text-sm text-slate-600">{item.description}</p>
+              <p className="text-xs sm:text-sm text-slate-600">{item.description}</p>
             </div>
           ))}
         </div>
@@ -172,14 +166,14 @@ function AnalysisResults({
       <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6">
         <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
           <h2 className="font-semibold text-base sm:text-lg flex items-center gap-2">
-            <svg className="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-cyan-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            Draft Response Letter
+            Draft Response
           </h2>
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 hover:bg-slate-50 transition text-slate-600"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 hover:bg-slate-50 transition text-slate-600 shrink-0"
           >
             {copied ? (
               <>
@@ -193,12 +187,12 @@ function AnalysisResults({
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                 </svg>
-                Copy Letter
+                Copy
               </>
             )}
           </button>
         </div>
-        <pre className="whitespace-pre-wrap text-sm text-slate-700 font-mono bg-slate-50 rounded-xl p-4 leading-relaxed">
+        <pre className="whitespace-pre-wrap text-xs sm:text-sm text-slate-700 font-mono bg-slate-50 rounded-xl p-3 sm:p-4 leading-relaxed overflow-x-auto">
           {analysis.draftResponseLetter}
         </pre>
       </div>
@@ -282,7 +276,6 @@ export default function AnalyzeLetterPage() {
 
   const handleUpload = async () => {
     if (!file || !user) return;
-
     setUploading(true);
     setError("");
     setProgress("Uploading letter...");
@@ -328,14 +321,8 @@ export default function AnalyzeLetterPage() {
       const { letterId, analysis: result } = await analyzeRes.json();
       setAnalysis(result);
 
-      // Prepend the new letter to history
       setPastLetters((prev) => [
-        {
-          id: letterId,
-          fileName: file.name,
-          uploadedAt: new Date().toISOString(),
-          ...result,
-        },
+        { id: letterId, fileName: file.name, uploadedAt: new Date().toISOString(), ...result },
         ...prev,
       ]);
 
@@ -367,22 +354,26 @@ export default function AnalyzeLetterPage() {
 
   return (
     <AuthenticatedLayout activeNav="analyze-letter">
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Analyze Creditor Letter</h1>
-        <p className="text-slate-600 mb-6 sm:mb-8 text-sm sm:text-base">
-          Upload a letter from a creditor or debt collector. Our AI will explain your rights, identify their claims, and draft a response.
-        </p>
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">Analyze Creditor Letter</h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Upload a letter from a creditor or debt collector. AI will explain your rights and draft a response.
+          </p>
+        </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+          <div className="mb-5 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
             {error}
           </div>
         )}
 
         {!uploading && !analysis && (
           <>
+            {/* Drop zone */}
             <div
-              className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition ${
+              className={`border-2 border-dashed rounded-2xl p-6 sm:p-10 text-center transition ${
                 dragActive
                   ? "border-teal-500 bg-teal-50"
                   : file
@@ -396,27 +387,28 @@ export default function AnalyzeLetterPage() {
             >
               {file ? (
                 <div>
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <p className="font-medium text-green-700">{file.name}</p>
-                  <p className="text-sm text-green-600 mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                  <button onClick={() => setFile(null)} className="mt-4 text-sm text-slate-500 hover:text-slate-700">
+                  <p className="font-medium text-green-700 text-sm">{file.name}</p>
+                  <p className="text-xs text-green-600 mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                  <button onClick={() => setFile(null)} className="mt-3 text-xs text-slate-500 hover:text-slate-700 underline">
                     Remove and choose another
                   </button>
                 </div>
               ) : (
                 <label className="block cursor-pointer">
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                   </div>
-                  <p className="font-medium">Drag and drop your letter here</p>
-                  <p className="text-sm text-slate-500 mt-1">or click to browse</p>
-                  <p className="text-xs text-slate-400 mt-2">Supports PDF, JPG, PNG, WebP</p>
+                  <p className="font-medium text-sm hidden sm:block">Drag and drop your letter here</p>
+                  <p className="font-medium text-sm sm:hidden">Tap to select your letter</p>
+                  <p className="text-xs text-slate-500 mt-1 hidden sm:block">or click to browse</p>
+                  <p className="text-xs text-slate-400 mt-2">PDF, JPG, PNG, WebP</p>
                   <input type="file" accept={ACCEPTED_TYPES} onChange={handleFileChange} className="sr-only" />
                 </label>
               )}
@@ -425,7 +417,7 @@ export default function AnalyzeLetterPage() {
             {file && (
               <button
                 onClick={handleUpload}
-                className="w-full mt-6 py-3.5 sm:py-4 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 hover:from-lime-400 hover:via-teal-400 hover:to-cyan-500 text-white rounded-xl font-medium transition text-base sm:text-lg"
+                className="w-full mt-4 py-3.5 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 hover:opacity-90 text-white rounded-xl font-medium transition text-base"
               >
                 Analyze Letter
               </button>
@@ -433,24 +425,24 @@ export default function AnalyzeLetterPage() {
 
             {/* Past Letters */}
             {(loadingHistory || pastLetters.length > 0) && (
-              <div className="mt-10">
-                <h2 className="text-lg font-semibold mb-4">Past Letters</h2>
+              <div className="mt-8">
+                <h2 className="text-base font-semibold mb-3 text-slate-700">Past Letters</h2>
                 {loadingHistory ? (
                   <div className="flex items-center gap-2 text-slate-400 text-sm py-4">
                     <div className="w-4 h-4 border-2 border-slate-300 border-t-teal-500 rounded-full animate-spin" />
                     Loading history...
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {pastLetters.map((letter) => (
                       <button
                         key={letter.id}
                         onClick={() => setAnalysis(letter)}
-                        className="w-full text-left p-4 bg-white border border-slate-200 rounded-xl hover:border-teal-300 hover:bg-teal-50/30 transition group"
+                        className="w-full text-left p-3 sm:p-4 bg-white border border-slate-200 rounded-xl hover:border-teal-300 hover:bg-teal-50/30 transition group"
                       >
                         <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-medium text-slate-800 truncate">
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-sm text-slate-800 truncate">
                               {letter.creditorName || letter.fileName}
                             </p>
                             <p className="text-xs text-slate-400 mt-0.5">
@@ -458,18 +450,18 @@ export default function AnalyzeLetterPage() {
                                 month: "short", day: "numeric", year: "numeric",
                               })}
                               {letter.creditorName && (
-                                <span className="ml-1 text-slate-300">· {letter.fileName}</span>
+                                <span className="ml-1 text-slate-300 hidden sm:inline">· {letter.fileName}</span>
                               )}
                             </p>
                           </div>
-                          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                          <div className="flex items-center gap-1.5 shrink-0">
                             {letter.amountClaimed !== null && (
                               <span className="hidden sm:inline text-xs text-slate-500">${letter.amountClaimed.toLocaleString()}</span>
                             )}
                             <span className="px-2 py-0.5 bg-teal-50 text-teal-700 border border-teal-100 rounded-full text-xs font-medium max-w-[100px] sm:max-w-none truncate">
                               {LETTER_TYPE_LABELS[letter.letterType] ?? letter.letterType}
                             </span>
-                            <svg className="w-4 h-4 text-slate-300 group-hover:text-teal-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 text-slate-300 group-hover:text-teal-500 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                           </div>
@@ -483,15 +475,16 @@ export default function AnalyzeLetterPage() {
           </>
         )}
 
+        {/* Uploading state */}
         {uploading && (
-          <div className="text-center py-10 sm:py-16">
-            <div className="w-16 sm:w-20 h-16 sm:h-20 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-            <h2 className="text-lg sm:text-xl font-semibold mb-2">
+          <div className="text-center py-12 sm:py-16">
+            <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-5" />
+            <h2 className="text-lg font-semibold mb-2">
               {analyzing ? "Analyzing Your Letter" : "Uploading..."}
             </h2>
-            <p className="text-slate-600">{progress}</p>
-            <div className="mt-8 max-w-md mx-auto">
-              <div className="flex justify-between text-sm text-slate-500 mb-2">
+            <p className="text-slate-500 text-sm">{progress}</p>
+            <div className="mt-6 max-w-xs mx-auto">
+              <div className="flex justify-between text-xs text-slate-400 mb-1.5">
                 <span>Progress</span>
                 <span>{analyzing ? "75%" : "25%"}</span>
               </div>
@@ -506,11 +499,7 @@ export default function AnalyzeLetterPage() {
         )}
 
         {analysis && (
-          <AnalysisResults
-            analysis={analysis}
-            onReset={handleReset}
-            label={undefined}
-          />
+          <AnalysisResults analysis={analysis} onReset={handleReset} />
         )}
       </main>
     </AuthenticatedLayout>
