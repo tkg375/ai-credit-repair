@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
@@ -19,6 +19,21 @@ interface LetterAnalysis {
   letterType: string;
   keyClaimsAndDemands: string[];
   amountClaimed: number | null;
+  deadline: string | null;
+  yourLegalRights: string[];
+  recommendedActions: RecommendedAction[];
+  draftResponseLetter: string;
+}
+
+interface PastLetter {
+  id: string;
+  fileName: string;
+  uploadedAt: string;
+  creditorName: string | null;
+  letterType: string;
+  amountClaimed: number | null;
+  keyClaimsAndDemands: string[];
+  letterDate: string | null;
   deadline: string | null;
   yourLegalRights: string[];
   recommendedActions: RecommendedAction[];
@@ -50,6 +65,154 @@ function isValidFile(file: File): boolean {
   return validTypes.includes(file.type) || validExts.some((ext) => name.endsWith(ext));
 }
 
+function AnalysisResults({
+  analysis,
+  onReset,
+  label,
+}: {
+  analysis: LetterAnalysis;
+  onReset: () => void;
+  label?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    if (!analysis.draftResponseLetter) return;
+    await navigator.clipboard.writeText(analysis.draftResponseLetter);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="space-y-6">
+      {label && (
+        <p className="text-sm text-slate-500 italic">{label}</p>
+      )}
+
+      {/* Letter summary bar */}
+      <div className="flex flex-wrap items-center gap-3 p-4 bg-slate-50 rounded-xl text-sm">
+        {analysis.creditorName && (
+          <span className="font-medium text-slate-700">{analysis.creditorName}</span>
+        )}
+        <span className="px-2.5 py-1 bg-teal-100 text-teal-700 rounded-full text-xs font-medium">
+          {LETTER_TYPE_LABELS[analysis.letterType] ?? analysis.letterType}
+        </span>
+        {analysis.amountClaimed !== null && (
+          <span className="text-slate-600">
+            Amount: <strong>${analysis.amountClaimed.toLocaleString()}</strong>
+          </span>
+        )}
+        {analysis.deadline && (
+          <span className="text-red-600 font-medium">
+            Deadline: {new Date(analysis.deadline).toLocaleDateString()}
+          </span>
+        )}
+      </div>
+
+      {/* Key Claims & Demands */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+          <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          Key Claims &amp; Demands
+        </h2>
+        <ul className="space-y-2">
+          {analysis.keyClaimsAndDemands.map((claim, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
+              {claim}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Your Legal Rights */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+          <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          Your Legal Rights
+        </h2>
+        <ul className="space-y-2">
+          {analysis.yourLegalRights.map((right, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0" />
+              {right}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Recommended Actions */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+          <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          Recommended Actions
+        </h2>
+        <div className="space-y-3">
+          {analysis.recommendedActions.map((item, i) => (
+            <div key={i} className="p-4 bg-slate-50 rounded-xl">
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${PRIORITY_STYLES[item.priority]}`}>
+                  {item.priority}
+                </span>
+                <span className="font-medium text-sm text-slate-800">{item.action}</span>
+              </div>
+              <p className="text-sm text-slate-600">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Draft Response Letter */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold text-lg flex items-center gap-2">
+            <svg className="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Draft Response Letter
+          </h2>
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 hover:bg-slate-50 transition text-slate-600"
+          >
+            {copied ? (
+              <>
+                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Copied!
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                </svg>
+                Copy Letter
+              </>
+            )}
+          </button>
+        </div>
+        <pre className="whitespace-pre-wrap text-sm text-slate-700 font-mono bg-slate-50 rounded-xl p-4 leading-relaxed">
+          {analysis.draftResponseLetter}
+        </pre>
+      </div>
+
+      <button
+        onClick={onReset}
+        className="w-full py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition"
+      >
+        Analyze Another Letter
+      </button>
+    </div>
+  );
+}
+
 export default function AnalyzeLetterPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -60,12 +223,25 @@ export default function AnalyzeLetterPage() {
   const [error, setError] = useState("");
   const [progress, setProgress] = useState("");
   const [analysis, setAnalysis] = useState<LetterAnalysis | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [pastLetters, setPastLetters] = useState<PastLetter[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   if (!authLoading && !user) {
     router.push("/login");
     return null;
   }
+
+  useEffect(() => {
+    if (!user) return;
+    setLoadingHistory(true);
+    fetch("/api/letters", {
+      headers: { Authorization: `Bearer ${user.idToken}` },
+    })
+      .then((r) => r.json())
+      .then((d) => { if (d.letters) setPastLetters(d.letters); })
+      .catch(() => {})
+      .finally(() => setLoadingHistory(false));
+  }, [user]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -112,13 +288,9 @@ export default function AnalyzeLetterPage() {
     setProgress("Uploading letter...");
 
     try {
-      // Get a pre-signed S3 upload URL (bypasses API size limits)
       const urlRes = await fetch("/api/letters/upload-url", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.idToken}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
         body: JSON.stringify({ fileName: file.name, mimeType: file.type }),
       });
 
@@ -129,7 +301,6 @@ export default function AnalyzeLetterPage() {
 
       const { uploadUrl, s3Key } = await urlRes.json();
 
-      // Upload directly to S3 (bypasses Next.js API size limits)
       const putRes = await fetch(uploadUrl, {
         method: "PUT",
         body: file,
@@ -145,10 +316,7 @@ export default function AnalyzeLetterPage() {
 
       const analyzeRes = await fetch("/api/letters/analyze", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.idToken}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
         body: JSON.stringify({ s3Key, fileName: file.name, mimeType: file.type }),
       });
 
@@ -157,8 +325,20 @@ export default function AnalyzeLetterPage() {
         throw new Error(errorData.details || errorData.error || "Failed to analyze letter");
       }
 
-      const { analysis: result } = await analyzeRes.json();
+      const { letterId, analysis: result } = await analyzeRes.json();
       setAnalysis(result);
+
+      // Prepend the new letter to history
+      setPastLetters((prev) => [
+        {
+          id: letterId,
+          fileName: file.name,
+          uploadedAt: new Date().toISOString(),
+          ...result,
+        },
+        ...prev,
+      ]);
+
       setUploading(false);
       setAnalyzing(false);
     } catch (err) {
@@ -169,18 +349,10 @@ export default function AnalyzeLetterPage() {
     }
   };
 
-  const handleCopyLetter = async () => {
-    if (!analysis?.draftResponseLetter) return;
-    await navigator.clipboard.writeText(analysis.draftResponseLetter);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const handleReset = () => {
     setFile(null);
     setAnalysis(null);
     setError("");
-    setCopied(false);
     setUploading(false);
     setAnalyzing(false);
   };
@@ -231,10 +403,7 @@ export default function AnalyzeLetterPage() {
                   </div>
                   <p className="font-medium text-green-700">{file.name}</p>
                   <p className="text-sm text-green-600 mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                  <button
-                    onClick={() => setFile(null)}
-                    className="mt-4 text-sm text-slate-500 hover:text-slate-700"
-                  >
+                  <button onClick={() => setFile(null)} className="mt-4 text-sm text-slate-500 hover:text-slate-700">
                     Remove and choose another
                   </button>
                 </div>
@@ -248,12 +417,7 @@ export default function AnalyzeLetterPage() {
                   <p className="font-medium">Drag and drop your letter here</p>
                   <p className="text-sm text-slate-500 mt-1">or click to browse</p>
                   <p className="text-xs text-slate-400 mt-2">Supports PDF, JPG, PNG, WebP</p>
-                  <input
-                    type="file"
-                    accept={ACCEPTED_TYPES}
-                    onChange={handleFileChange}
-                    className="sr-only"
-                  />
+                  <input type="file" accept={ACCEPTED_TYPES} onChange={handleFileChange} className="sr-only" />
                 </label>
               )}
             </div>
@@ -266,6 +430,56 @@ export default function AnalyzeLetterPage() {
                 Analyze Letter
               </button>
             )}
+
+            {/* Past Letters */}
+            {(loadingHistory || pastLetters.length > 0) && (
+              <div className="mt-10">
+                <h2 className="text-lg font-semibold mb-4">Past Letters</h2>
+                {loadingHistory ? (
+                  <div className="flex items-center gap-2 text-slate-400 text-sm py-4">
+                    <div className="w-4 h-4 border-2 border-slate-300 border-t-teal-500 rounded-full animate-spin" />
+                    Loading history...
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {pastLetters.map((letter) => (
+                      <button
+                        key={letter.id}
+                        onClick={() => setAnalysis(letter)}
+                        className="w-full text-left p-4 bg-white border border-slate-200 rounded-xl hover:border-teal-300 hover:bg-teal-50/30 transition group"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-medium text-slate-800 truncate">
+                              {letter.creditorName || letter.fileName}
+                            </p>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              {new Date(letter.uploadedAt).toLocaleDateString("en-US", {
+                                month: "short", day: "numeric", year: "numeric",
+                              })}
+                              {letter.creditorName && (
+                                <span className="ml-1 text-slate-300">· {letter.fileName}</span>
+                              )}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {letter.amountClaimed !== null && (
+                              <span className="text-xs text-slate-500">${letter.amountClaimed.toLocaleString()}</span>
+                            )}
+                            <span className="px-2 py-0.5 bg-teal-50 text-teal-700 border border-teal-100 rounded-full text-xs font-medium">
+                              {LETTER_TYPE_LABELS[letter.letterType] ?? letter.letterType}
+                            </span>
+                            <svg className="w-4 h-4 text-slate-300 group-hover:text-teal-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
 
@@ -276,7 +490,6 @@ export default function AnalyzeLetterPage() {
               {analyzing ? "Analyzing Your Letter" : "Uploading..."}
             </h2>
             <p className="text-slate-600">{progress}</p>
-
             <div className="mt-8 max-w-md mx-auto">
               <div className="flex justify-between text-sm text-slate-500 mb-2">
                 <span>Progress</span>
@@ -293,128 +506,11 @@ export default function AnalyzeLetterPage() {
         )}
 
         {analysis && (
-          <div className="space-y-6">
-            {/* Letter summary bar */}
-            <div className="flex flex-wrap items-center gap-3 p-4 bg-slate-50 rounded-xl text-sm">
-              {analysis.creditorName && (
-                <span className="font-medium text-slate-700">{analysis.creditorName}</span>
-              )}
-              <span className="px-2.5 py-1 bg-teal-100 text-teal-700 rounded-full text-xs font-medium">
-                {LETTER_TYPE_LABELS[analysis.letterType] ?? analysis.letterType}
-              </span>
-              {analysis.amountClaimed !== null && (
-                <span className="text-slate-600">
-                  Amount: <strong>${analysis.amountClaimed.toLocaleString()}</strong>
-                </span>
-              )}
-              {analysis.deadline && (
-                <span className="text-red-600 font-medium">
-                  Deadline: {new Date(analysis.deadline).toLocaleDateString()}
-                </span>
-              )}
-            </div>
-
-            {/* Key Claims & Demands */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
-              <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Key Claims &amp; Demands
-              </h2>
-              <ul className="space-y-2">
-                {analysis.keyClaimsAndDemands.map((claim, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
-                    {claim}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Your Legal Rights */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
-              <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                Your Legal Rights
-              </h2>
-              <ul className="space-y-2">
-                {analysis.yourLegalRights.map((right, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0" />
-                    {right}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Recommended Actions */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
-              <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Recommended Actions
-              </h2>
-              <div className="space-y-3">
-                {analysis.recommendedActions.map((item, i) => (
-                  <div key={i} className="p-4 bg-slate-50 rounded-xl">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${PRIORITY_STYLES[item.priority]}`}>
-                        {item.priority}
-                      </span>
-                      <span className="font-medium text-sm text-slate-800">{item.action}</span>
-                    </div>
-                    <p className="text-sm text-slate-600">{item.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Draft Response Letter */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-lg flex items-center gap-2">
-                  <svg className="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  Draft Response Letter
-                </h2>
-                <button
-                  onClick={handleCopyLetter}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 hover:bg-slate-50 transition text-slate-600"
-                >
-                  {copied ? (
-                    <>
-                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                      </svg>
-                      Copy Letter
-                    </>
-                  )}
-                </button>
-              </div>
-              <pre className="whitespace-pre-wrap text-sm text-slate-700 font-mono bg-slate-50 rounded-xl p-4 leading-relaxed">
-                {analysis.draftResponseLetter}
-              </pre>
-            </div>
-
-            <button
-              onClick={handleReset}
-              className="w-full py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition"
-            >
-              Analyze Another Letter
-            </button>
-          </div>
+          <AnalysisResults
+            analysis={analysis}
+            onReset={handleReset}
+            label={undefined}
+          />
         )}
       </main>
     </AuthenticatedLayout>
