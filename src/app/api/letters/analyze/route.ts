@@ -55,23 +55,23 @@ export async function POST(request: NextRequest) {
   const { s3Key, fileName, mimeType } = body;
   if (!s3Key || !fileName) return NextResponse.json({ error: "s3Key and fileName are required" }, { status: 400 });
 
-  // Fetch file from S3
-  const bytes = await getObject(s3Key);
-  const base64 = Buffer.from(bytes).toString("base64");
-  const fileMime = mimeType || "application/pdf";
-  const isPdf = fileMime === "application/pdf" || fileName.toLowerCase().endsWith(".pdf");
-
-  const contentBlock = isPdf
-    ? {
-        type: "document",
-        source: { type: "base64", media_type: "application/pdf", data: base64 },
-      }
-    : {
-        type: "image",
-        source: { type: "base64", media_type: fileMime, data: base64 },
-      };
-
   try {
+    // Fetch file from S3
+    const bytes = await getObject(s3Key);
+    const base64 = Buffer.from(bytes).toString("base64");
+    const fileMime = mimeType || "application/pdf";
+    const isPdf = fileMime === "application/pdf" || fileName.toLowerCase().endsWith(".pdf");
+
+    const contentBlock = isPdf
+      ? {
+          type: "document",
+          source: { type: "base64", media_type: "application/pdf", data: base64 },
+        }
+      : {
+          type: "image",
+          source: { type: "base64", media_type: fileMime, data: base64 },
+        };
+
     const res = await fetch(ANTHROPIC_API_URL, {
       method: "POST",
       headers: {
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         "anthropic-version": "2024-01-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
+        model: "claude-sonnet-4-20250514",
         max_tokens: 4096,
         messages: [
           {

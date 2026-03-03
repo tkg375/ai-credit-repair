@@ -132,7 +132,7 @@ export default function AnalyzeLetterPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to analyze letter");
+      if (!res.ok) throw new Error(data.details || data.error || "Failed to analyze letter");
 
       setAnalysis(data.analysis);
       setPageState("results");
