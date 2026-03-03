@@ -83,8 +83,19 @@ export default function EducationPage() {
           className="w-full px-4 py-3 rounded-xl border border-slate-200 mb-4 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 text-sm"
         />
 
-        {/* Category Tabs */}
-        <div className="flex gap-2 mb-5 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+        {/* Category — select on mobile, tabs on sm+ */}
+        <div className="sm:hidden mb-4">
+          <select
+            value={activeCategory}
+            onChange={(e) => setActiveCategory(e.target.value)}
+            className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+          >
+            {["All", ...categories].map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+        <div className="hidden sm:flex gap-2 mb-5 overflow-x-auto pb-1">
           {["All", ...categories].map((cat) => (
             <button
               key={cat}

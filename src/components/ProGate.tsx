@@ -49,7 +49,7 @@ export function ProGate({ children, feature }: { children: ReactNode; feature?: 
 
         {/* Feature grid */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-6">
-          <ul className="grid grid-cols-2 gap-x-6 gap-y-3 text-left">
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-left">
             {features.map((f) => (
               <li key={f} className="flex items-start gap-2 text-sm text-slate-700">
                 <svg className="w-4 h-4 text-teal-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

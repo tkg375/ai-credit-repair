@@ -130,8 +130,19 @@ export default function TemplatesPage() {
         </p>
 
         <ProGate feature="Letter Templates Library">
-          {/* Category tabs */}
-          <div className="flex gap-2 overflow-x-auto pb-1 mb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+          {/* Category — select on mobile, tabs on sm+ */}
+          <div className="sm:hidden mb-4">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+            >
+              {TEMPLATE_CATEGORIES.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="hidden sm:flex gap-2 overflow-x-auto pb-1 mb-4">
             {TEMPLATE_CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
@@ -195,7 +206,7 @@ export default function TemplatesPage() {
 
       {/* Generate Modal — bottom sheet on mobile, centered on sm+ */}
       {selectedTemplate && (
-        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center sm:p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center sm:justify-center sm:p-4 z-50">
           <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
             {/* Modal header */}
             <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-4 sm:px-6 py-4 flex items-center justify-between shrink-0">
@@ -237,12 +248,12 @@ export default function TemplatesPage() {
                     <input type="text" placeholder="Creditor / Collector Name" value={form.creditorName}
                       onChange={(e) => setForm((f) => ({ ...f, creditorName: e.target.value }))}
                       className={INPUT} />
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input type="text" placeholder="Account Number" value={form.accountNumber}
                         onChange={(e) => setForm((f) => ({ ...f, accountNumber: e.target.value }))}
-                        className="px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                        className="flex-1 px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
                       <select value={form.bureau} onChange={(e) => setForm((f) => ({ ...f, bureau: e.target.value }))}
-                        className="px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                        className="w-full sm:w-auto px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
                         {BUREAUS.map((b) => <option key={b} value={b}>{b}</option>)}
                       </select>
                     </div>
