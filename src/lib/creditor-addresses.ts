@@ -1,5 +1,3 @@
-import OpenAI from "openai";
-
 export interface CreditorAddress {
   name: string;
   address: string;
@@ -390,95 +388,8 @@ function lookupStatic(creditorName: string): CreditorAddress | null {
   return null;
 }
 
-// In-memory cache for AI lookups (survives across requests in the same serverless instance)
-const aiCache = new Map<string, { result: CreditorAddress | null; timestamp: number }>();
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
-
-async function lookupAI(creditorName: string): Promise<CreditorAddress | null> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey || apiKey === "sk-your-openai-key-here") {
-    return null;
-  }
-
-  const normalized = normalizeName(creditorName);
-  const cached = aiCache.get(normalized);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.result;
-  }
-
-  const openai = new OpenAI({ apiKey });
-
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "system",
-        content: `You are a factual database lookup tool. Given a creditor or debt collection company name, provide their official mailing address for consumer disputes or correspondence.
-
-RULES:
-- Only provide addresses you are highly confident are correct
-- Prefer P.O. Box or designated dispute/consumer relations department addresses
-- If you are not confident about the address, set confidence to "low"
-- Never fabricate an address
-
-Respond with JSON: { "name": string, "address": string, "city": string, "state": string, "zip": string, "department": string | null, "confidence": "high" | "medium" | "low" }`,
-      },
-      {
-        role: "user",
-        content: `What is the official mailing address for disputes with: ${creditorName}`,
-      },
-    ],
-    response_format: { type: "json_object" },
-    temperature: 0,
-  });
-
-  const content = response.choices[0].message.content;
-  if (!content) {
-    aiCache.set(normalized, { result: null, timestamp: Date.now() });
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(content);
-
-    if (parsed.confidence === "low") {
-      aiCache.set(normalized, { result: null, timestamp: Date.now() });
-      return null;
-    }
-
-    const result: CreditorAddress = {
-      name: parsed.name || creditorName,
-      address: parsed.address,
-      city: parsed.city,
-      state: parsed.state,
-      zip: parsed.zip,
-      department: parsed.department || undefined,
-      source: "ai",
-      confidence: parsed.confidence,
-    };
-
-    aiCache.set(normalized, { result, timestamp: Date.now() });
-    return result;
-  } catch {
-    aiCache.set(normalized, { result: null, timestamp: Date.now() });
-    return null;
-  }
-}
-
-export async function resolveCreditorAddress(creditorName: string): Promise<CreditorAddress | null> {
-  // Layer 1: Static database (instant, free)
-  const staticResult = lookupStatic(creditorName);
-  if (staticResult) {
-    return staticResult;
-  }
-
-  // Layer 2: AI fallback
-  try {
-    return await lookupAI(creditorName);
-  } catch (error) {
-    console.error("AI address lookup failed:", error);
-    return null;
-  }
+export function resolveCreditorAddress(creditorName: string): CreditorAddress | null {
+  return lookupStatic(creditorName);
 }
 
 export function formatAddress(addr: CreditorAddress): string {

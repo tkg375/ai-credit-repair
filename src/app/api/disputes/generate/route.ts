@@ -172,9 +172,9 @@ export async function POST(req: NextRequest) {
     try {
       if (bureauDispute && bureau) {
         // For bureau disputes, address the letter TO the credit bureau
-        creditorAddress = await resolveCreditorAddress(bureau);
+        creditorAddress = resolveCreditorAddress(bureau);
       } else {
-        creditorAddress = await resolveCreditorAddress(creditorName);
+        creditorAddress = resolveCreditorAddress(creditorName);
       }
     } catch (addrError) {
       console.error("Address lookup failed (non-blocking):", addrError);
