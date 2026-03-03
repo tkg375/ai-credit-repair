@@ -380,7 +380,6 @@ export default function Home() {
               <Link href="/terms" className="hover:text-slate-700 transition">Terms</Link>
               <Link href="/privacy" className="hover:text-slate-700 transition">Privacy</Link>
               <Link href="/support" className="hover:text-slate-700 transition">Support</Link>
-              <a href="mailto:support@credit-800.com" className="hover:text-slate-700 transition">support@credit-800.com</a>
             </div>
           </div>
           <p className="text-center text-xs text-slate-400 mt-4">
