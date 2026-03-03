@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
+import { getObject } from "@/lib/s3";
 
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
@@ -45,17 +46,19 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return NextResponse.json({ error: "Gemini not configured" }, { status: 503 });
 
-  let body: { fileName: string; mimeType: string; base64: string };
+  let body: { s3Key: string; fileName: string; mimeType: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { fileName, mimeType, base64 } = body;
-  if (!fileName || !base64) return NextResponse.json({ error: "fileName and base64 are required" }, { status: 400 });
+  const { s3Key, fileName, mimeType } = body;
+  if (!s3Key || !fileName) return NextResponse.json({ error: "s3Key and fileName are required" }, { status: 400 });
 
   try {
+    const bytes = await getObject(s3Key);
+    const base64 = Buffer.from(bytes).toString("base64");
     const fileMime = mimeType || "application/pdf";
 
     const res = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
@@ -88,6 +91,7 @@ export async function POST(request: NextRequest) {
     const letterId = await firestore.addDoc(COLLECTIONS.creditorLetters, {
       userId: user.uid,
       fileName,
+      s3Key,
       uploadedAt: new Date().toISOString(),
       creditorName: analysis.creditorName ?? null,
       letterDate: analysis.letterDate ?? null,

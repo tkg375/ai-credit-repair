@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   try {
     const { fileName, mimeType } = await req.json();
     const timestamp = Date.now();
-    const s3Key = `letters/${user.uid}/${timestamp}-${fileName}`;
+    const s3Key = `reports/${user.uid}/letters/${timestamp}-${fileName}`;
     const uploadUrl = await getUploadUrl(s3Key, mimeType || "application/pdf");
     return NextResponse.json({ uploadUrl, s3Key });
   } catch (error) {

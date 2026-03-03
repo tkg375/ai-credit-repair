@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 
@@ -24,9 +25,7 @@ interface LetterAnalysis {
   draftResponseLetter: string;
 }
 
-type PageState = "idle" | "analyzing" | "results";
-
-const ACCEPTED_TYPES = "application/pdf,.pdf,image/jpeg,.jpg,.jpeg,image/png,.png,image/webp,.webp";
+const ACCEPTED_TYPES = ".pdf,application/pdf,image/jpeg,.jpg,.jpeg,image/png,.png,image/webp,.webp";
 
 const LETTER_TYPE_LABELS: Record<string, string> = {
   collection_notice: "Collection Notice",
@@ -52,13 +51,21 @@ function isValidFile(file: File): boolean {
 }
 
 export default function AnalyzeLetterPage() {
-  const { user } = useAuth();
-  const [pageState, setPageState] = useState<PageState>("idle");
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState("");
+  const [progress, setProgress] = useState("");
   const [analysis, setAnalysis] = useState<LetterAnalysis | null>(null);
   const [copied, setCopied] = useState(false);
+
+  if (!authLoading && !user) {
+    router.push("/login");
+    return null;
+  }
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -75,7 +82,7 @@ export default function AnalyzeLetterPage() {
     e.stopPropagation();
     setDragActive(false);
     setError("");
-    if (e.dataTransfer.files?.[0]) {
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const dropped = e.dataTransfer.files[0];
       if (isValidFile(dropped)) {
         setFile(dropped);
@@ -87,7 +94,7 @@ export default function AnalyzeLetterPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError("");
-    if (e.target.files?.[0]) {
+    if (e.target.files && e.target.files[0]) {
       const selected = e.target.files[0];
       if (isValidFile(selected)) {
         setFile(selected);
@@ -97,43 +104,68 @@ export default function AnalyzeLetterPage() {
     }
   };
 
-  const handleAnalyze = async () => {
+  const handleUpload = async () => {
     if (!file || !user) return;
 
-    if (file.size > 4 * 1024 * 1024) {
-      setError("File is too large. Please use a file under 4 MB (compress or reduce scan resolution if needed).");
-      return;
-    }
-
-    setPageState("analyzing");
+    setUploading(true);
     setError("");
+    setProgress("Uploading letter...");
 
     try {
-      // Read file as base64 client-side
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result as string;
-          resolve(result.split(",")[1]); // strip data URL prefix
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-      const res = await fetch("/api/letters/analyze", {
+      // Get a pre-signed S3 upload URL (bypasses API size limits)
+      const urlRes = await fetch("/api/letters/upload-url", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
-        body: JSON.stringify({ fileName: file.name, mimeType: file.type, base64 }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.idToken}`,
+        },
+        body: JSON.stringify({ fileName: file.name, mimeType: file.type }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.details || data.error || "Failed to analyze letter");
+      if (!urlRes.ok) {
+        const errorData = await urlRes.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to get upload URL");
+      }
 
-      setAnalysis(data.analysis);
-      setPageState("results");
+      const { uploadUrl, s3Key } = await urlRes.json();
+
+      // Upload directly to S3 (bypasses Next.js API size limits)
+      const putRes = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type || "application/pdf" },
+      });
+
+      if (!putRes.ok) {
+        throw new Error(`Upload failed: ${putRes.status} ${putRes.statusText}`);
+      }
+
+      setProgress("Analyzing letter with AI...");
+      setAnalyzing(true);
+
+      const analyzeRes = await fetch("/api/letters/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.idToken}`,
+        },
+        body: JSON.stringify({ s3Key, fileName: file.name, mimeType: file.type }),
+      });
+
+      if (!analyzeRes.ok) {
+        const errorData = await analyzeRes.json().catch(() => ({}));
+        throw new Error(errorData.details || errorData.error || "Failed to analyze letter");
+      }
+
+      const { analysis: result } = await analyzeRes.json();
+      setAnalysis(result);
+      setUploading(false);
+      setAnalyzing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to analyze letter");
-      setPageState("idle");
+      const message = err instanceof Error ? err.message : String(err);
+      setError(`Failed to process letter: ${message}`);
+      setUploading(false);
+      setAnalyzing(false);
     }
   };
 
@@ -145,12 +177,21 @@ export default function AnalyzeLetterPage() {
   };
 
   const handleReset = () => {
-    setPageState("idle");
     setFile(null);
     setAnalysis(null);
     setError("");
     setCopied(false);
+    setUploading(false);
+    setAnalyzing(false);
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <AuthenticatedLayout activeNav="analyze-letter">
@@ -166,7 +207,7 @@ export default function AnalyzeLetterPage() {
           </div>
         )}
 
-        {pageState === "idle" && (
+        {!uploading && !analysis && (
           <>
             <div
               className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition ${
@@ -206,7 +247,7 @@ export default function AnalyzeLetterPage() {
                   </div>
                   <p className="font-medium">Drag and drop your letter here</p>
                   <p className="text-sm text-slate-500 mt-1">or click to browse</p>
-                  <p className="text-xs text-slate-400 mt-2">Supports PDF, JPG, PNG, WebP (scanned letters welcome)</p>
+                  <p className="text-xs text-slate-400 mt-2">Supports PDF, JPG, PNG, WebP</p>
                   <input
                     type="file"
                     accept={ACCEPTED_TYPES}
@@ -219,34 +260,39 @@ export default function AnalyzeLetterPage() {
 
             {file && (
               <button
-                onClick={handleAnalyze}
+                onClick={handleUpload}
                 className="w-full mt-6 py-3.5 sm:py-4 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 hover:from-lime-400 hover:via-teal-400 hover:to-cyan-500 text-white rounded-xl font-medium transition text-base sm:text-lg"
               >
                 Analyze Letter
               </button>
             )}
-
-            <div className="mt-6 p-4 bg-slate-50 rounded-xl text-sm text-slate-600">
-              <p className="font-medium mb-1">What gets analyzed:</p>
-              <ul className="space-y-1 list-disc list-inside text-slate-500">
-                <li>Claims and demands made by the creditor</li>
-                <li>Your rights under FCRA, FDCPA, and other consumer laws</li>
-                <li>Prioritized actions you should take</li>
-                <li>A draft response letter you can send</li>
-              </ul>
-            </div>
           </>
         )}
 
-        {pageState === "analyzing" && (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-            <h2 className="text-xl font-semibold mb-2">Analyzing Your Letter</h2>
-            <p className="text-slate-600 text-sm">Our AI is reviewing the letter, identifying your rights, and drafting a response...</p>
+        {uploading && (
+          <div className="text-center py-10 sm:py-16">
+            <div className="w-16 sm:w-20 h-16 sm:h-20 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">
+              {analyzing ? "Analyzing Your Letter" : "Uploading..."}
+            </h2>
+            <p className="text-slate-600">{progress}</p>
+
+            <div className="mt-8 max-w-md mx-auto">
+              <div className="flex justify-between text-sm text-slate-500 mb-2">
+                <span>Progress</span>
+                <span>{analyzing ? "75%" : "25%"}</span>
+              </div>
+              <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-lime-500 to-teal-600 transition-all duration-1000"
+                  style={{ width: analyzing ? "75%" : "25%" }}
+                />
+              </div>
+            </div>
           </div>
         )}
 
-        {pageState === "results" && analysis && (
+        {analysis && (
           <div className="space-y-6">
             {/* Letter summary bar */}
             <div className="flex flex-wrap items-center gap-3 p-4 bg-slate-50 rounded-xl text-sm">
