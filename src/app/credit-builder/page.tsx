@@ -422,11 +422,7 @@ function ProductCard({ product, highlight }: { product: CreditBuilderProduct; hi
         href={product.link}
         target="_blank"
         rel="noopener noreferrer"
-        className={`block w-full text-center py-2.5 rounded-xl text-sm font-medium transition ${
-          highlight
-            ? "bg-gradient-to-r from-lime-500 to-teal-600 text-white hover:opacity-90"
-            : "border border-slate-200 text-slate-700 hover:bg-slate-50"
-        }`}
+        className="block w-full text-center py-2.5 rounded-xl text-sm font-medium transition bg-gradient-to-r from-lime-500 to-teal-600 text-white hover:opacity-90"
       >
         View & Apply →
       </a>
