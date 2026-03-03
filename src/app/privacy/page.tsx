@@ -4,19 +4,21 @@ import { Logo } from "@/components/Logo";
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto border-b border-slate-200">
-        <Link href="/">
-          <Logo className="h-10 sm:h-14 w-auto" />
-        </Link>
-        <div className="flex gap-2 sm:gap-4">
-          <Link href="/login" className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap">
-            Log In
+      <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
+        <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
+          <Link href="/">
+            <Logo className="h-10 sm:h-14 w-auto" />
           </Link>
-          <Link href="/register" className="px-3 sm:px-4 py-2 text-sm bg-teal-600 hover:bg-teal-500 text-white rounded-lg transition whitespace-nowrap">
-            Get Started
-          </Link>
-        </div>
-      </nav>
+          <div className="flex gap-2 sm:gap-4">
+            <Link href="/login" className="px-3 sm:px-4 py-2 text-sm text-white/90 hover:text-white transition whitespace-nowrap">
+              Log In
+            </Link>
+            <Link href="/register" className="px-3 sm:px-4 py-2 text-sm bg-white text-teal-600 hover:bg-lime-50 rounded-lg transition whitespace-nowrap font-medium">
+              Get Started
+            </Link>
+          </div>
+        </nav>
+      </div>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <h1 className="text-3xl sm:text-4xl font-bold mb-6">Privacy Policy</h1>
