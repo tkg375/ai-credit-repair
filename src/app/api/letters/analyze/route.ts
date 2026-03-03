@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
 
-const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 const ANALYZE_PROMPT = `You are a consumer rights and credit law expert. A user has uploaded a letter received from a creditor, debt collector, or credit bureau.
 
@@ -35,14 +35,15 @@ Guidelines:
 - deadline: Extract any response deadline or due date if mentioned, otherwise null
 - yourLegalRights: List 3-6 specific legal rights applicable under FCRA, FDCPA, or other consumer protection laws based on the letter type
 - recommendedActions: Provide 3-5 prioritized actions the consumer should take, ordered by urgency
-- draftResponseLetter: Write a professional, legally-informed response letter the consumer can customize and send. Include appropriate legal citations (FDCPA Section 809, FCRA Section 611, etc.) where relevant`;
+- draftResponseLetter: Write a professional, legally-informed response letter the consumer can customize and send. Include appropriate legal citations (FDCPA Section 809, FCRA Section 611, etc.) where relevant
+Return only the raw JSON, no markdown.`;
 
 export async function POST(request: NextRequest) {
   const user = await getAuthUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: "AI service not configured" }, { status: 503 });
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return NextResponse.json({ error: "Gemini not configured" }, { status: 503 });
 
   let body: { fileName: string; mimeType: string; base64: string };
   try {
@@ -56,50 +57,31 @@ export async function POST(request: NextRequest) {
 
   try {
     const fileMime = mimeType || "application/pdf";
-    const isPdf = fileMime === "application/pdf" || fileName.toLowerCase().endsWith(".pdf");
 
-    const contentBlock = isPdf
-      ? {
-          type: "document",
-          source: { type: "base64", media_type: "application/pdf", data: base64 },
-        }
-      : {
-          type: "image",
-          source: { type: "base64", media_type: fileMime, data: base64 },
-        };
-
-    const res = await fetch(ANTHROPIC_API_URL, {
+    const res = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2024-01-01",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 4096,
-        messages: [
-          {
-            role: "user",
-            content: [
-              contentBlock,
-              { type: "text", text: ANALYZE_PROMPT },
-            ],
-          },
-        ],
+        contents: [{
+          parts: [
+            { inline_data: { mime_type: fileMime, data: base64 } },
+            { text: ANALYZE_PROMPT },
+          ],
+        }],
+        generationConfig: { temperature: 0, maxOutputTokens: 4096 },
       }),
     });
 
     if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Claude API error ${res.status}: ${err}`);
+      const err = await res.json().catch(() => ({}));
+      throw new Error(`Gemini error: ${JSON.stringify(err)}`);
     }
 
     const data = await res.json();
-    const text = data.content?.[0]?.text || "";
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("No JSON in Claude response");
+    if (!jsonMatch) throw new Error("No JSON in Gemini response");
 
     const analysis = JSON.parse(jsonMatch[0]);
 
