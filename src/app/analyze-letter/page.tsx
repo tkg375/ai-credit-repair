@@ -104,20 +104,35 @@ export default function AnalyzeLetterPage() {
     setError("");
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      // Step 1: get pre-signed S3 URL (bypasses Lambda body size limit)
+      const urlRes = await fetch("/api/letters/upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
+        body: JSON.stringify({ fileName: file.name, mimeType: file.type }),
+      });
+      if (!urlRes.ok) {
+        const d = await urlRes.json().catch(() => ({}));
+        throw new Error(d.error || "Failed to get upload URL");
+      }
+      const { uploadUrl, s3Key } = await urlRes.json();
 
+      // Step 2: upload directly to S3
+      const putRes = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type || "application/pdf" },
+      });
+      if (!putRes.ok) throw new Error(`Upload failed: ${putRes.status}`);
+
+      // Step 3: analyze via S3 key
       const res = await fetch("/api/letters/analyze", {
         method: "POST",
-        headers: { Authorization: `Bearer ${user.idToken}` },
-        body: formData,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
+        body: JSON.stringify({ s3Key, fileName: file.name, mimeType: file.type }),
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to analyze letter");
-      }
+      if (!res.ok) throw new Error(data.error || "Failed to analyze letter");
 
       setAnalysis(data.analysis);
       setPageState("results");

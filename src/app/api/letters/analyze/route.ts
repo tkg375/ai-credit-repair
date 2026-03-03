@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
+import { getObject } from "@/lib/s3";
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 
@@ -44,21 +45,21 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return NextResponse.json({ error: "AI service not configured" }, { status: 503 });
 
-  let formData: FormData;
+  let body: { s3Key: string; fileName: string; mimeType: string };
   try {
-    formData = await request.formData();
+    body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const file = formData.get("file") as File | null;
-  if (!file) return NextResponse.json({ error: "file is required" }, { status: 400 });
+  const { s3Key, fileName, mimeType } = body;
+  if (!s3Key || !fileName) return NextResponse.json({ error: "s3Key and fileName are required" }, { status: 400 });
 
-  const arrayBuffer = await file.arrayBuffer();
-  const base64 = Buffer.from(arrayBuffer).toString("base64");
-  const mimeType = file.type || "application/pdf";
-
-  const isPdf = mimeType === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+  // Fetch file from S3
+  const bytes = await getObject(s3Key);
+  const base64 = Buffer.from(bytes).toString("base64");
+  const fileMime = mimeType || "application/pdf";
+  const isPdf = fileMime === "application/pdf" || fileName.toLowerCase().endsWith(".pdf");
 
   const contentBlock = isPdf
     ? {
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
       }
     : {
         type: "image",
-        source: { type: "base64", media_type: mimeType, data: base64 },
+        source: { type: "base64", media_type: fileMime, data: base64 },
       };
 
   try {
@@ -108,7 +109,8 @@ export async function POST(request: NextRequest) {
 
     const letterId = await firestore.addDoc(COLLECTIONS.creditorLetters, {
       userId: user.uid,
-      fileName: file.name,
+      fileName,
+      s3Key,
       uploadedAt: new Date().toISOString(),
       creditorName: analysis.creditorName ?? null,
       letterDate: analysis.letterDate ?? null,
