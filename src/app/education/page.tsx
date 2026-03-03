@@ -125,7 +125,7 @@ export default function EducationPage() {
               </button>
 
               {expandedModule === mod.id && (
-                <div className="border-t border-slate-100 p-5">
+                <div className="border-t border-slate-100 p-4 sm:p-5">
                   <div className="prose prose-sm prose-slate max-w-none">
                     {mod.content.split("\n\n").map((paragraph, i) => {
                       if (paragraph.startsWith("**") && paragraph.endsWith("**")) {

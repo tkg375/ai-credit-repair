@@ -3,9 +3,54 @@ import { Logo } from "@/components/Logo";
 import { ScoreChart } from "@/components/ScoreChart";
 import { SampleLetterModal } from "@/components/SampleLetterModal";
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://credit-800.com/#organization",
+      name: "Credit 800",
+      url: "https://credit-800.com",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://credit-800.com/og-image.png",
+      },
+      sameAs: [],
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://credit-800.com/#website",
+      url: "https://credit-800.com",
+      name: "Credit 800",
+      description:
+        "AI-powered credit repair: dispute letters, score analysis, and a personalized plan to reach 800.",
+      publisher: { "@id": "https://credit-800.com/#organization" },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://credit-800.com/#app",
+      name: "Credit 800",
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      offers: {
+        "@type": "Offer",
+        price: "5.00",
+        priceCurrency: "USD",
+        billingIncrement: "P1M",
+      },
+      description:
+        "Credit 800 uses AI to analyze your credit report, automatically generate FCRA-compliant dispute letters, and build a personalized action plan to reach an 800 credit score.",
+    },
+  ],
+};
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Nav + Hero with gradient background */}
       <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
         <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">

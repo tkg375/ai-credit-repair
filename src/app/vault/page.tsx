@@ -137,7 +137,7 @@ export default function VaultPage() {
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
           onDrop={(e) => { e.preventDefault(); setDragOver(false); handleUpload(e.dataTransfer.files); }}
-          className={`border-2 border-dashed rounded-2xl p-8 text-center mb-6 transition ${
+          className={`border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center mb-6 transition ${
             dragOver ? "border-teal-500 bg-teal-50" : "border-slate-300 bg-white hover:border-slate-400"
           }`}
         >
@@ -189,7 +189,7 @@ export default function VaultPage() {
 
         {/* Documents List */}
         {filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+          <div className="bg-white rounded-2xl border border-slate-200 p-8 sm:p-12 text-center">
             <p className="text-slate-500">No documents yet. Upload your first file above.</p>
           </div>
         ) : (

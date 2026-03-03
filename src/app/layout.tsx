@@ -41,9 +41,6 @@ export const metadata: Metadata = {
   creator: "Credit 800",
   publisher: "Credit 800",
   metadataBase: new URL("https://credit-800.com"),
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     type: "website",
     locale: "en_US",

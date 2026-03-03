@@ -195,15 +195,15 @@ export default function TemplatesPage() {
 
       {/* Generate Modal */}
       {selectedTemplate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-4 flex items-center justify-between shrink-0">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center sm:p-4 z-50">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+            <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-4 sm:px-6 py-4 flex items-center justify-between shrink-0">
               <h2 className="text-white font-semibold text-lg">{selectedTemplate.title}</h2>
               <button onClick={() => setSelectedTemplate(null)} className="text-white/70 hover:text-white text-2xl leading-none">×</button>
             </div>
 
             <div className="overflow-y-auto flex-1">
-              <div className="p-6 space-y-4">
+              <div className="p-4 sm:p-6 space-y-4">
                 {/* Your Info */}
                 <div>
                   <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Your Information</p>
@@ -257,15 +257,15 @@ export default function TemplatesPage() {
                   <textarea
                     readOnly
                     value={generatedLetter}
-                    rows={14}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-xs font-mono bg-slate-50 focus:outline-none resize-none"
+                    rows={8}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-xs font-mono bg-slate-50 focus:outline-none resize-none sm:rows-[14]"
                   />
                 </div>
               </div>
             </div>
 
             {/* Footer actions */}
-            <div className="border-t border-slate-100 px-6 py-4 flex gap-3 shrink-0">
+            <div className="border-t border-slate-100 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row gap-2 sm:gap-3 shrink-0">
               <button
                 onClick={handleCopy}
                 className="flex-1 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition"
