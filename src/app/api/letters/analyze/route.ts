@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
             { text: ANALYZE_PROMPT },
           ],
         }],
-        generationConfig: { temperature: 0, maxOutputTokens: 4096 },
+        generationConfig: { temperature: 0, maxOutputTokens: 8192 },
       }),
     });
 
@@ -88,12 +88,11 @@ export async function POST(request: NextRequest) {
       throw new Error(`Empty Gemini response (finishReason: ${finishReason ?? "unknown"}). Raw: ${JSON.stringify(data).slice(0, 300)}`);
     }
 
-    // Strip markdown code fences if present
-    const stripped = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
-    const jsonMatch = stripped.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error(`No JSON in Gemini response. Raw text: ${text.slice(0, 500)}`);
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start === -1 || end === -1) throw new Error(`No JSON in Gemini response. Raw text: ${text.slice(0, 500)}`);
 
-    const analysis = JSON.parse(jsonMatch[0]);
+    const analysis = JSON.parse(text.slice(start, end + 1));
 
     const letterId = await firestore.addDoc(COLLECTIONS.creditorLetters, {
       userId: user.uid,
