@@ -83,8 +83,15 @@ export async function POST(request: NextRequest) {
     const data = await res.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("No JSON in Gemini response");
+    if (!text) {
+      const finishReason = data.candidates?.[0]?.finishReason;
+      throw new Error(`Empty Gemini response (finishReason: ${finishReason ?? "unknown"}). Raw: ${JSON.stringify(data).slice(0, 300)}`);
+    }
+
+    // Strip markdown code fences if present
+    const stripped = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+    const jsonMatch = stripped.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error(`No JSON in Gemini response. Raw text: ${text.slice(0, 500)}`);
 
     const analysis = JSON.parse(jsonMatch[0]);
 
