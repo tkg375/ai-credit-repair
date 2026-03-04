@@ -84,6 +84,10 @@ export default function Home() {
                 <br />
                 <span className="text-white/90">One Platform.</span>
               </h1>
+              <div className="mt-3 sm:mt-4 inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5">
+                <span className="text-lime-300 font-bold text-lg">$5</span>
+                <span className="text-white/80 text-sm font-medium">/month</span>
+              </div>
               <p className="mt-4 sm:mt-6 text-base sm:text-lg text-lime-100 max-w-xl leading-relaxed">
                 Credit repair, budget tracking, debt payoff, loan readiness, goals, and more — all powered by AI. Fix your credit and build real financial health from one dashboard.
               </p>

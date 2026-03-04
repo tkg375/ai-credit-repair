@@ -220,10 +220,11 @@ export default function AnalyzeLetterPage() {
   const [pastLetters, setPastLetters] = useState<PastLetter[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
-  if (!authLoading && !user) {
-    router.push("/login");
-    return null;
-  }
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+    }
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     if (!user) return;
