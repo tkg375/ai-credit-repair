@@ -22,8 +22,9 @@ export function useSubscription(): SubscriptionState {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      cachedState = { isPro: false, loading: false, status: "none" };
-      setState(cachedState);
+      cachedState = null;
+      fetchPromise = null;
+      setState({ isPro: false, loading: false, status: "none" });
       return;
     }
 
