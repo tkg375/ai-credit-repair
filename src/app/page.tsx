@@ -306,7 +306,7 @@ export default function Home() {
                 "Credit score simulator",
                 "Document vault (unlimited)",
                 "CFPB complaint generator",
-                "Priority AI analysis",
+                "Analyze letters from debt collectors",
                 "Mail disputes via USPS ($2/letter)",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
