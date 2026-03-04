@@ -321,11 +321,51 @@ export default function Home() {
               href="/register"
               className="block text-center px-6 py-3 bg-gradient-to-r from-lime-500 to-teal-600 hover:from-lime-400 hover:to-teal-500 text-white rounded-lg font-medium transition text-sm"
             >
-              Get Started
+              Get Started — $5/month
             </Link>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
+              <span className="flex items-center gap-1">
+                <svg className="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                Cancel anytime
+              </span>
+              <span className="flex items-center gap-1">
+                <svg className="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                No contracts
+              </span>
+              <span className="flex items-center gap-1">
+                <svg className="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                Keep access until end of billing period
+              </span>
+            </div>
           </div>
         </div>
-        <p className="text-xs text-slate-400 text-center mt-6">Cancel anytime. You keep access until the end of your billing period.</p>
+
+        {/* FCRA / FDCPA trust strip */}
+        <div className="max-w-2xl mx-auto mt-8 grid sm:grid-cols-3 gap-4">
+          {[
+            {
+              label: "FCRA Compliant",
+              detail: "Fair Credit Reporting Act",
+              desc: "Your right to dispute inaccurate information is protected under the FCRA. Bureaus must investigate within 30 days.",
+            },
+            {
+              label: "FDCPA Protected",
+              detail: "Fair Debt Collection Practices Act",
+              desc: "The FDCPA protects you from abusive debt collectors. You have the right to request debt validation and stop contact.",
+            },
+            {
+              label: "Secure & Private",
+              detail: "256-bit encryption",
+              desc: "Your documents and personal information are encrypted and never shared with third parties.",
+            },
+          ].map((t) => (
+            <div key={t.label} className="border border-slate-200 rounded-xl p-4 text-center">
+              <p className="font-semibold text-sm text-slate-800">{t.label}</p>
+              <p className="text-xs text-teal-600 font-medium mt-0.5 mb-2">{t.detail}</p>
+              <p className="text-xs text-slate-500 leading-relaxed">{t.desc}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Sample Letter Section (Feature 5) */}
@@ -396,6 +436,78 @@ export default function Home() {
                 <p className="text-xs font-mono text-slate-400">{t.score}</p>
               </div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3">Frequently Asked Questions</h2>
+        <p className="text-slate-500 text-center mb-10 max-w-2xl mx-auto text-sm sm:text-base">
+          Everything you need to know before getting started.
+        </p>
+        <div className="max-w-3xl mx-auto space-y-4">
+          {[
+            {
+              q: "Is this legit? I've been burned by credit repair scams before.",
+              a: "We understand the skepticism — the credit repair industry is full of companies that charge hundreds of dollars and deliver nothing. Credit 800 is different: it's a self-service tool that puts you in control. We don't make promises on your behalf or charge per letter. You generate your own FCRA-compliant dispute letters using AI, send them yourself, and keep 100% of the results. No shady contracts, no recurring upsells.",
+            },
+            {
+              q: "What is the FCRA and how does it protect me?",
+              a: "The Fair Credit Reporting Act (FCRA) is a federal law that gives you the right to dispute any inaccurate, incomplete, or unverifiable information on your credit report. Credit bureaus are required by law to investigate your disputes within 30 days and remove anything they cannot verify. Credit 800 generates dispute letters that cite specific FCRA sections so your disputes carry legal weight.",
+            },
+            {
+              q: "What is the FDCPA and what rights do I have with debt collectors?",
+              a: "The Fair Debt Collection Practices Act (FDCPA) protects you from abusive, deceptive, or unfair debt collection practices. Under the FDCPA, you have the right to request debt validation (proof the debt is yours and the amount is correct), dispute the debt in writing, and demand collectors stop contacting you. Our letter templates include FDCPA-compliant cease & desist and debt validation letters.",
+            },
+            {
+              q: "How fast will I see results?",
+              a: "Credit bureaus are required to respond to disputes within 30 days (sometimes 45 days if you submit additional documentation). Many users see their first removals within 30–60 days. Results depend on your specific situation — inaccurate items, outdated accounts, and unverifiable collections are typically the fastest to remove. Payment history and utilization improvements can reflect on your report within 1–2 billing cycles.",
+            },
+            {
+              q: "Do I need to send letters myself?",
+              a: "For digital disputes, you copy the letter and submit it directly on the bureau's website (Equifax, Experian, TransUnion) or via certified mail. We also offer a USPS mail service ($2/letter) where we print and mail the dispute on your behalf with a trackable delivery confirmation.",
+            },
+            {
+              q: "What if the bureau doesn't respond or denies my dispute?",
+              a: "If a bureau denies your dispute, you can escalate with a Method of Verification letter demanding they explain exactly how they verified the item — this forces a more thorough reinvestigation. If they still fail to respond within 30 days, the item must be removed by law. Credit 800 includes escalation letter templates for exactly these situations.",
+            },
+            {
+              q: "Does disputing items hurt my credit score?",
+              a: "No. Filing a dispute does not trigger a hard inquiry and will not lower your score. In fact, successfully removing negative items almost always results in a score increase. The only way disputing can backfire is if you dispute accurate, positive information — so stick to disputing inaccuracies and unverifiable items.",
+            },
+            {
+              q: "What's included in the $5/month subscription?",
+              a: "Everything — unlimited dispute letters, budget tracker, debt payoff optimizer, credit score simulator, loan readiness calculator, goals tracker, document vault, CFPB complaint generator, letter templates library (goodwill, pay-for-delete, cease & desist, debt validation, and more), creditor letter analyzer, and smart notifications. No feature gates, no usage limits.",
+            },
+            {
+              q: "How is Credit 800 different from hiring a credit repair company?",
+              a: "Traditional credit repair companies charge $79–$149/month and do the same thing you can do yourself for free (disputing items under the FCRA). Many also require long-term contracts. Credit 800 gives you the same AI-powered tools for $5/month and puts you in the driver's seat — you see exactly what's being sent and why, and you keep 100% of the results.",
+            },
+            {
+              q: "Can I cancel anytime?",
+              a: "Yes, absolutely. There are no contracts, no cancellation fees, and no questions asked. You can cancel from your account settings at any time. You'll keep full access to all features until the end of your current billing period.",
+            },
+            {
+              q: "Is my personal information safe?",
+              a: "Yes. All data is encrypted in transit and at rest using 256-bit encryption. We never sell your data or share it with third parties. Your uploaded documents are stored securely and only accessible by you.",
+            },
+            {
+              q: "Do I need my SSN to use Credit 800?",
+              a: "No. You do not need to provide your Social Security Number to use Credit 800. You upload your credit report (which you can get for free at AnnualCreditReport.com) and our AI analyzes it. Your SSN is never required or stored.",
+            },
+          ].map((item, i) => (
+            <details key={i} className="group border border-slate-200 rounded-xl overflow-hidden">
+              <summary className="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer font-medium text-sm text-slate-800 hover:bg-slate-50 transition list-none">
+                {item.q}
+                <svg className="w-4 h-4 text-slate-400 shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div className="px-5 pb-5 pt-1 text-sm text-slate-600 leading-relaxed border-t border-slate-100">
+                {item.a}
+              </div>
+            </details>
           ))}
         </div>
       </section>
