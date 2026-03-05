@@ -80,7 +80,7 @@ export default function Home() {
                 <span className="text-white text-xs font-medium">All-in-One Financial Hub</span>
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-white">
-                Your Finances.
+                Your Credit &amp; Finances.
                 <br />
                 <span className="text-white/90">One Platform.</span>
                 <br />
