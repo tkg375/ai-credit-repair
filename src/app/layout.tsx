@@ -19,6 +19,10 @@ export const metadata: Metadata = {
     default: "Credit 800 — AI-Powered Credit Repair",
     template: "%s | Credit 800",
   },
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+  },
   description:
     "Credit 800 uses AI to analyze your credit report, automatically generate FCRA-compliant dispute letters, and build a personalized action plan to reach an 800 credit score.",
   keywords: [
