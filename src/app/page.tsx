@@ -102,6 +102,12 @@ export default function Home() {
                 >
                   See What's Inside
                 </a>
+                <a
+                  href="#faq"
+                  className="px-6 py-3 border border-white/50 hover:border-white text-white rounded-lg font-medium transition text-center"
+                >
+                  FAQs
+                </a>
               </div>
               <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
                 {["Credit Disputes", "Budget Tracker", "Loan Readiness", "Goals", "Debt Payoff", "Letter Templates"].map((t) => (
@@ -441,7 +447,7 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
+      <section id="faq" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3">Frequently Asked Questions</h2>
         <p className="text-slate-500 text-center mb-10 max-w-2xl mx-auto text-sm sm:text-base">
           Everything you need to know before getting started.
