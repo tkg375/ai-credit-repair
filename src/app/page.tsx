@@ -542,6 +542,9 @@ export default function Home() {
             </div>
           </div>
           <p className="text-center text-xs text-slate-400 mt-4">
+            &copy; {new Date().getFullYear()} Credit 800. All rights reserved.
+          </p>
+          <p className="text-center text-xs text-slate-400 mt-1">
             Not a credit repair organization. Educational tool only.
           </p>
           <div className="mt-6 pt-6 border-t border-slate-100 text-center">
