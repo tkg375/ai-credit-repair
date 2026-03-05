@@ -449,6 +449,10 @@ export default function Home() {
         <div className="max-w-3xl mx-auto space-y-4">
           {[
             {
+              q: "Why do we charge?",
+              a: "We wish we could offer Credit 800 completely free — and honestly, we'd love to. But the AI that powers your dispute letter generation, credit analysis, and smart recommendations isn't free for us to run. Every letter generated, every report analyzed, and every recommendation made costs us in AI processing fees. On top of that, there's hosting, infrastructure, security, and ongoing development to keep everything fast, private, and up to date. At $5/month, we're covering those real costs while keeping the price as low as humanly possible. We believe everyone deserves access to these tools — not just people who can afford $100/month credit repair companies — so we've worked hard to make it as affordable as we can.",
+            },
+            {
               q: "Is this legit? I've been burned by credit repair scams before.",
               a: "We understand the skepticism — the credit repair industry is full of companies that charge hundreds of dollars and deliver nothing. Credit 800 is different: it's a self-service tool that puts you in control. We don't make promises on your behalf or charge per letter. You generate your own FCRA-compliant dispute letters using AI, send them yourself, and keep 100% of the results. No shady contracts, no recurring upsells.",
             },
