@@ -20,8 +20,8 @@ export const metadata: Metadata = {
     template: "%s | Credit 800",
   },
   icons: {
-    icon: "/icon.svg",
-    shortcut: "/icon.svg",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
   },
   description:
     "Credit 800 uses AI to analyze your credit report, automatically generate FCRA-compliant dispute letters, and build a personalized action plan to reach an 800 credit score.",
