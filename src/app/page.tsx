@@ -97,10 +97,10 @@ export default function Home() {
                   Get Started
                 </Link>
                 <a
-                  href="#how-it-works"
+                  href="#pricing"
                   className="px-6 py-3 border border-white/50 hover:border-white text-white rounded-lg font-medium transition text-center"
                 >
-                  See What's Inside
+                  What's Included
                 </a>
                 <a
                   href="#faq"
