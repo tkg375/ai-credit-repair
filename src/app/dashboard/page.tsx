@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/lib/auth-context";
@@ -183,9 +183,11 @@ async function checkDeadlines(
   }
 }
 
-export default function Dashboard() {
+function DashboardContent() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [showWelcome, setShowWelcome] = useState(false);
   const [scoreHistory, setScoreHistory] = useState<{ score: number; recordedAt: string }[]>([]);
   const [latestScore, setLatestScore] = useState<number | null>(null);
   const [disputableCount, setDisputableCount] = useState(0);
@@ -197,6 +199,10 @@ export default function Dashboard() {
   const [totalAssets, setTotalAssets] = useState<number | null>(null);
   const [totalLiabilities, setTotalLiabilities] = useState<number | null>(null);
   const [topGoals, setTopGoals] = useState<{ id: string; title: string; current: number; target: number; unit: string }[]>([]);
+
+  useEffect(() => {
+    if (searchParams.get("welcome") === "1") setShowWelcome(true);
+  }, [searchParams]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -365,6 +371,23 @@ export default function Dashboard() {
     <AuthenticatedLayout activeNav="dashboard">
       <OnboardingModal />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        {showWelcome && (
+          <div className="mb-6 bg-gradient-to-r from-lime-50 to-teal-50 border border-teal-200 rounded-2xl p-5 flex items-start justify-between gap-4">
+            <div>
+              <p className="font-semibold text-teal-800 mb-0.5">Welcome to Credit 800!</p>
+              <p className="text-sm text-teal-700">Your account is active. Start by uploading your credit report or adding your current score to get personalized recommendations.</p>
+            </div>
+            <button
+              onClick={() => setShowWelcome(false)}
+              className="text-teal-500 hover:text-teal-700 shrink-0 mt-0.5 transition"
+              aria-label="Dismiss"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
         <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Dashboard</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
@@ -712,5 +735,13 @@ export default function Dashboard() {
 
       </main>
     </AuthenticatedLayout>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense>
+      <DashboardContent />
+    </Suspense>
   );
 }

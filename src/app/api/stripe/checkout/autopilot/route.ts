@@ -1,11 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
 import { firestore } from "@/lib/firebase-admin";
 import { logAuditEvent } from "@/lib/audit-log";
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   const user = await getAuthUser();
+
+  let bodySuccessUrl: string | undefined;
+  try {
+    const body = await req.json();
+    if (typeof body?.successUrl === "string") bodySuccessUrl = body.successUrl;
+  } catch { /* no body / not JSON */ }
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -37,7 +43,7 @@ export async function POST() {
       payment_method_types: ["card"],
       customer_update: { name: "auto", address: "auto" },
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${appUrl}/autopilot?subscribed=1`,
+      success_url: bodySuccessUrl || `${appUrl}/autopilot?subscribed=1`,
       cancel_url: `${appUrl}/pricing`,
       metadata: { firebaseUid: user.uid, planTier: "autopilot" },
     });

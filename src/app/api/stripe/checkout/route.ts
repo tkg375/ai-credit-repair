@@ -10,6 +10,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  let bodySuccessUrl: string | undefined;
+  try {
+    const body = await req.json();
+    if (typeof body?.successUrl === "string") bodySuccessUrl = body.successUrl;
+  } catch { /* no body / not JSON */ }
+
   const priceId = process.env["STRIPE_PRO_PRICE_ID"];
   if (!priceId) {
     console.error("[checkout] STRIPE_PRO_PRICE_ID is not set");
@@ -68,7 +74,7 @@ export async function POST(req: NextRequest) {
       customer_update: { name: "auto", address: "auto" },
       line_items: [{ price: priceId as string, quantity: 1 }],
       ...(applyDiscount && { discounts: [{ coupon: referralCouponId! }] }),
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/pricing`,
+      success_url: bodySuccessUrl || `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/pricing`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/pricing`,
       metadata: { firebaseUid: user.uid },
     });
