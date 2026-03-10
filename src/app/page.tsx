@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { ScoreChart } from "@/components/ScoreChart";
-import { SampleLetterModal } from "@/components/SampleLetterModal";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -55,6 +54,12 @@ export default function Home() {
       <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
         <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
           <Logo className="h-10 sm:h-14 w-auto" />
+          <div className="hidden md:flex items-center gap-6 text-sm text-white/90">
+            <Link href="/faq" className="hover:text-white transition">FAQ</Link>
+            <Link href="/plans" className="hover:text-white transition">Pricing</Link>
+            <Link href="/sample-letters" className="hover:text-white transition">Sample Letters</Link>
+            <Link href="/support" className="hover:text-white transition">Support</Link>
+          </div>
           <div className="flex gap-2 sm:gap-4">
             <Link
               href="/login"
@@ -96,18 +101,18 @@ export default function Home() {
                 >
                   Get Started
                 </Link>
-                <a
-                  href="#pricing"
+                <Link
+                  href="/plans"
                   className="px-6 py-3 border border-white/50 hover:border-white text-white rounded-lg font-medium transition text-center"
                 >
                   Our Plans
-                </a>
-                <a
-                  href="#faq"
+                </Link>
+                <Link
+                  href="/faq"
                   className="px-6 py-3 border border-white/50 hover:border-white text-white rounded-lg font-medium transition text-center"
                 >
                   FAQs
-                </a>
+                </Link>
               </div>
               <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
                 {["Credit Disputes", "Budget Tracker", "Loan Readiness", "Goals", "Debt Payoff", "Letter Templates"].map((t) => (
@@ -282,140 +287,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4">Simple, Transparent Pricing</h2>
-        <p className="text-slate-600 text-center mb-8 sm:mb-12 max-w-2xl mx-auto text-sm sm:text-base">
-          Start free, go Pro for the full toolkit, or let Autopilot handle everything for you.
-        </p>
-        <div className="grid gap-6 sm:grid-cols-2 max-w-3xl mx-auto">
-
-          {/* Self Service */}
-          <div className="bg-white border-2 border-teal-500 rounded-2xl p-6 flex flex-col">
-            <h3 className="font-semibold text-slate-900 mb-1">Self Service</h3>
-            <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">$5 <span className="text-sm font-normal text-slate-400">/ month</span></p>
-            <p className="text-xs text-slate-500 mb-5">Full DIY credit repair toolkit</p>
-            <ul className="space-y-2 flex-1 mb-6">
-              {[
-                "Unlimited dispute letters",
-                "Budget tracker & spending charts",
-                "Goals tracker with notifications",
-                "Loan readiness calculator",
-                "Letter templates library",
-                "Credit freeze manager",
-                "Debt payoff optimizer",
-                "Credit score simulator",
-                "Document vault (unlimited)",
-                "CFPB complaint generator",
-                "Analyze letters from collectors",
-                "Mail disputes via USPS ($2/letter)",
-              ].map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
-                  <svg className="w-3.5 h-3.5 text-teal-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <Link href="/register" className="block text-center px-4 py-2.5 bg-gradient-to-r from-lime-500 to-teal-600 hover:from-lime-400 hover:to-teal-500 text-white rounded-xl font-medium transition text-sm">
-              Get Started — $5/mo
-            </Link>
-          </div>
-
-          {/* Autopilot — Coming Soon */}
-          <div className="bg-white border-2 border-slate-200 rounded-2xl p-6 flex flex-col relative overflow-hidden">
-            {/* Coming Soon overlay */}
-            <div className="absolute inset-0 z-10 backdrop-blur-sm bg-white/60 flex flex-col items-center justify-center rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center mb-3">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <p className="text-lg font-bold text-slate-900">Coming Soon</p>
-              <p className="text-xs text-slate-500 mt-1 text-center px-4">Fully automated credit repair is on its way.</p>
-            </div>
-            <div className="absolute top-0 right-0 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">NEW</div>
-            <h3 className="font-semibold text-slate-900 mb-1">Autopilot</h3>
-            <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-teal-500 to-cyan-600 bg-clip-text text-transparent">$49 <span className="text-sm font-normal text-slate-400">/ month</span></p>
-            <p className="text-xs text-slate-500 mb-5">We do everything for you</p>
-            <ul className="space-y-2 flex-1 mb-6">
-              {[
-                "Everything in Pro",
-                "Monthly soft-pull credit report",
-                "Auto-generated dispute letters",
-                "Automatic USPS mailing (up to 10/mo)",
-                "VantageScore tracking — hands-free",
-                "FCRA-compliant full automation",
-                "Priority support",
-                "Compliance audit trail",
-              ].map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
-                  <svg className="w-3.5 h-3.5 text-cyan-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <button disabled className="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-xl font-medium text-sm opacity-40 cursor-not-allowed">
-              Coming Soon
-            </button>
-          </div>
-
-        </div>
-
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
-          <span className="flex items-center gap-1">
-            <svg className="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-            Cancel anytime
-          </span>
-          <span className="flex items-center gap-1">
-            <svg className="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-            No contracts
-          </span>
-          <span className="flex items-center gap-1">
-            <svg className="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-            Keep access until end of billing period
-          </span>
-        </div>
-
-        {/* FCRA / FDCPA trust strip */}
-        <div className="max-w-2xl mx-auto mt-8 grid sm:grid-cols-3 gap-4">
-          {[
-            {
-              label: "FCRA Compliant",
-              detail: "Fair Credit Reporting Act",
-              desc: "Your right to dispute inaccurate information is protected under the FCRA. Bureaus must investigate within 30 days.",
-            },
-            {
-              label: "FDCPA Protected",
-              detail: "Fair Debt Collection Practices Act",
-              desc: "The FDCPA protects you from abusive debt collectors. You have the right to request debt validation and stop contact.",
-            },
-            {
-              label: "Secure & Private",
-              detail: "256-bit encryption",
-              desc: "Your documents and personal information are encrypted and never shared with third parties.",
-            },
-          ].map((t) => (
-            <div key={t.label} className="border border-slate-200 rounded-xl p-4 text-center">
-              <p className="font-semibold text-sm text-slate-800">{t.label}</p>
-              <p className="text-xs text-teal-600 font-medium mt-0.5 mb-2">{t.detail}</p>
-              <p className="text-xs text-slate-500 leading-relaxed">{t.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Sample Letter Section (Feature 5) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 sm:p-12 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3">See What Your Letters Look Like</h2>
-          <p className="text-slate-600 mb-6 max-w-xl mx-auto text-sm sm:text-base">
-            Our AI generates FCRA-compliant dispute letters citing specific legal sections, tailored to your exact situation — not generic templates.
-          </p>
-          <SampleLetterModal />
-        </div>
-      </section>
-
-      {/* Testimonials (Feature 7) */}
+      {/* Testimonials */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3">Real Results from Real People</h2>
         <p className="text-slate-600 text-center mb-10 max-w-2xl mx-auto text-sm sm:text-base">
@@ -472,82 +344,6 @@ export default function Home() {
                 <p className="text-xs font-mono text-slate-400">{t.score}</p>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section id="faq" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3">Frequently Asked Questions</h2>
-        <p className="text-slate-500 text-center mb-10 max-w-2xl mx-auto text-sm sm:text-base">
-          Everything you need to know before getting started.
-        </p>
-        <div className="max-w-3xl mx-auto space-y-4">
-          {[
-            {
-              q: "Why do we charge?",
-              a: "We wish we could offer Credit 800 completely free — and honestly, we'd love to. But the AI that powers your dispute letter generation, credit analysis, and smart recommendations isn't free for us to run. Every letter generated, every report analyzed, and every recommendation made costs us in AI processing fees. On top of that, there's hosting, infrastructure, security, and ongoing development to keep everything fast, private, and up to date. At $5/month, we're covering those real costs while keeping the price as low as humanly possible. We believe everyone deserves access to these tools — not just people who can afford $100/month credit repair companies — so we've worked hard to make it as affordable as we can.",
-            },
-            {
-              q: "Is this legit? I've been burned by credit repair scams before.",
-              a: "We understand the skepticism — the credit repair industry is full of companies that charge hundreds of dollars and deliver nothing. Credit 800 is different: it's a self-service tool that puts you in control. We don't make promises on your behalf or charge per letter. You generate your own FCRA-compliant dispute letters using AI, send them yourself, and keep 100% of the results. No shady contracts, no recurring upsells.",
-            },
-            {
-              q: "What is the FCRA and how does it protect me?",
-              a: "The Fair Credit Reporting Act (FCRA) is a federal law that gives you the right to dispute any inaccurate, incomplete, or unverifiable information on your credit report. Credit bureaus are required by law to investigate your disputes within 30 days and remove anything they cannot verify. Credit 800 generates dispute letters that cite specific FCRA sections so your disputes carry legal weight.",
-            },
-            {
-              q: "What is the FDCPA and what rights do I have with debt collectors?",
-              a: "The Fair Debt Collection Practices Act (FDCPA) protects you from abusive, deceptive, or unfair debt collection practices. Under the FDCPA, you have the right to request debt validation (proof the debt is yours and the amount is correct), dispute the debt in writing, and demand collectors stop contacting you. Our letter templates include FDCPA-compliant cease & desist and debt validation letters.",
-            },
-            {
-              q: "How fast will I see results?",
-              a: "Credit bureaus are required to respond to disputes within 30 days (sometimes 45 days if you submit additional documentation). Many users see their first removals within 30–60 days. Results depend on your specific situation — inaccurate items, outdated accounts, and unverifiable collections are typically the fastest to remove. Payment history and utilization improvements can reflect on your report within 1–2 billing cycles.",
-            },
-            {
-              q: "Do I need to send letters myself?",
-              a: "For digital disputes, you copy the letter and submit it directly on the bureau's website (Equifax, Experian, TransUnion) or via certified mail. We also offer a USPS mail service ($2/letter) where we print and mail the dispute on your behalf with a trackable delivery confirmation.",
-            },
-            {
-              q: "What if the bureau doesn't respond or denies my dispute?",
-              a: "If a bureau denies your dispute, you can escalate with a Method of Verification letter demanding they explain exactly how they verified the item — this forces a more thorough reinvestigation. If they still fail to respond within 30 days, the item must be removed by law. Credit 800 includes escalation letter templates for exactly these situations.",
-            },
-            {
-              q: "Does disputing items hurt my credit score?",
-              a: "No. Filing a dispute does not trigger a hard inquiry and will not lower your score. In fact, successfully removing negative items almost always results in a score increase. The only way disputing can backfire is if you dispute accurate, positive information — so stick to disputing inaccuracies and unverifiable items.",
-            },
-            {
-              q: "What's included in the $5/month subscription?",
-              a: "Everything — unlimited dispute letters, budget tracker, debt payoff optimizer, credit score simulator, loan readiness calculator, goals tracker, document vault, CFPB complaint generator, letter templates library (goodwill, pay-for-delete, cease & desist, debt validation, and more), creditor letter analyzer, and smart notifications. No feature gates, no usage limits.",
-            },
-            {
-              q: "How is Credit 800 different from hiring a credit repair company?",
-              a: "Traditional credit repair companies charge $79–$149/month and do the same thing you can do yourself for free (disputing items under the FCRA). Many also require long-term contracts. Credit 800 gives you the same AI-powered tools for $5/month and puts you in the driver's seat — you see exactly what's being sent and why, and you keep 100% of the results.",
-            },
-            {
-              q: "Can I cancel anytime?",
-              a: "Yes, absolutely. There are no contracts, no cancellation fees, and no questions asked. You can cancel from your account settings at any time. You'll keep full access to all features until the end of your current billing period.",
-            },
-            {
-              q: "Is my personal information safe?",
-              a: "Yes. All data is encrypted in transit and at rest using 256-bit encryption. We never sell your data or share it with third parties. Your uploaded documents are stored securely and only accessible by you.",
-            },
-            {
-              q: "Do I need my SSN to use Credit 800?",
-              a: "No. You do not need to provide your Social Security Number to use Credit 800. You upload your credit report (which you can get for free at AnnualCreditReport.com) and our AI analyzes it. Your SSN is never required or stored.",
-            },
-          ].map((item, i) => (
-            <details key={i} className="group border border-slate-200 rounded-xl overflow-hidden">
-              <summary className="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer font-medium text-sm text-slate-800 hover:bg-slate-50 transition list-none">
-                {item.q}
-                <svg className="w-4 h-4 text-slate-400 shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </summary>
-              <div className="px-5 pb-5 pt-1 text-sm text-slate-600 leading-relaxed border-t border-slate-100">
-                {item.a}
-              </div>
-            </details>
           ))}
         </div>
       </section>
