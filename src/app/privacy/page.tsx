@@ -22,7 +22,7 @@ export default function PrivacyPolicy() {
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <h1 className="text-3xl sm:text-4xl font-bold mb-6">Privacy Policy</h1>
-        <p className="text-slate-500 mb-8">Last updated: February 27, 2026</p>
+        <p className="text-slate-500 mb-8">Last updated: March 9, 2026</p>
 
         <div className="prose prose-slate max-w-none space-y-6">
           <section>
@@ -41,12 +41,12 @@ export default function PrivacyPolicy() {
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Email address</li>
               <li>Password (hashed — never stored in plain text)</li>
-              <li>Optional: full name, phone number, date of birth, and mailing address (if added to your profile)</li>
+              <li>Full name, date of birth, mailing address, and phone number (required at signup for dispute letter generation)</li>
               <li>Temporary two-factor authentication codes (stored in hashed form, auto-deleted after use or expiry)</li>
             </ul>
 
             <h3 className="text-lg font-medium mt-4 mb-2">Credit Report Data</h3>
-            <p className="text-slate-600 leading-relaxed mb-3">When you upload a credit report, we process:</p>
+            <p className="text-slate-600 leading-relaxed mb-3">When you upload a credit report (Self Service) or authorize an automated pull (Autopilot), we process:</p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Account information (creditor names, account numbers, balances)</li>
               <li>Payment history and derogatory marks</li>
@@ -55,7 +55,17 @@ export default function PrivacyPolicy() {
               <li>Personal identifying information contained in the report</li>
             </ul>
 
-            <h3 className="text-lg font-medium mt-4 mb-2">Financial & Budget Data</h3>
+            <h3 className="text-lg font-medium mt-4 mb-2">Autopilot — Credit Bureau Data</h3>
+            <p className="text-slate-600 leading-relaxed mb-3">
+              If you subscribe to the Autopilot plan and provide written FCRA authorization, we collect:
+            </p>
+            <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
+              <li>Social Security Number (SSN) — used only in-memory during the credit pull API call to authenticate with the credit bureau; never stored, logged, or written to disk</li>
+              <li>Soft-pull credit report data from our bureau data provider (Array) including tradelines, balances, payment history, and VantageScore</li>
+              <li>FCRA consent records including timestamp, IP address, user agent, and consent version — stored permanently as an immutable compliance record</li>
+            </ul>
+
+            <h3 className="text-lg font-medium mt-4 mb-2">Financial &amp; Budget Data</h3>
             <p className="text-slate-600 leading-relaxed mb-3">If you use budget or debt payoff features, we store:</p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Budget entries (category, amount, date)</li>
@@ -76,6 +86,13 @@ export default function PrivacyPolicy() {
               We receive only a tokenized reference and last-four digits from Stripe for display purposes.
             </p>
 
+            <h3 className="text-lg font-medium mt-4 mb-2">Audit Log Data</h3>
+            <p className="text-slate-600 leading-relaxed">
+              For compliance purposes, we maintain an immutable audit log of all significant account actions including
+              FCRA consent grants and revocations, credit pulls, dispute letter generation, USPS mailings, subscription
+              changes, and two-factor authentication events. These records are retained as required by applicable law.
+            </p>
+
             <h3 className="text-lg font-medium mt-4 mb-2">Usage Data</h3>
             <p className="text-slate-600 leading-relaxed mb-3">We automatically collect:</p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
@@ -94,8 +111,10 @@ export default function PrivacyPolicy() {
               <li>Provide and maintain the Service</li>
               <li>Analyze your credit report and identify potential disputes using AI</li>
               <li>Generate personalized dispute letters and action plans</li>
+              <li>Automatically pull your credit report and mail dispute letters on your behalf (Autopilot subscribers only, with FCRA authorization)</li>
               <li>Process subscription payments and manage billing</li>
               <li>Send transactional emails (analysis complete, dispute mailed, subscription receipts, two-factor authentication codes, weekly progress summaries)</li>
+              <li>Maintain compliance audit trails as required by FCRA and applicable law</li>
               <li>Improve and optimize the Service</li>
               <li>Detect and prevent fraud or abuse</li>
             </ul>
@@ -106,8 +125,9 @@ export default function PrivacyPolicy() {
             <p className="text-slate-600 leading-relaxed">
               We use artificial intelligence services (including Anthropic Claude, Google Gemini, and OpenAI) to analyze your
               credit report data, generate dispute letters, and parse bureau response documents. This processing occurs on secure servers.
-              We do not use your credit report data to train AI models. AI-generated content is always
-              presented for your review before any action is taken.
+              We do not use your credit report data to train AI models. Under the Self Service plan, AI-generated content is always
+              presented for your review before any action is taken. Under the Autopilot plan, AI processing occurs automatically
+              and is logged in your audit trail.
             </p>
           </section>
 
@@ -118,9 +138,11 @@ export default function PrivacyPolicy() {
             </p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Credit report PDFs are stored in encrypted AWS S3 cloud storage</li>
-              <li>Account data is stored in Google Firebase Firestore with access controls</li>
-              <li>Passwords are hashed and never stored in plain text</li>
+              <li>Account data and audit logs are stored in Google Firebase Firestore with access controls</li>
+              <li>Passwords and 2FA codes are hashed and never stored in plain text</li>
+              <li>SSNs are never stored or logged — used only transiently in-memory during credit pulls</li>
               <li>All data transmission uses TLS encryption</li>
+              <li>Two-factor authentication is mandatory for all accounts and cannot be disabled</li>
               <li>Access to data is restricted to authorized personnel only</li>
             </ul>
           </section>
@@ -129,9 +151,10 @@ export default function PrivacyPolicy() {
             <h2 className="text-xl font-semibold mb-3">6. Data Retention</h2>
             <p className="text-slate-600 leading-relaxed">
               We retain your account information and credit report data for as long as your account is active.
-              You may request deletion of your account and associated data by contacting us at support@credit-800.com.
-              After account deletion, we may retain certain information as required by law or for legitimate
-              business purposes for up to 90 days.
+              FCRA consent records and audit logs are retained as required by applicable law and may be retained
+              beyond account closure. You may request deletion of your account and associated data by contacting
+              us at support@credit-800.com. After account deletion, we may retain certain information as required
+              by law or for legitimate business purposes for up to 90 days.
             </p>
           </section>
 
@@ -142,6 +165,7 @@ export default function PrivacyPolicy() {
             </p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li><strong>Stripe:</strong> For payment processing and subscription management</li>
+              <li><strong>Array:</strong> For soft-pull credit bureau data access (Autopilot subscribers only, with FCRA authorization) — name, date of birth, SSN, and address are transmitted to Array solely to authenticate the credit pull request</li>
               <li><strong>PostGrid:</strong> For physical USPS mailing and mail tracking of dispute letters (name and mailing address only)</li>
               <li><strong>AWS:</strong> For cloud infrastructure, file storage, and email delivery (SES)</li>
               <li><strong>Google Firebase / Gemini / OpenAI / Anthropic:</strong> For authentication, data storage, and AI analysis</li>
@@ -161,6 +185,8 @@ export default function PrivacyPolicy() {
               <li>Export your disputes, scores, and budget data as CSV from within the app</li>
               <li>Opt out of non-transactional email communications</li>
               <li>Cancel your subscription at any time</li>
+              <li>Revoke Autopilot FCRA authorization at any time via the Autopilot dashboard, stopping all future automated credit pulls and mailings</li>
+              <li>View your full compliance audit trail from the Autopilot dashboard</li>
             </ul>
             <p className="text-slate-600 leading-relaxed mt-3">
               To exercise any of these rights, contact us at{" "}
