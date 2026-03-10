@@ -231,16 +231,6 @@ export default function SubscriptionPage() {
 
           {/* Autopilot */}
           <div className={`bg-white rounded-2xl border-2 p-6 flex flex-col relative overflow-hidden ${isAutopilot ? "border-cyan-400 ring-1 ring-cyan-400" : "border-slate-200"}`}>
-            {/* Coming Soon overlay */}
-            <div className="absolute inset-0 z-10 backdrop-blur-sm bg-white/60 flex flex-col items-center justify-center rounded-2xl">
-              <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center mb-3">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <p className="text-lg font-bold text-slate-900">Coming Soon</p>
-              <p className="text-xs text-slate-500 mt-1 text-center px-4">Fully automated credit repair is on its way.</p>
-            </div>
             <div className="absolute top-0 right-0 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">
               NEW
             </div>
@@ -260,15 +250,11 @@ export default function SubscriptionPage() {
                 </li>
               ))}
             </ul>
-            {!isSubscribed ? (
-              <button onClick={() => handleUpgrade("autopilot")} disabled={upgradingAutopilot} className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-xl font-medium hover:opacity-90 transition disabled:opacity-50 text-sm">
-                {upgradingAutopilot ? "Loading..." : "Start Autopilot — $49/mo"}
-              </button>
-            ) : isAutopilot ? (
+            {isAutopilot ? (
               <div className="text-center text-sm text-cyan-600 font-medium py-2">Active</div>
             ) : (
-              <button onClick={() => handleUpgrade("autopilot")} disabled={upgradingAutopilot} className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-xl font-medium hover:opacity-90 transition disabled:opacity-50 text-sm">
-                {upgradingAutopilot ? "Loading..." : "Upgrade to Autopilot"}
+              <button disabled className="w-full py-2.5 bg-slate-200 text-slate-400 rounded-xl font-medium cursor-not-allowed text-sm">
+                Coming Soon
               </button>
             )}
           </div>
