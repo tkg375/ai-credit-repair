@@ -84,7 +84,7 @@ export default function Home() {
                 <br />
                 <span className="text-white/90">One Platform.</span>
                 <br />
-                <span className="text-white/90">From $5/month.</span>
+                <span className="text-white/90">$5/month.</span>
               </h1>
               <p className="mt-4 sm:mt-6 text-base sm:text-lg text-lime-100 max-w-xl leading-relaxed">
                 Credit repair, budget tracking, debt payoff, loan readiness, goals, and more — all powered by AI. Fix your credit and build real financial health from one dashboard.
@@ -288,27 +288,9 @@ export default function Home() {
         <p className="text-slate-600 text-center mb-8 sm:mb-12 max-w-2xl mx-auto text-sm sm:text-base">
           Start free, go Pro for the full toolkit, or let Autopilot handle everything for you.
         </p>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+        <div className="grid gap-6 sm:grid-cols-2 max-w-3xl mx-auto">
 
-          {/* Free */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col">
-            <h3 className="font-semibold text-slate-900 mb-1">Free</h3>
-            <p className="text-3xl font-bold mb-1 text-slate-900">$0 <span className="text-sm font-normal text-slate-400">/ month</span></p>
-            <p className="text-xs text-slate-500 mb-5">Basic access, no card required</p>
-            <ul className="space-y-2 flex-1 mb-6">
-              {["View your disputes", "Upload credit report (1/day)", "Basic education content"].map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
-                  <svg className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <Link href="/register" className="block text-center px-4 py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-xl font-medium transition text-sm">
-              Get Started Free
-            </Link>
-          </div>
-
-          {/* Pro */}
+          {/* Self Service */}
           <div className="bg-white border-2 border-teal-500 rounded-2xl p-6 flex flex-col">
             <h3 className="font-semibold text-slate-900 mb-1">Self Service</h3>
             <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">$5 <span className="text-sm font-normal text-slate-400">/ month</span></p>

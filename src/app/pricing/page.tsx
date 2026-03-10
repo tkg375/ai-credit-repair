@@ -200,25 +200,9 @@ export default function SubscriptionPage() {
         )}
 
         {/* Pricing tiers */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2">
 
-          {/* Free */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col">
-            <h3 className="font-semibold text-slate-900 mb-1">Free</h3>
-            <p className="text-3xl font-bold mb-1 text-slate-900">$0 <span className="text-sm font-normal text-slate-400">/ month</span></p>
-            <p className="text-xs text-slate-500 mb-5">Basic access</p>
-            <ul className="space-y-2 flex-1 mb-6">
-              {["View your disputes", "Upload credit report (1/day)", "Basic education content"].map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
-                  <svg className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <div className="text-center text-sm text-slate-400 py-2">Current plan</div>
-          </div>
-
-          {/* Pro */}
+          {/* Self Service */}
           <div className={`bg-white rounded-2xl border-2 p-6 flex flex-col ${isPro ? "border-teal-400 ring-1 ring-teal-400" : "border-slate-200"}`}>
             <div className="flex items-center justify-between mb-1">
               <h3 className="font-semibold text-slate-900">Self Service</h3>
