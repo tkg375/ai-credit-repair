@@ -65,15 +65,15 @@ const faqs = [
 export default function FAQPage() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
         <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
           <Link href="/">
             <Logo className="h-10 sm:h-14 w-auto" />
           </Link>
           <div className="hidden md:flex items-center gap-6 text-sm text-white/90">
-            <Link href="/faq" className="text-white font-medium">FAQ</Link>
             <Link href="/plans" className="hover:text-white transition">Pricing</Link>
             <Link href="/sample-letters" className="hover:text-white transition">Sample Letters</Link>
+            <Link href="/faq" className="text-white font-medium">FAQ</Link>
             <Link href="/support" className="hover:text-white transition">Support</Link>
           </div>
           <div className="flex gap-2 sm:gap-4">
@@ -85,6 +85,8 @@ export default function FAQPage() {
             </Link>
           </div>
         </nav>
+      </header>
+      <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-14 text-center">
           <h1 className="text-3xl sm:text-5xl font-bold text-white mb-3">Frequently Asked Questions</h1>
           <p className="text-lime-100 max-w-2xl mx-auto text-sm sm:text-base">

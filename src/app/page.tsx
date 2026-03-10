@@ -51,13 +51,13 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {/* Nav + Hero with gradient background */}
-      <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
         <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
           <Logo className="h-10 sm:h-14 w-auto" />
           <div className="hidden md:flex items-center gap-6 text-sm text-white/90">
-            <Link href="/faq" className="hover:text-white transition">FAQ</Link>
             <Link href="/plans" className="hover:text-white transition">Pricing</Link>
             <Link href="/sample-letters" className="hover:text-white transition">Sample Letters</Link>
+            <Link href="/faq" className="hover:text-white transition">FAQ</Link>
             <Link href="/support" className="hover:text-white transition">Support</Link>
           </div>
           <div className="flex gap-2 sm:gap-4">
@@ -75,7 +75,9 @@ export default function Home() {
             </Link>
           </div>
         </nav>
+      </header>
 
+      <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
         {/* Hero */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-16 pb-12 sm:pb-16">
           <div className="grid lg:grid-cols-2 gap-12 items-center">

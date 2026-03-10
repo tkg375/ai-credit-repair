@@ -4,11 +4,17 @@ import { Logo } from "@/components/Logo";
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
         <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
           <Link href="/">
             <Logo className="h-10 sm:h-14 w-auto" />
           </Link>
+          <div className="hidden md:flex items-center gap-6 text-sm text-white/90">
+            <Link href="/plans" className="hover:text-white transition">Pricing</Link>
+            <Link href="/sample-letters" className="hover:text-white transition">Sample Letters</Link>
+            <Link href="/faq" className="hover:text-white transition">FAQ</Link>
+            <Link href="/support" className="hover:text-white transition">Support</Link>
+          </div>
           <div className="flex gap-2 sm:gap-4">
             <Link href="/login" className="px-3 sm:px-4 py-2 text-sm text-white/90 hover:text-white transition whitespace-nowrap">
               Log In
@@ -18,7 +24,7 @@ export default function TermsOfService() {
             </Link>
           </div>
         </nav>
-      </div>
+      </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <h1 className="text-3xl sm:text-4xl font-bold mb-6">Terms of Service</h1>
