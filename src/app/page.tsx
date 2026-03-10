@@ -84,7 +84,7 @@ export default function Home() {
                 <br />
                 <span className="text-white/90">One Platform.</span>
                 <br />
-                <span className="text-white/90">$5/month.</span>
+                <span className="text-white/90">From $5/month.</span>
               </h1>
               <p className="mt-4 sm:mt-6 text-base sm:text-lg text-lime-100 max-w-xl leading-relaxed">
                 Credit repair, budget tracking, debt payoff, loan readiness, goals, and more — all powered by AI. Fix your credit and build real financial health from one dashboard.
@@ -286,21 +286,34 @@ export default function Home() {
       <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4">Simple, Transparent Pricing</h2>
         <p className="text-slate-600 text-center mb-8 sm:mb-12 max-w-2xl mx-auto text-sm sm:text-base">
-          Everything included for one low price. Cancel anytime.
+          Start free, go Pro for the full toolkit, or let Autopilot handle everything for you.
         </p>
-        <div className="max-w-2xl mx-auto">
-          <div className="border-2 border-teal-500 rounded-2xl p-8">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-1">Everything Included</h3>
-                <p className="text-slate-500 text-sm">One subscription. Every feature. No limits.</p>
-              </div>
-              <div className="text-left sm:text-right">
-                <span className="text-4xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">$5</span>
-                <span className="text-slate-400 text-sm ml-1">/ month</span>
-              </div>
-            </div>
-            <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-3 mb-8">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+
+          {/* Free */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col">
+            <h3 className="font-semibold text-slate-900 mb-1">Free</h3>
+            <p className="text-3xl font-bold mb-1 text-slate-900">$0 <span className="text-sm font-normal text-slate-400">/ month</span></p>
+            <p className="text-xs text-slate-500 mb-5">Basic access, no card required</p>
+            <ul className="space-y-2 flex-1 mb-6">
+              {["View your disputes", "Upload credit report (1/day)", "Basic education content"].map((f) => (
+                <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
+                  <svg className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Link href="/register" className="block text-center px-4 py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-xl font-medium transition text-sm">
+              Get Started Free
+            </Link>
+          </div>
+
+          {/* Pro */}
+          <div className="bg-white border-2 border-teal-500 rounded-2xl p-6 flex flex-col">
+            <h3 className="font-semibold text-slate-900 mb-1">Pro</h3>
+            <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">$5 <span className="text-sm font-normal text-slate-400">/ month</span></p>
+            <p className="text-xs text-slate-500 mb-5">Full DIY credit repair toolkit</p>
+            <ul className="space-y-2 flex-1 mb-6">
               {[
                 "Unlimited dispute letters",
                 "Budget tracker & spending charts",
@@ -312,38 +325,73 @@ export default function Home() {
                 "Credit score simulator",
                 "Document vault (unlimited)",
                 "CFPB complaint generator",
-                "Analyze letters from debt collectors",
+                "Analyze letters from collectors",
                 "Mail disputes via USPS ($2/letter)",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
-                  <svg className="w-4 h-4 text-teal-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
+                  <svg className="w-3.5 h-3.5 text-teal-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
                   {f}
                 </li>
               ))}
             </ul>
-            <Link
-              href="/register"
-              className="block text-center px-6 py-3 bg-gradient-to-r from-lime-500 to-teal-600 hover:from-lime-400 hover:to-teal-500 text-white rounded-lg font-medium transition text-sm"
-            >
-              Get Started — $5/month
+            <Link href="/register" className="block text-center px-4 py-2.5 bg-gradient-to-r from-lime-500 to-teal-600 hover:from-lime-400 hover:to-teal-500 text-white rounded-xl font-medium transition text-sm">
+              Get Started — $5/mo
             </Link>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
-              <span className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                Cancel anytime
-              </span>
-              <span className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                No contracts
-              </span>
-              <span className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                Keep access until end of billing period
-              </span>
-            </div>
           </div>
+
+          {/* Autopilot — Coming Soon */}
+          <div className="bg-white border-2 border-slate-200 rounded-2xl p-6 flex flex-col relative overflow-hidden">
+            {/* Coming Soon overlay */}
+            <div className="absolute inset-0 z-10 backdrop-blur-sm bg-white/60 flex flex-col items-center justify-center rounded-2xl">
+              <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center mb-3">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <p className="text-lg font-bold text-slate-900">Coming Soon</p>
+              <p className="text-xs text-slate-500 mt-1 text-center px-4">Fully automated credit repair is on its way.</p>
+            </div>
+            <div className="absolute top-0 right-0 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">NEW</div>
+            <h3 className="font-semibold text-slate-900 mb-1">Autopilot</h3>
+            <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-teal-500 to-cyan-600 bg-clip-text text-transparent">$49 <span className="text-sm font-normal text-slate-400">/ month</span></p>
+            <p className="text-xs text-slate-500 mb-5">We do everything for you</p>
+            <ul className="space-y-2 flex-1 mb-6">
+              {[
+                "Everything in Pro",
+                "Monthly soft-pull credit report",
+                "Auto-generated dispute letters",
+                "Automatic USPS mailing (up to 10/mo)",
+                "VantageScore tracking — hands-free",
+                "FCRA-compliant full automation",
+                "Priority support",
+                "Compliance audit trail",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
+                  <svg className="w-3.5 h-3.5 text-cyan-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <button disabled className="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-xl font-medium text-sm opacity-40 cursor-not-allowed">
+              Coming Soon
+            </button>
+          </div>
+
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
+          <span className="flex items-center gap-1">
+            <svg className="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            Cancel anytime
+          </span>
+          <span className="flex items-center gap-1">
+            <svg className="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            No contracts
+          </span>
+          <span className="flex items-center gap-1">
+            <svg className="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            Keep access until end of billing period
+          </span>
         </div>
 
         {/* FCRA / FDCPA trust strip */}
