@@ -84,7 +84,7 @@ export default function Home() {
                 <br />
                 <span className="text-white/90">One Platform.</span>
                 <br />
-                <span className="text-white/90">$5/month.</span>
+                <span className="text-white/90">Start from $5/month.</span>
               </h1>
               <p className="mt-4 sm:mt-6 text-base sm:text-lg text-lime-100 max-w-xl leading-relaxed">
                 Credit repair, budget tracking, debt payoff, loan readiness, goals, and more — all powered by AI. Fix your credit and build real financial health from one dashboard.
