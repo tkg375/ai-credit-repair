@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "./auth-context";
+import type { PlanTier } from "./subscription";
 
 interface SubscriptionState {
+  plan: PlanTier;
   isPro: boolean;
+  isAutopilot: boolean;
   loading: boolean;
   status: string;
 }
@@ -16,7 +19,7 @@ let fetchPromise: Promise<void> | null = null;
 export function useSubscription(): SubscriptionState {
   const { user, loading: authLoading } = useAuth();
   const [state, setState] = useState<SubscriptionState>(
-    cachedState ?? { isPro: false, loading: true, status: "none" }
+    cachedState ?? { plan: "none", isPro: false, isAutopilot: false, loading: true, status: "none" }
   );
 
   useEffect(() => {
@@ -24,7 +27,7 @@ export function useSubscription(): SubscriptionState {
     if (!user) {
       cachedState = null;
       fetchPromise = null;
-      setState({ isPro: false, loading: false, status: "none" });
+      setState({ plan: "none", isPro: false, isAutopilot: false, loading: false, status: "none" });
       return;
     }
 
@@ -39,15 +42,18 @@ export function useSubscription(): SubscriptionState {
       })
         .then((r) => r.json())
         .then((d) => {
+          const plan = (d.plan as PlanTier) || "none";
           cachedState = {
-            isPro: d.plan === "pro",
+            plan,
+            isPro: plan === "pro" || plan === "autopilot",
+            isAutopilot: plan === "autopilot",
             loading: false,
             status: d.status ?? "none",
           };
           setState(cachedState);
         })
         .catch(() => {
-          cachedState = { isPro: false, loading: false, status: "error" };
+          cachedState = { plan: "none", isPro: false, isAutopilot: false, loading: false, status: "error" };
           setState(cachedState);
         })
         .finally(() => {

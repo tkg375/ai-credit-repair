@@ -44,8 +44,15 @@ export async function GET() {
     const card = paymentMethod?.card;
     const latestInvoice = subscription.latest_invoice as Stripe.Invoice | null;
 
+    // Detect autopilot vs pro from the price ID
+    const activePriceId = subscription.items.data[0]?.price?.id;
+    const autopilotPriceId = process.env.STRIPE_AUTOPILOT_PRICE_ID;
+    const planTier = stripeIsPro && activePriceId && autopilotPriceId && activePriceId === autopilotPriceId
+      ? "autopilot"
+      : stripeIsPro ? "pro" : "none";
+
     return NextResponse.json({
-      plan: stripeIsPro ? "pro" : "none",
+      plan: planTier,
       status: subscription.status,
       currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,

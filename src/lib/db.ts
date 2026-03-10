@@ -16,4 +16,8 @@ export const COLLECTIONS = {
   goals: "goals",
   creditFreezes: "creditFreezes",
   creditorLetters: "creditorLetters",
+  // Autopilot
+  autopilotRuns: "autopilotRuns",
+  fcraConsents: "fcraConsents",
+  auditLogs: "auditLogs",
 } as const;

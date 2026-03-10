@@ -28,9 +28,14 @@ export async function POST(req: NextRequest) {
         if (uid && session.subscription) {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
           const periodEnd = subscription.items.data[0]?.current_period_end;
+          // Determine plan tier from the price ID on the subscription
+          const priceId = subscription.items.data[0]?.price?.id;
+          const autopilotPriceId = process.env.STRIPE_AUTOPILOT_PRICE_ID;
+          const planTier = priceId && autopilotPriceId && priceId === autopilotPriceId ? "autopilot" : "pro";
           await firestore.updateDoc("users", uid, {
             stripeSubscriptionId: subscription.id,
             subscriptionStatus: subscription.status,
+            planTier,
             ...(periodEnd && { currentPeriodEnd: new Date(periodEnd * 1000).toISOString() }),
           });
 

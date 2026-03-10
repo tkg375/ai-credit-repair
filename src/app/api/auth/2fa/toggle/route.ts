@@ -1,23 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getAuthUser } from "@/lib/auth";
-import { firestore, COLLECTIONS } from "@/lib/db";
+import { NextResponse } from "next/server";
 
-export async function PATCH(request: NextRequest) {
-  const user = await getAuthUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  let enabled: boolean;
-  try {
-    const body = await request.json();
-    enabled = Boolean(body.enabled);
-  } catch {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
-  }
-
-  await firestore.updateDoc(COLLECTIONS.users, user.uid, {
-    twoFactorEnabled: enabled,
-    updatedAt: new Date().toISOString(),
-  });
-
-  return NextResponse.json({ twoFactorEnabled: enabled });
+/**
+ * Two-factor authentication is mandatory for all users and cannot be disabled.
+ * This endpoint is intentionally locked down to prevent any bypass.
+ */
+export async function PATCH() {
+  return NextResponse.json(
+    {
+      error: "Two-factor authentication is required for all accounts and cannot be disabled.",
+      twoFactorEnabled: true,
+    },
+    { status: 403 }
+  );
 }

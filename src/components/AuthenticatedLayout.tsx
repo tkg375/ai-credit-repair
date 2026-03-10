@@ -94,7 +94,7 @@ function ReportIssueModal({ onClose }: { onClose: () => void }) {
 }
 
 
-type NavItem = "dashboard" | "upload" | "tools" | "disputes" | "plan" | "scores" | "simulator" | "education" | "vault" | "payoff" | "recommendations" | "cfpb" | "pricing" | "bureaus" | "profile" | "calendar" | "investing" | "portfolio" | "budget" | "goals" | "readiness" | "templates" | "freeze" | "credit-builder" | "monitoring" | "analyze-letter";
+type NavItem = "dashboard" | "upload" | "tools" | "disputes" | "plan" | "scores" | "simulator" | "education" | "vault" | "payoff" | "recommendations" | "cfpb" | "pricing" | "bureaus" | "profile" | "calendar" | "investing" | "portfolio" | "budget" | "goals" | "readiness" | "templates" | "freeze" | "credit-builder" | "monitoring" | "analyze-letter" | "autopilot";
 
 interface NavEntry {
   href: string;
@@ -169,8 +169,24 @@ export function AuthenticatedLayout({
   const { user, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const { isPro, loading: subLoading } = useSubscription();
+  const { isPro, isAutopilot, loading: subLoading } = useSubscription();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Inject Autopilot nav item for autopilot subscribers
+  const effectiveSections = isAutopilot
+    ? sections.map((s) =>
+        s.label === "Main"
+          ? {
+              ...s,
+              items: [
+                s.items[0],
+                { href: "/autopilot", label: "Autopilot", key: "autopilot" as NavItem, icon: <Icon d="M13 10V3L4 14h7v7l9-11h-7z" /> },
+                ...s.items.slice(1),
+              ],
+            }
+          : s
+      )
+    : sections;
   const [profileName, setProfileName] = useState<string | null>(null);
   const [profilePhone, setProfilePhone] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -178,10 +194,12 @@ export function AuthenticatedLayout({
   // Redirect unsubscribed users to the subscription page
   useEffect(() => {
     if (subLoading) return;
-    if (!isPro && pathname !== "/pricing") {
+    const hasAccess = isPro || isAutopilot;
+    const allowedPaths = ["/pricing", "/autopilot"];
+    if (!hasAccess && !allowedPaths.includes(pathname)) {
       router.replace("/pricing");
     }
-  }, [isPro, subLoading, pathname, router]);
+  }, [isPro, isAutopilot, subLoading, pathname, router]);
 
   useEffect(() => {
     if (!user) return;
@@ -200,7 +218,7 @@ export function AuthenticatedLayout({
 
   const navLinks = (onClick?: () => void) => (
     <nav className="flex-1 overflow-y-auto py-4">
-      {sections.map((section) => (
+      {effectiveSections.map((section) => (
         <div key={section.label} className="mb-4">
           <p className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
             {section.label}
@@ -229,7 +247,9 @@ export function AuthenticatedLayout({
   );
 
   // Show spinner while checking subscription or while redirect is in progress
-  if (subLoading || (!isPro && pathname !== "/pricing")) {
+  const hasAccess = isPro || isAutopilot;
+  const allowedPaths = ["/pricing", "/autopilot"];
+  if (subLoading || (!hasAccess && !allowedPaths.includes(pathname))) {
     return (
       <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-white items-center justify-center">
         <div className="w-10 h-10 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />

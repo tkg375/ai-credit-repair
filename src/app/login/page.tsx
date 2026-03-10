@@ -22,7 +22,7 @@ export default function LoginPage() {
     try {
       await signIn(email, password);
 
-      // signIn saves to localStorage synchronously before returning
+      // 2FA is mandatory — always send a code and redirect to verify
       let idToken: string | null = null;
       try {
         const stored = localStorage.getItem("creditai_auth");
@@ -30,25 +30,23 @@ export default function LoginPage() {
       } catch { /* ignore */ }
 
       if (idToken) {
-        try {
-          const profileRes = await fetch("/api/users/profile", {
-            headers: { Authorization: `Bearer ${idToken}` },
-          });
-          if (profileRes.ok) {
-            const profileData = await profileRes.json();
-            if (profileData.profile?.twoFactorEnabled) {
-              await fetch("/api/auth/2fa/send", {
-                method: "POST",
-                headers: { Authorization: `Bearer ${idToken}` },
-              });
-              router.push("/verify-2fa");
-              return;
-            }
+        const sendRes = await fetch("/api/auth/2fa/send", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
+        if (!sendRes.ok) {
+          const data = await sendRes.json();
+          // Throttled — a code was already sent recently, still redirect to verify
+          if (!data.throttled) {
+            setError(data.error || "Failed to send verification code. Please try again.");
+            return;
           }
-        } catch { /* proceed to dashboard if check fails */ }
+        }
+        router.push("/verify-2fa");
+      } else {
+        // Fallback — should not happen, but don't leave user stuck
+        router.push("/dashboard");
       }
-
-      router.push("/dashboard");
     } catch {
       setError("Invalid email or password.");
     } finally {
@@ -64,7 +62,10 @@ export default function LoginPage() {
         </Link>
 
         <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-xl">
-          <h1 className="text-2xl font-bold mb-6 text-center">Welcome Back</h1>
+          <h1 className="text-2xl font-bold mb-2 text-center">Welcome Back</h1>
+          <p className="text-xs text-slate-500 text-center mb-6">
+            A verification code will be sent to your email each time you log in.
+          </p>
 
           {error && (
             <p className="text-red-500 text-sm text-center mb-4 bg-red-50 py-2 px-4 rounded-lg">{error}</p>
