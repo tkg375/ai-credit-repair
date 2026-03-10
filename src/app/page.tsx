@@ -310,7 +310,7 @@ export default function Home() {
 
           {/* Pro */}
           <div className="bg-white border-2 border-teal-500 rounded-2xl p-6 flex flex-col">
-            <h3 className="font-semibold text-slate-900 mb-1">Pro</h3>
+            <h3 className="font-semibold text-slate-900 mb-1">Self Service</h3>
             <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">$5 <span className="text-sm font-normal text-slate-400">/ month</span></p>
             <p className="text-xs text-slate-500 mb-5">Full DIY credit repair toolkit</p>
             <ul className="space-y-2 flex-1 mb-6">

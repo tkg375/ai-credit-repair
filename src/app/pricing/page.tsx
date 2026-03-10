@@ -143,7 +143,7 @@ export default function SubscriptionPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h2 className="text-xl font-bold">
-                    {isAutopilot ? "Credit 800 Autopilot" : "Credit 800 Pro"}
+                    {isAutopilot ? "Credit 800 Autopilot" : "Credit 800 Self Service"}
                   </h2>
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                 </div>
@@ -221,7 +221,7 @@ export default function SubscriptionPage() {
           {/* Pro */}
           <div className={`bg-white rounded-2xl border-2 p-6 flex flex-col ${isPro ? "border-teal-400 ring-1 ring-teal-400" : "border-slate-200"}`}>
             <div className="flex items-center justify-between mb-1">
-              <h3 className="font-semibold text-slate-900">Pro</h3>
+              <h3 className="font-semibold text-slate-900">Self Service</h3>
               {isPro && <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">Your Plan</span>}
             </div>
             <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">$5 <span className="text-sm font-normal text-slate-400">/ month</span></p>
@@ -236,7 +236,7 @@ export default function SubscriptionPage() {
             </ul>
             {!isSubscribed ? (
               <button onClick={() => handleUpgrade("pro")} disabled={upgradingPro} className="w-full py-2.5 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl font-medium hover:opacity-90 transition disabled:opacity-50 text-sm">
-                {upgradingPro ? "Loading..." : "Subscribe — $5/mo"}
+                {upgradingPro ? "Loading..." : "Subscribe — Self Service $5/mo"}
               </button>
             ) : isPro ? (
               <div className="text-center text-sm text-teal-600 font-medium py-2">Active</div>

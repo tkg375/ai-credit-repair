@@ -95,13 +95,13 @@ export async function sendProUpgradeEmail(to: string, amount: number) {
   const amountStr = `$${(amount / 100).toFixed(2)}`;
   await sendEmail(
     to,
-    "You're now a Credit 800 Pro member 🎉",
+    "You're now a Credit 800 Self Service member 🎉",
     `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
       <div style="background:linear-gradient(135deg,#84cc16,#14b8a6);padding:24px;border-radius:12px;margin-bottom:24px">
-        <h1 style="color:white;margin:0;font-size:24px">Welcome to Pro! 🎉</h1>
-        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Your Credit 800 Pro membership is now active</p>
+        <h1 style="color:white;margin:0;font-size:24px">Welcome to Self Service! 🎉</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Your Credit 800 Self Service plan is now active</p>
       </div>
-      <p>You're all set! Your Pro plan (${amountStr}/month) is active and all features are unlocked.</p>
+      <p>You're all set! Your Self Service plan (${amountStr}/month) is active and all features are unlocked.</p>
       <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:16px 0">
         <p style="margin:0 0 8px;font-weight:bold;color:#15803d">What you now have access to:</p>
         <ul style="margin:0;color:#166534;font-size:14px;padding-left:20px;line-height:1.8">
@@ -135,7 +135,7 @@ export async function sendNewSubscriberNotification(subscriberEmail: string, amo
     `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
       <div style="background:linear-gradient(135deg,#84cc16,#14b8a6);padding:24px;border-radius:12px;margin-bottom:24px">
         <h1 style="color:white;margin:0;font-size:24px">New Subscriber 🎉</h1>
-        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Someone just upgraded to Credit 800 Pro</p>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Someone just subscribed to Credit 800 Self Service</p>
       </div>
       <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
         <tr><td style="padding:10px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Email</td><td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:bold">${subscriberEmail}</td></tr>
