@@ -100,7 +100,7 @@ export default function Home() {
                   href="#pricing"
                   className="px-6 py-3 border border-white/50 hover:border-white text-white rounded-lg font-medium transition text-center"
                 >
-                  What's Included
+                  Our Plans
                 </a>
                 <a
                   href="#faq"
