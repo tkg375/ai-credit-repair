@@ -248,7 +248,7 @@ export function AuthenticatedLayout({
 
   // Show spinner while checking subscription or while redirect is in progress
   const hasAccess = isPro || isAutopilot;
-  const allowedPaths = ["/pricing", "/autopilot"];
+  const allowedPaths = ["/pricing", "/autopilot", "/profile"];
   if (subLoading || (!hasAccess && !allowedPaths.includes(pathname))) {
     return (
       <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-white items-center justify-center">
