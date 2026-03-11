@@ -92,7 +92,7 @@ const sections = [
       },
       {
         q: "Do I need my SSN to use Credit 800?",
-        a: "No. You do not need to provide your Social Security Number. You upload your credit report (available free at AnnualCreditReport.com) and our AI analyzes it. Your SSN is never required or stored.",
+        a: "It depends on your plan. Self Service: no SSN required. You upload your own credit report (available free at AnnualCreditReport.com) and our AI analyzes it — your SSN is never requested or stored. Autopilot: your SSN is required so we can pull your credit report automatically each month on your behalf. It is stored encrypted using 256-bit encryption, never shared with third parties, and used solely to retrieve your credit report.",
       },
       {
         q: "Does Autopilot store my credit report data?",
