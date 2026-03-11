@@ -87,17 +87,23 @@ export async function recordConsent(params: {
  * Returns the user's active, non-revoked consent if it exists and matches
  * the current consent version. Returns null if consent is missing, revoked,
  * or stale (version mismatch requires re-consent).
+ *
+ * Uses the consentId stored on the user doc to avoid needing a composite index.
  */
 export async function getValidConsent(userId: string): Promise<ConsentRecord | null> {
-  const results = await firestore.query("fcraConsents", [
-    { field: "userId", op: "EQUAL", value: userId },
-    { field: "isActive", op: "EQUAL", value: true },
-    { field: "version", op: "EQUAL", value: CONSENT_VERSION },
-  ], "consentedAt", "DESCENDING", 1);
+  const userDoc = await firestore.getDoc("users", userId);
+  if (!userDoc.exists) return null;
 
-  if (results.length === 0) return null;
+  const consentId = userDoc.data.autopilotConsentId as string | null;
+  const consentVersion = userDoc.data.autopilotConsentVersion as string | null;
 
-  const doc = results[0];
+  // No consent on file, or it was for an older version
+  if (!consentId || consentVersion !== CONSENT_VERSION) return null;
+
+  // Look up the consent record directly by ID
+  const doc = await firestore.getDoc("fcraConsents", consentId);
+  if (!doc.exists || !doc.data.isActive) return null;
+
   return {
     id: doc.id,
     userId: doc.data.userId as string,
