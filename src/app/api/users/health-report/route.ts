@@ -8,8 +8,18 @@ export async function POST() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    // Check if health email was recently sent (within 30 days)
     const userDoc = await firestore.getDoc(COLLECTIONS.users, user.uid);
+
+    // Don't email new users until they've had the app for at least 7 days
+    const accountCreatedAt = userDoc.data.createdAt as string | null;
+    if (accountCreatedAt) {
+      const accountAgeDays = (Date.now() - new Date(accountCreatedAt).getTime()) / (1000 * 60 * 60 * 24);
+      if (accountAgeDays < 7) {
+        return NextResponse.json({ skipped: true });
+      }
+    }
+
+    // Check if health email was recently sent (within 30 days)
     const lastSent = userDoc.data.lastHealthEmailSentAt as string | null;
     if (lastSent) {
       const daysSince = (Date.now() - new Date(lastSent).getTime()) / (1000 * 60 * 60 * 24);
