@@ -9,6 +9,8 @@ const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 interface AdminStats {
   totalUsers: number;
   proSubscribers: number;
+  autopilotSubscribers: number;
+  totalActiveSubscribers: number;
   mrrCents: number;
   disputesLast7: number;
   disputesLast30: number;
@@ -101,12 +103,13 @@ export default function AdminPage() {
         </div>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           <StatCard label="Total Users" value={stats.totalUsers} />
-          <StatCard label="Pro Subscribers" value={stats.proSubscribers} />
+          <StatCard label="Active Subscribers" value={stats.totalActiveSubscribers} />
+          <StatCard label="Self Service" value={stats.proSubscribers} sub="$5/mo" />
+          <StatCard label="Autopilot" value={stats.autopilotSubscribers} sub="$49/mo" />
           <StatCard label="MRR (est.)" value={mrrDisplay} sub="Based on active subs" />
           <StatCard label="Disputes This Week" value={stats.disputesLast7} sub={`${stats.disputesLast30} last 30 days`} />
-          <StatCard label="Reports This Week" value={stats.reportsLast7} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">

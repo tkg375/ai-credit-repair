@@ -19,9 +19,9 @@ export async function GET() {
     ]);
 
     const totalUsers = users.length;
-    const proSubscribers = users.filter(
-      (u) => u.data.subscriptionStatus === "active"
-    ).length;
+    const activeSubscribers = users.filter((u) => u.data.subscriptionStatus === "active");
+    const proSubscribers = activeSubscribers.filter((u) => u.data.planTier === "pro").length;
+    const autopilotSubscribers = activeSubscribers.filter((u) => u.data.planTier === "autopilot").length;
 
     const disputesLast7 = disputes.filter((d) => {
       const at = d.data.createdAt as string;
@@ -61,13 +61,13 @@ export async function GET() {
       userId: d.data.userId,
     }));
 
-    // Estimated MRR (pro subscribers × $29.99 — adjust if needed)
-    const PRICE_PER_MONTH = 2999; // cents
-    const mrrCents = proSubscribers * PRICE_PER_MONTH;
+    const mrrCents = (proSubscribers * 500) + (autopilotSubscribers * 4900);
 
     return NextResponse.json({
       totalUsers,
       proSubscribers,
+      autopilotSubscribers,
+      totalActiveSubscribers: proSubscribers + autopilotSubscribers,
       mrrCents,
       disputesLast7,
       disputesLast30,

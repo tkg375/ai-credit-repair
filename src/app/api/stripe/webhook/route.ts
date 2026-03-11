@@ -76,8 +76,12 @@ export async function POST(req: NextRequest) {
         const uid = customer.metadata?.firebaseUid;
         if (uid) {
           const periodEnd = subscription.items.data[0]?.current_period_end;
+          const priceId = subscription.items.data[0]?.price?.id;
+          const autopilotPriceId = process.env.STRIPE_AUTOPILOT_PRICE_ID;
+          const planTier = priceId && autopilotPriceId && priceId === autopilotPriceId ? "autopilot" : "pro";
           await firestore.updateDoc("users", uid, {
             subscriptionStatus: subscription.status,
+            planTier,
             ...(periodEnd && { currentPeriodEnd: new Date(periodEnd * 1000).toISOString() }),
           });
         }
