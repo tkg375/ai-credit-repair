@@ -50,7 +50,7 @@ const sections = [
     faqs: [
       {
         q: "Is this legit? I've been burned by credit repair scams before.",
-        a: "We understand the skepticism — the credit repair industry is full of companies that charge hundreds of dollars and deliver nothing. Credit 800 is different: it's a self-service tool that puts you in control. We don't make promises on your behalf or charge per letter. You generate your own FCRA-compliant dispute letters using AI, send them yourself, and keep 100% of the results. No shady contracts, no recurring upsells.",
+        a: "We understand the skepticism — the credit repair industry is full of companies that charge hundreds of dollars and deliver nothing. Credit 800 is different. On the Self Service plan, you're in full control — you generate your own FCRA-compliant dispute letters using AI, send them yourself, and keep 100% of the results. On the Autopilot plan, we handle everything for you transparently — you can see every letter generated and every action taken. Either way, no shady contracts, no per-letter charges, and no promises we can't keep.",
       },
       {
         q: "How fast will I see results?",
@@ -62,7 +62,7 @@ const sections = [
       },
       {
         q: "What if the bureau doesn't respond or denies my dispute?",
-        a: "If a bureau denies your dispute, you can escalate with a Method of Verification letter demanding they explain exactly how they verified the item — this forces a more thorough reinvestigation. If they still fail to respond within 30 days, the item must be removed by law. Credit 800 includes escalation letter templates for exactly these situations.",
+        a: "If a bureau denies your dispute, the next step is a Method of Verification letter demanding they explain exactly how they verified the item — this forces a more thorough reinvestigation. If they still fail to respond within 30 days, the item must be removed by law. On Self Service, Credit 800 includes escalation letter templates so you can send these yourself. On Autopilot, we detect denials and automatically generate and mail the escalation letter on your behalf.",
       },
       {
         q: "Does disputing items hurt my credit score?",
