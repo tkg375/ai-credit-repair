@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { firestore } from "@/lib/firebase-admin";
-import { sendNewSubscriberNotification, sendProUpgradeEmail } from "@/lib/email";
+import { sendNewSubscriberNotification, sendProUpgradeEmail, sendAutopilotUpgradeEmail } from "@/lib/email";
 import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -25,13 +25,14 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const uid = session.metadata?.firebaseUid;
+        let planTier: "pro" | "autopilot" = "pro";
         if (uid && session.subscription) {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
           const periodEnd = subscription.items.data[0]?.current_period_end;
           // Determine plan tier from the price ID on the subscription
           const priceId = subscription.items.data[0]?.price?.id;
           const autopilotPriceId = process.env.STRIPE_AUTOPILOT_PRICE_ID;
-          const planTier = priceId && autopilotPriceId && priceId === autopilotPriceId ? "autopilot" : "pro";
+          planTier = priceId && autopilotPriceId && priceId === autopilotPriceId ? "autopilot" : "pro";
           await firestore.updateDoc("users", uid, {
             stripeSubscriptionId: subscription.id,
             subscriptionStatus: subscription.status,
@@ -61,12 +62,16 @@ export async function POST(req: NextRequest) {
         }
         const subscriberEmail = session.customer_details?.email || "unknown";
         const amount = session.amount_total ?? 500;
-        // Email the customer a confirmation
+        // Email the customer the correct plan confirmation
         if (session.customer_details?.email) {
-          await sendProUpgradeEmail(session.customer_details.email, amount);
+          if (planTier === "autopilot") {
+            await sendAutopilotUpgradeEmail(session.customer_details.email, amount);
+          } else {
+            await sendProUpgradeEmail(session.customer_details.email, amount);
+          }
         }
-        // Notify owner
-        await sendNewSubscriberNotification(subscriberEmail, amount);
+        // Notify owner with plan info
+        await sendNewSubscriberNotification(subscriberEmail, amount, planTier);
         break;
       }
 

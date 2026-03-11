@@ -122,27 +122,60 @@ export async function sendProUpgradeEmail(to: string, amount: number) {
   );
 }
 
-export async function sendNewSubscriberNotification(subscriberEmail: string, amount: number) {
+export async function sendAutopilotUpgradeEmail(to: string, amount: number) {
+  const amountStr = `$${(amount / 100).toFixed(2)}`;
+  await sendEmail(
+    to,
+    "You're now on Credit 800 Autopilot — we handle everything",
+    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+      <div style="background:linear-gradient(135deg,#14b8a6,#06b6d4);padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:24px">Autopilot is Active 🚀</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Your Credit 800 Autopilot plan (${amountStr}/month) is now live</p>
+      </div>
+      <p>You're all set — you don't need to do a thing. Here's what we handle for you every month:</p>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:16px 0">
+        <p style="margin:0 0 8px;font-weight:bold;color:#15803d">What Autopilot does automatically:</p>
+        <ul style="margin:0;color:#166534;font-size:14px;padding-left:20px;line-height:1.8">
+          <li>Pulls your credit report monthly (soft pull — no score impact)</li>
+          <li>Generates FCRA-compliant dispute letters for every inaccuracy</li>
+          <li>Mails letters directly to the bureaus via USPS (up to 10/mo)</li>
+          <li>Escalates automatically if a bureau denies or ignores a dispute</li>
+          <li>Tracks your VantageScore month over month</li>
+          <li>Maintains a full compliance audit trail</li>
+        </ul>
+      </div>
+      <p style="color:#64748b;font-size:14px">You also retain full access to all Self Service tools — disputes, simulator, budget tracker, vault, and more. You can log in anytime to review what's been sent on your behalf.</p>
+      <p style="color:#64748b;font-size:14px">A payment receipt has been sent to your email from Stripe. You can manage your subscription or cancel anytime from the Subscription page.</p>
+      <a href="https://credit-800.com/autopilot" style="display:inline-block;background:linear-gradient(135deg,#14b8a6,#06b6d4);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:8px 0">View My Autopilot Dashboard →</a>
+      <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 · Questions? Reply to this email.<br>Not a credit repair organization. Educational tool only.</p>
+    </body></html>`
+  );
+}
+
+export async function sendNewSubscriberNotification(subscriberEmail: string, amount: number, planTier?: string) {
   const ownerEmail = process.env.OWNER_NOTIFICATION_EMAIL;
   if (!ownerEmail) return;
 
   const amountStr = `$${(amount / 100).toFixed(2)}`;
   const now = new Date().toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" });
 
+  const planLabel = planTier === "autopilot" ? "Autopilot" : "Self Service";
+  const planColor = planTier === "autopilot" ? "linear-gradient(135deg,#14b8a6,#06b6d4)" : "linear-gradient(135deg,#84cc16,#14b8a6)";
   await sendEmail(
     ownerEmail,
-    `💰 New subscriber — ${subscriberEmail} (${amountStr}/mo)`,
+    `💰 New ${planLabel} subscriber — ${subscriberEmail} (${amountStr}/mo)`,
     `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
-      <div style="background:linear-gradient(135deg,#84cc16,#14b8a6);padding:24px;border-radius:12px;margin-bottom:24px">
-        <h1 style="color:white;margin:0;font-size:24px">New Subscriber 🎉</h1>
-        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Someone just subscribed to Credit 800 Self Service</p>
+      <div style="background:${planColor};padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:24px">New ${planLabel} Subscriber 🎉</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Someone just subscribed to Credit 800 ${planLabel}</p>
       </div>
       <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
         <tr><td style="padding:10px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Email</td><td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:bold">${subscriberEmail}</td></tr>
+        <tr><td style="padding:10px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Plan</td><td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:bold">${planLabel}</td></tr>
         <tr><td style="padding:10px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Amount</td><td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:bold;color:#16a34a">${amountStr}/month</td></tr>
         <tr><td style="padding:10px;color:#64748b;font-size:14px">Time</td><td style="padding:10px">${now} ET</td></tr>
       </table>
-      <a href="https://dashboard.stripe.com/customers" style="display:inline-block;background:linear-gradient(135deg,#84cc16,#14b8a6);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold">View in Stripe →</a>
+      <a href="https://dashboard.stripe.com/customers" style="display:inline-block;background:${planColor};color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold">View in Stripe →</a>
       <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 · Automated notification</p>
     </body></html>`
   );
