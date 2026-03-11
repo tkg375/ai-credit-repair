@@ -446,6 +446,57 @@ export async function sendWeeklyProgressEmail(
   );
 }
 
+export async function sendPaymentFailedEmail(to: string, planLabel: string) {
+  const ownerEmail = process.env.OWNER_NOTIFICATION_EMAIL;
+
+  await sendEmail(
+    to,
+    "Action required: your Credit 800 payment failed",
+    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+      <div style="background:linear-gradient(135deg,#ef4444,#b91c1c);padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:24px">Payment Failed</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Your Credit 800 ${planLabel} subscription could not be billed</p>
+      </div>
+      <p>Hi there,</p>
+      <p>We weren't able to process your monthly payment for Credit 800 ${planLabel}. As a result, <strong>your access to all features has been paused</strong> until your payment is updated.</p>
+      <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:16px;margin:16px 0">
+        <p style="margin:0 0 8px;font-weight:bold;color:#b91c1c">What this means:</p>
+        <ul style="margin:0;color:#7f1d1d;font-size:14px;padding-left:20px;line-height:1.8">
+          <li>All dispute letter generation and mailing is paused</li>
+          <li>AI analysis and report processing is paused</li>
+          <li>Your existing disputes, reports, and data are safe and untouched</li>
+          <li>Everything will resume the moment your payment is updated</li>
+        </ul>
+      </div>
+      <p style="font-weight:bold;">To restore access, update your payment method:</p>
+      <a href="https://credit-800.com/pricing" style="display:inline-block;background:linear-gradient(135deg,#ef4444,#b91c1c);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:8px 0">Update Payment Method →</a>
+      <p style="color:#64748b;font-size:14px;margin-top:16px">Stripe will automatically retry your card over the next few days. If it succeeds, your access will be restored automatically with no action needed on your part.</p>
+      <p style="color:#64748b;font-size:14px">If you have questions or need help, reply to this email and we'll sort it out right away.</p>
+      <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 · Not a credit repair organization. Educational tool only.</p>
+    </body></html>`
+  );
+
+  if (ownerEmail) {
+    await sendEmail(
+      ownerEmail,
+      `⚠️ Payment failed — ${to} (${planLabel})`,
+      `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+        <div style="background:linear-gradient(135deg,#f59e0b,#ef4444);padding:24px;border-radius:12px;margin-bottom:24px">
+          <h1 style="color:white;margin:0;font-size:22px">Payment Failed</h1>
+          <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">A subscriber's payment could not be processed</p>
+        </div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+          <tr><td style="padding:10px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Email</td><td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:bold">${to}</td></tr>
+          <tr><td style="padding:10px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:14px">Plan</td><td style="padding:10px;border-bottom:1px solid #e2e8f0;font-weight:bold">${planLabel}</td></tr>
+          <tr><td style="padding:10px;color:#64748b;font-size:14px">Status</td><td style="padding:10px;font-weight:bold;color:#b91c1c">past_due — access paused</td></tr>
+        </table>
+        <a href="https://dashboard.stripe.com/customers" style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#ef4444);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold">View in Stripe →</a>
+        <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 · Automated notification</p>
+      </body></html>`
+    );
+  }
+}
+
 export async function sendIssueReport(params: {
   userId: string;
   userEmail: string;

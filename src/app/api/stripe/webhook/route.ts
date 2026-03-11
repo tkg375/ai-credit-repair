@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { firestore } from "@/lib/firebase-admin";
-import { sendNewSubscriberNotification, sendProUpgradeEmail, sendAutopilotUpgradeEmail } from "@/lib/email";
+import { sendNewSubscriberNotification, sendProUpgradeEmail, sendAutopilotUpgradeEmail, sendPaymentFailedEmail } from "@/lib/email";
 import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -111,9 +111,20 @@ export async function POST(req: NextRequest) {
         const customer = await stripe.customers.retrieve(invoice.customer as string) as Stripe.Customer;
         const uid = customer.metadata?.firebaseUid;
         if (uid) {
+          // Get current plan tier before marking past_due so we can label the email correctly
+          const userDoc = await firestore.getDoc("users", uid);
+          const planTier = (userDoc?.data?.planTier as string) || "pro";
+          const planLabel = planTier === "autopilot" ? "Autopilot" : "Self Service";
+
           await firestore.updateDoc("users", uid, {
             subscriptionStatus: "past_due",
           });
+
+          // Email the user so they know why access was paused
+          const userEmail = customer.email || (userDoc?.data?.email as string | undefined);
+          if (userEmail) {
+            await sendPaymentFailedEmail(userEmail, planLabel);
+          }
         }
         break;
       }

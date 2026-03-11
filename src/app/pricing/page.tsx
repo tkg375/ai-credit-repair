@@ -136,6 +136,23 @@ export default function SubscriptionPage() {
         </h1>
         <p className="text-slate-500 mb-8 text-sm">Manage your plan, billing, and payment method</p>
 
+        {/* Past-due payment banner */}
+        {sub?.status === "past_due" && (
+          <div className="bg-red-50 border border-red-300 rounded-2xl p-5 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1">
+              <p className="font-semibold text-red-700 mb-1">Your payment failed — access is paused</p>
+              <p className="text-sm text-red-600">Update your payment method to restore full access immediately. Your data and disputes are safe.</p>
+            </div>
+            <button
+              onClick={openPortal}
+              disabled={openingPortal}
+              className="shrink-0 px-5 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition disabled:opacity-50 text-sm"
+            >
+              {openingPortal ? "Loading..." : "Update Payment Method"}
+            </button>
+          </div>
+        )}
+
         {/* Current plan card */}
         {isSubscribed && (
           <div className={`bg-white rounded-2xl border-2 p-6 mb-8 ${isAutopilot ? "border-cyan-400" : "border-teal-400"}`}>
