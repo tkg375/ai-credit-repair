@@ -26,6 +26,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File must be a PDF" }, { status: 400 });
     }
 
+    if (file.size > 50 * 1024 * 1024) {
+      return NextResponse.json({ error: "File too large (max 50MB)" }, { status: 413 });
+    }
+
     // Upload to S3
     const timestamp = Date.now();
     const s3Key = `reports/${user.uid}/${timestamp}-${file.name}`;

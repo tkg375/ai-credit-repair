@@ -61,6 +61,11 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "notificationId required" }, { status: 400 });
     }
 
+    const notif = await firestore.getDoc("notifications", notificationId);
+    if (!notif || notif.data?.userId !== user.uid) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     await firestore.updateDoc("notifications", notificationId, { read: read ?? true });
 
     return NextResponse.json({ success: true });

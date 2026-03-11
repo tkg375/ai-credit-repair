@@ -18,6 +18,18 @@ export async function DELETE() {
       COLLECTIONS.disputes,
       COLLECTIONS.creditScores,
       COLLECTIONS.actionPlans,
+      COLLECTIONS.reportChanges,
+      COLLECTIONS.notifications,
+      COLLECTIONS.portfolioAccounts,
+      COLLECTIONS.portfolioSnapshots,
+      COLLECTIONS.plaidItems,
+      COLLECTIONS.budgetEntries,
+      COLLECTIONS.goals,
+      COLLECTIONS.creditFreezes,
+      COLLECTIONS.creditorLetters,
+      COLLECTIONS.autopilotRuns,
+      COLLECTIONS.fcraConsents,
+      COLLECTIONS.auditLogs,
     ];
 
     for (const col of collections) {

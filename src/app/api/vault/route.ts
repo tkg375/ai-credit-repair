@@ -54,6 +54,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
+    if (file.size > 50 * 1024 * 1024) {
+      return NextResponse.json({ error: "File too large (max 50MB)" }, { status: 413 });
+    }
+
     // Upload to S3
     const s3Key = `vault/${user.uid}/${Date.now()}-${file.name}`;
     const bytes = new Uint8Array(await file.arrayBuffer());

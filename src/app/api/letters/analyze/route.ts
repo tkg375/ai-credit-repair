@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { firestore, COLLECTIONS } from "@/lib/db";
 import { getObject } from "@/lib/s3";
+import { getUserSubscription } from "@/lib/subscription";
 
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
@@ -42,6 +43,11 @@ Return only the raw JSON, no markdown.`;
 export async function POST(request: NextRequest) {
   const user = await getAuthUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const sub = await getUserSubscription(user.uid);
+  if (!sub.isPro) {
+    return NextResponse.json({ error: "Active subscription required" }, { status: 403 });
+  }
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return NextResponse.json({ error: "Gemini not configured" }, { status: 503 });

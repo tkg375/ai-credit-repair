@@ -18,9 +18,6 @@ export default function ProfilePage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState("");
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [togglingTwoFactor, setTogglingTwoFactor] = useState(false);
-
   // Form fields
   const [fullName, setFullName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
@@ -53,7 +50,6 @@ export default function ProfilePage() {
           setCity(p.city || "");
           setState(p.state || "");
           setZip(p.zip || "");
-          setTwoFactorEnabled(Boolean(p.twoFactorEnabled));
         }
       })
       .catch(() => {})
@@ -87,38 +83,12 @@ export default function ProfilePage() {
     }
   };
 
-  const handleToggle2FA = async () => {
-    if (!user) return;
-    setTogglingTwoFactor(true);
-    const newValue = !twoFactorEnabled;
-    try {
-      const res = await fetch("/api/auth/2fa/toggle", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
-        body: JSON.stringify({ enabled: newValue }),
-      });
-      if (!res.ok) throw new Error("Failed to toggle 2FA");
-      setTwoFactorEnabled(newValue);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to toggle 2FA");
-    } finally {
-      setTogglingTwoFactor(false);
-    }
-  };
-
   const handleDeleteAccount = async () => {
     if (!user || deleteConfirmText !== "DELETE") return;
     setDeleting(true);
     setError("");
     try {
-      // 1. Delete all Firestore data server-side
-      const res = await fetch("/api/users/delete", {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${user.idToken}` },
-      });
-      if (!res.ok) throw new Error("Failed to delete account data");
-
-      // 2. Delete Firebase Auth account using the user's ID token
+      // 1. Delete Firebase Auth account first (requires valid idToken)
       const authRes = await fetch(
         `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${API_KEY}`,
         {
@@ -131,6 +101,12 @@ export default function ProfilePage() {
         const d = await authRes.json();
         throw new Error(d.error?.message || "Failed to delete auth account");
       }
+
+      // 2. Delete all Firestore data server-side
+      await fetch("/api/users/delete", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${user.idToken}` },
+      });
 
       // 3. Sign out and redirect
       await signOut();
@@ -268,37 +244,6 @@ export default function ProfilePage() {
         >
           {saving ? "Saving..." : saveSuccess ? "✓ Saved!" : "Save Changes"}
         </button>
-
-        {/* Security Section */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
-          <h2 className="font-semibold text-slate-800 mb-1">Security</h2>
-          <p className="text-sm text-slate-500 mb-4">Protect your account with two-factor authentication.</p>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-700">Two-Factor Authentication</p>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {twoFactorEnabled
-                  ? "Enabled — you will be asked for a code on each sign-in."
-                  : "Disabled — enable to require a code when signing in."}
-              </p>
-            </div>
-            <button
-              onClick={handleToggle2FA}
-              disabled={togglingTwoFactor}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-50 ${
-                twoFactorEnabled ? "bg-teal-600" : "bg-slate-200"
-              }`}
-              role="switch"
-              aria-checked={twoFactorEnabled}
-            >
-              <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ${
-                  twoFactorEnabled ? "translate-x-5" : "translate-x-0"
-                }`}
-              />
-            </button>
-          </div>
-        </div>
 
         {/* Danger Zone */}
         <div className="bg-white rounded-2xl border border-red-200 p-6">

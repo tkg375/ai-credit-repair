@@ -21,7 +21,7 @@ export async function GET() {
     const totalUsers = users.length;
     const proSubscribers = users.filter((u) => u.data.subscriptionStatus === "active" && u.data.planTier === "pro").length;
     const autopilotSubscribers = users.filter((u) => u.data.subscriptionStatus === "active" && u.data.planTier === "autopilot").length;
-    const notSubscribed = users.filter((u) => u.data.subscriptionStatus !== "active").length;
+    const notSubscribed = users.filter((u) => !u.data.subscriptionStatus || u.data.subscriptionStatus === "canceled" || u.data.subscriptionStatus === "never").length;
 
     const disputesLast7 = disputes.filter((d) => {
       const at = d.data.createdAt as string;
