@@ -19,10 +19,9 @@ export async function GET() {
     ]);
 
     const totalUsers = users.length;
-    const activeSubscribers = users.filter((u) => u.data.subscriptionStatus === "active");
-    const autopilotSubscribers = activeSubscribers.filter((u) => u.data.planTier === "autopilot").length;
-    // Treat "pro", undefined, or any unrecognized planTier as Self Service
-    const proSubscribers = activeSubscribers.length - autopilotSubscribers;
+    const proSubscribers = users.filter((u) => u.data.subscriptionStatus === "active" && u.data.planTier === "pro").length;
+    const autopilotSubscribers = users.filter((u) => u.data.subscriptionStatus === "active" && u.data.planTier === "autopilot").length;
+    const notSubscribed = users.filter((u) => u.data.subscriptionStatus !== "active").length;
 
     const disputesLast7 = disputes.filter((d) => {
       const at = d.data.createdAt as string;
@@ -66,9 +65,9 @@ export async function GET() {
 
     return NextResponse.json({
       totalUsers,
+      notSubscribed,
       proSubscribers,
       autopilotSubscribers,
-      totalActiveSubscribers: proSubscribers + autopilotSubscribers,
       mrrCents,
       disputesLast7,
       disputesLast30,
