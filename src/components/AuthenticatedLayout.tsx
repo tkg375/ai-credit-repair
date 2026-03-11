@@ -195,7 +195,7 @@ export function AuthenticatedLayout({
   useEffect(() => {
     if (subLoading) return;
     const hasAccess = isPro || isAutopilot;
-    const allowedPaths = ["/pricing", "/autopilot"];
+    const allowedPaths = ["/pricing", "/autopilot", "/profile"];
     if (!hasAccess && !allowedPaths.includes(pathname)) {
       router.replace("/pricing");
     }
