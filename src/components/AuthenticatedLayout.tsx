@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -93,7 +93,6 @@ function ReportIssueModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-
 type NavItem = "dashboard" | "upload" | "tools" | "disputes" | "plan" | "scores" | "simulator" | "education" | "vault" | "payoff" | "recommendations" | "cfpb" | "pricing" | "bureaus" | "profile" | "calendar" | "investing" | "portfolio" | "budget" | "goals" | "readiness" | "templates" | "freeze" | "credit-builder" | "monitoring" | "analyze-letter" | "autopilot";
 
 interface NavEntry {
@@ -128,7 +127,7 @@ const sections: { label: string; items: NavEntry[] }[] = [
     label: "Analysis",
     items: [
       { href: "/simulator", label: "Score Simulator", key: "simulator", icon: <Icon d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /> },
-{ href: "/bureaus", label: "Bureau Comparison", key: "bureaus", icon: <Icon d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /> },
+      { href: "/bureaus", label: "Bureau Comparison", key: "bureaus", icon: <Icon d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /> },
       { href: "/readiness", label: "Loan Readiness", key: "readiness", icon: <Icon d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /> },
       { href: "/monitoring", label: "Identity Monitor", key: "monitoring", icon: <Icon d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /> },
       { href: "/tools", label: "Tools", key: "tools", icon: <Icon d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" /> },
@@ -149,15 +148,167 @@ const sections: { label: string; items: NavEntry[] }[] = [
       { href: "/freeze", label: "Credit Freeze", key: "freeze", icon: <Icon d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /> },
     ],
   },
-  {
-    label: "Account",
-    items: [
-{ href: "/pricing", label: "Subscription", key: "pricing", icon: <Icon d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /> },
-    ],
-  },
 ];
 
-const allItems = sections.flatMap((s) => s.items);
+function NavDropdown({
+  label,
+  items,
+  activeNav,
+  onNavigate,
+}: {
+  label: string;
+  items: NavEntry[];
+  activeNav: NavItem;
+  onNavigate?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const hasActive = items.some((i) => i.key === activeNav);
+
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+          hasActive
+            ? "text-teal-700 bg-teal-50"
+            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+        }`}
+      >
+        {label}
+        <svg
+          className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 w-52 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50">
+          {items.map((item) => {
+            const active = activeNav === item.key;
+            return (
+              <Link
+                key={item.key}
+                href={item.href}
+                onClick={() => { setOpen(false); onNavigate?.(); }}
+                className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+                  active
+                    ? "text-teal-700 bg-teal-50 font-medium"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                <span className={active ? "text-teal-600" : "text-slate-400"}>{item.icon}</span>
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProfileDropdown({
+  profileName,
+  userEmail,
+  activeNav,
+  onSignOut,
+}: {
+  profileName: string | null;
+  userEmail: string | null | undefined;
+  activeNav: NavItem;
+  onSignOut: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const isActive = activeNav === "profile" || activeNav === "pricing";
+
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+          isActive ? "text-teal-700 bg-teal-50" : "text-slate-600 hover:bg-slate-100"
+        }`}
+      >
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-lime-400 to-teal-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+          {(profileName || userEmail || "?")[0].toUpperCase()}
+        </div>
+        <span>Profile</span>
+        <svg
+          className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute top-full right-0 mt-1 w-52 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50">
+          <Link
+            href="/profile"
+            onClick={() => setOpen(false)}
+            className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+              activeNav === "profile"
+                ? "text-teal-700 bg-teal-50 font-medium"
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            }`}
+          >
+            <svg className="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            Profile Settings
+          </Link>
+          <Link
+            href="/pricing"
+            onClick={() => setOpen(false)}
+            className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+              activeNav === "pricing"
+                ? "text-teal-700 bg-teal-50 font-medium"
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            }`}
+          >
+            <svg className="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            Subscription
+          </Link>
+          <div className="border-t border-slate-100 mt-1 pt-1">
+            <button
+              onClick={() => { onSignOut(); setOpen(false); }}
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Sign Out
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function AuthenticatedLayout({
   activeNav,
@@ -170,7 +321,9 @@ export function AuthenticatedLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { isPro, isAutopilot, loading: subLoading } = useSubscription();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileName, setProfileName] = useState<string | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   // Inject Autopilot nav item for autopilot subscribers
   const effectiveSections = isAutopilot
@@ -187,11 +340,8 @@ export function AuthenticatedLayout({
           : s
       )
     : sections;
-  const [profileName, setProfileName] = useState<string | null>(null);
-  const [profilePhone, setProfilePhone] = useState<string | null>(null);
-  const [showReportModal, setShowReportModal] = useState(false);
 
-  // Redirect unsubscribed users to the subscription page
+  // Redirect unsubscribed users
   useEffect(() => {
     if (subLoading) return;
     const hasAccess = isPro || isAutopilot;
@@ -208,45 +358,11 @@ export function AuthenticatedLayout({
     })
       .then((r) => r.json())
       .then((d) => {
-        if (d.profile) {
-          setProfileName(d.profile.fullName || null);
-          setProfilePhone(d.profile.phone || null);
-        }
+        if (d.profile) setProfileName(d.profile.fullName || null);
       })
       .catch(() => {});
   }, [user]);
 
-  const navLinks = (onClick?: () => void) => (
-    <nav className="flex-1 overflow-y-auto py-4">
-      {effectiveSections.map((section) => (
-        <div key={section.label} className="mb-4">
-          <p className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-            {section.label}
-          </p>
-          {section.items.map((item) => {
-            const active = activeNav === item.key;
-            return (
-              <Link
-                key={item.key}
-                href={item.href}
-                onClick={onClick}
-                className={`flex items-center gap-3 mx-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-gradient-to-r from-lime-500/10 to-teal-500/10 text-teal-700"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                }`}
-              >
-                <span className={active ? "text-teal-600" : "text-slate-400"}>{item.icon}</span>
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
-      ))}
-    </nav>
-  );
-
-  // Show spinner while checking subscription or while redirect is in progress
   const hasAccess = isPro || isAutopilot;
   const allowedPaths = ["/pricing", "/autopilot", "/profile"];
   if (subLoading || (!hasAccess && !allowedPaths.includes(pathname))) {
@@ -258,118 +374,163 @@ export function AuthenticatedLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-white text-slate-900">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-white text-slate-900">
 
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-slate-200 bg-white fixed inset-y-0 left-0 z-30">
-        <div className="flex items-center gap-2 px-4 py-4 border-b border-slate-100">
-          <Link href="/dashboard">
-            <Logo className="h-7 w-auto" />
-          </Link>
+      {/* Top navigation bar */}
+      <header className="fixed top-0 left-0 right-0 z-30 h-14 bg-white border-b border-slate-200 flex items-center px-4 gap-3">
+        {/* Logo */}
+        <Link href="/dashboard" className="shrink-0 mr-2">
+          <Logo className="h-7 w-auto" />
+        </Link>
+
+        {/* Desktop nav dropdowns */}
+        <nav className="hidden md:flex items-center gap-1 flex-1">
+          {effectiveSections.map((section) => (
+            <NavDropdown
+              key={section.label}
+              label={section.label}
+              items={section.items}
+              activeNav={activeNav}
+            />
+          ))}
+        </nav>
+
+        {/* Right side: notifications + profile */}
+        <div className="hidden md:flex items-center gap-2 ml-auto">
+          <NotificationBell align="right" />
+          <ProfileDropdown
+            profileName={profileName}
+            userEmail={user?.email}
+            activeNav={activeNav}
+            onSignOut={signOut}
+          />
         </div>
 
-        {navLinks()}
-
-        <div className="border-t border-slate-100 p-3 space-y-2">
-          <Link
-            href="/profile"
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition ${activeNav === "profile" ? "bg-gradient-to-r from-lime-500/10 to-teal-500/10" : ""}`}
-          >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime-400 to-teal-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
-              {(profileName || user?.email || "?")[0].toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-slate-700 truncate">{profileName || user?.email}</p>
-              <p className="text-xs text-slate-400 truncate">{profilePhone || user?.email}</p>
-            </div>
-          </Link>
-          <div className="flex items-center justify-between px-2">
-            <NotificationBell align="left" />
-            <button onClick={signOut} className="text-xs text-slate-400 hover:text-red-500 transition">
-              Sign Out
-            </button>
-          </div>
+        {/* Mobile: notifications + hamburger */}
+        <div className="flex md:hidden items-center gap-2 ml-auto">
+          <NotificationBell align="right" />
           <button
-            onClick={() => setShowReportModal(true)}
-            className="block w-full text-center text-xs text-slate-400 hover:text-teal-600 transition px-2 pb-1"
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition"
           >
-            Report an Issue
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </button>
         </div>
-      </aside>
+      </header>
 
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
+      {/* Mobile drawer overlay */}
+      {mobileMenuOpen && (
         <>
           <div
             className="fixed inset-0 bg-black/40 z-40 md:hidden"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="fixed inset-y-0 left-0 w-64 bg-white z-50 flex flex-col shadow-xl md:hidden">
+          <aside className="fixed inset-y-0 left-0 w-72 bg-white z-50 flex flex-col shadow-xl md:hidden overflow-y-auto">
             <div className="flex items-center justify-between px-4 py-4 border-b border-slate-100">
-              <Link href="/dashboard" onClick={() => setSidebarOpen(false)}>
+              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                 <Logo className="h-7 w-auto" />
               </Link>
-              <button onClick={() => setSidebarOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            {navLinks(() => setSidebarOpen(false))}
+            <nav className="flex-1 py-4">
+              {effectiveSections.map((section) => (
+                <div key={section.label} className="mb-4">
+                  <p className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                    {section.label}
+                  </p>
+                  {section.items.map((item) => {
+                    const active = activeNav === item.key;
+                    return (
+                      <Link
+                        key={item.key}
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 mx-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          active
+                            ? "bg-gradient-to-r from-lime-500/10 to-teal-500/10 text-teal-700"
+                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        }`}
+                      >
+                        <span className={active ? "text-teal-600" : "text-slate-400"}>{item.icon}</span>
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))}
 
-            <div className="border-t border-slate-100 p-3 space-y-2">
-              <Link
-                href="/profile"
-                onClick={() => setSidebarOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition"
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime-400 to-teal-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
-                  {(user?.email || "?")[0].toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-slate-700 truncate">{user?.email}</p>
-                  <p className="text-xs text-slate-400">View profile</p>
-                </div>
-              </Link>
-              <div className="flex items-center justify-between px-2">
-                <NotificationBell align="left" />
-                <button
-                  onClick={() => { signOut(); setSidebarOpen(false); }}
-                  className="text-xs text-slate-400 hover:text-red-500 transition"
+              {/* Profile section in mobile drawer */}
+              <div className="mb-4">
+                <p className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Account
+                </p>
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 mx-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    activeNav === "profile"
+                      ? "bg-gradient-to-r from-lime-500/10 to-teal-500/10 text-teal-700"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  }`}
                 >
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-lime-400 to-teal-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                    {(profileName || user?.email || "?")[0].toUpperCase()}
+                  </div>
+                  Profile
+                </Link>
+                <Link
+                  href="/pricing"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 mx-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    activeNav === "pricing"
+                      ? "bg-gradient-to-r from-lime-500/10 to-teal-500/10 text-teal-700"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  }`}
+                >
+                  <svg className="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  Subscription
+                </Link>
+                <button
+                  onClick={() => { signOut(); setMobileMenuOpen(false); }}
+                  className="flex items-center gap-3 mx-2 px-3 py-2 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors w-full text-left"
+                >
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
                   Sign Out
                 </button>
               </div>
-            </div>
+            </nav>
           </aside>
         </>
       )}
 
-      {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center px-4 py-3 bg-white border-b border-slate-200">
-        <div className="flex-none">
-          <button onClick={() => setSidebarOpen(true)} className="text-slate-600">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-        <div className="flex-1 flex justify-center">
-          <Link href="/dashboard">
-            <Logo className="h-7 w-auto" />
-          </Link>
-        </div>
-        <div className="flex-none">
-          <NotificationBell />
-        </div>
-      </div>
-
       {/* Main content */}
-      <main className="flex-1 md:ml-56 pt-14 md:pt-0 min-h-screen">
+      <main className="flex-1 pt-14 pb-10 min-h-screen">
         {children}
       </main>
+
+      {/* Report an Issue — fixed bottom bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 flex justify-center py-2 bg-white/80 backdrop-blur-sm border-t border-slate-100">
+        <button
+          onClick={() => setShowReportModal(true)}
+          className="text-xs text-slate-400 hover:text-teal-600 transition-colors"
+        >
+          Report an Issue
+        </button>
+      </div>
 
       {showReportModal && <ReportIssueModal onClose={() => setShowReportModal(false)} />}
     </div>
