@@ -12,13 +12,14 @@ export async function GET() {
   const userDoc = await firestore.getDoc("users", user.uid);
   const manualStatus = userDoc?.data?.subscriptionStatus as string | undefined;
   const manualIsPro = manualStatus === "active" || manualStatus === "trialing";
+  const manualPlanTier = userDoc?.data?.planTier as string | undefined;
   const customerId = userDoc?.data?.stripeCustomerId as string | undefined;
   const subscriptionId = userDoc?.data?.stripeSubscriptionId as string | undefined;
 
   // No Stripe IDs — rely solely on manually-set Firestore status
   if (!subscriptionId || !customerId) {
     return NextResponse.json({
-      plan: manualIsPro ? "pro" : "none",
+      plan: manualIsPro ? (manualPlanTier ?? "pro") : "none",
       status: manualStatus ?? "none",
       subscription: null,
     });
@@ -75,7 +76,7 @@ export async function GET() {
     console.error("Failed to fetch Stripe subscription:", err);
     // Stripe call failed — fall back to Firestore status rather than blocking the user
     return NextResponse.json({
-      plan: manualIsPro ? "pro" : "none",
+      plan: manualIsPro ? (manualPlanTier ?? "pro") : "none",
       status: manualStatus ?? "error",
       subscription: null,
     });
