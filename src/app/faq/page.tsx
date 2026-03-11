@@ -13,7 +13,7 @@ const sections = [
     faqs: [
       {
         q: "Why do we charge?",
-        a: "We wish we could offer Credit 800 completely free — and honestly, we'd love to. But the AI that powers your dispute letter generation, credit analysis, and smart recommendations isn't free for us to run. Every letter generated, every report analyzed, and every recommendation made costs us in AI processing fees. On top of that, there's hosting, infrastructure, security, and ongoing development to keep everything fast, private, and up to date. At $5/month, we're covering those real costs while keeping the price as low as humanly possible. We believe everyone deserves access to these tools — not just people who can afford $100/month credit repair companies.",
+        a: "We wish we could offer Credit 800 completely free — and honestly, we'd love to. But the AI that powers your dispute letter generation, credit analysis, and smart recommendations isn't free for us to run. Every letter generated, every report analyzed, and every recommendation made costs us in AI processing fees. On top of that, there's hosting, infrastructure, security, and ongoing development to keep everything fast, private, and up to date. Our Self Service plan starts at $5/month, covering those real costs while keeping the price as low as humanly possible. For those who want us to handle everything automatically, our Autopilot plan is $49/month — comparable to a traditional credit repair service but with full transparency and no long-term contracts. We believe everyone deserves access to these tools — not just people who can afford $100/month credit repair companies.",
       },
       {
         q: "What's included in the Self Service plan ($5/month)?",
