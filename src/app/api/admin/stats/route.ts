@@ -20,8 +20,9 @@ export async function GET() {
 
     const totalUsers = users.length;
     const activeSubscribers = users.filter((u) => u.data.subscriptionStatus === "active");
-    const proSubscribers = activeSubscribers.filter((u) => u.data.planTier === "pro").length;
     const autopilotSubscribers = activeSubscribers.filter((u) => u.data.planTier === "autopilot").length;
+    // Treat "pro", undefined, or any unrecognized planTier as Self Service
+    const proSubscribers = activeSubscribers.length - autopilotSubscribers;
 
     const disputesLast7 = disputes.filter((d) => {
       const at = d.data.createdAt as string;
