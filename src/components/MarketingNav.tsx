@@ -16,7 +16,7 @@ export function MarketingNav() {
 
   return (
     <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
-      <Logo className="h-10 sm:h-14 w-auto" />
+      <Link href="/"><Logo className="h-10 sm:h-14 w-auto" /></Link>
 
       {/* Desktop links */}
       <div className="hidden md:flex items-center gap-1 bg-white/10 border border-white/20 rounded-full px-2 py-1 backdrop-blur-sm text-sm text-white/90">

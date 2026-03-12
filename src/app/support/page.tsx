@@ -55,25 +55,24 @@ export default function SupportPage() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
 
         {/* Call Us box */}
-        <div className="mb-8 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 flex items-center gap-5">
-          <div className="w-12 h-12 bg-gradient-to-br from-lime-500 to-teal-600 rounded-full flex items-center justify-center shrink-0">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Call Us</p>
-            <a
-              href="tel:+12294578122"
-              className="text-2xl font-bold text-white hover:text-lime-400 transition"
-            >
-              1-229-457-8122
-            </a>
-            <p className="text-xs text-slate-400 mt-0.5">Mon – Fri, 9am – 6pm EST</p>
+        <div className="mb-8 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="w-12 h-12 bg-gradient-to-br from-lime-500 to-teal-600 rounded-full flex items-center justify-center shrink-0">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-0.5">Call Us</p>
+              <a href="tel:+12294578122" className="text-xl sm:text-2xl font-bold text-white hover:text-lime-400 transition whitespace-nowrap">
+                1-229-457-8122
+              </a>
+              <p className="text-xs text-slate-400 mt-0.5">Mon – Fri, 9am – 6pm EST</p>
+            </div>
           </div>
           <a
             href="tel:+12294578122"
-            className="px-4 py-2 bg-gradient-to-r from-lime-500 to-teal-600 hover:opacity-90 text-white rounded-lg text-sm font-medium transition whitespace-nowrap"
+            className="px-4 py-2.5 bg-gradient-to-r from-lime-500 to-teal-600 hover:opacity-90 text-white rounded-lg text-sm font-medium transition text-center whitespace-nowrap"
           >
             Call Now
           </a>
