@@ -18,9 +18,13 @@ export async function GET() {
 
   // No Stripe IDs — rely solely on manually-set Firestore status
   if (!subscriptionId || !customerId) {
+    const plan = manualIsPro ? (manualPlanTier ?? "pro") : "none";
+    const amount = plan === "autopilot" ? 4900 : plan === "pro" ? 500 : 0;
     return NextResponse.json({
-      plan: manualIsPro ? (manualPlanTier ?? "pro") : "none",
+      plan,
       status: manualStatus ?? "none",
+      amount,
+      currentPeriodEnd: userDoc?.data?.currentPeriodEnd ?? null,
       subscription: null,
     });
   }

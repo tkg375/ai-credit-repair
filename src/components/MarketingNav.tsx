@@ -1,0 +1,93 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Logo } from "@/components/Logo";
+
+const navLinks = [
+  { href: "/plans", label: "Pricing" },
+  { href: "/sample-letters", label: "Sample Letters" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/support", label: "Support" },
+];
+
+export function MarketingNav() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
+      <Logo className="h-10 sm:h-14 w-auto" />
+
+      {/* Desktop links */}
+      <div className="hidden md:flex items-center gap-6 text-sm text-white/90">
+        {navLinks.map((l) => (
+          <Link key={l.href} href={l.href} className="hover:text-white transition">{l.label}</Link>
+        ))}
+      </div>
+
+      {/* Desktop right buttons */}
+      <div className="hidden md:flex gap-4">
+        <Link href="/login" className="px-4 py-2 text-sm text-white/90 hover:text-white transition whitespace-nowrap">
+          Log In
+        </Link>
+        <Link href="/register" className="px-4 py-2 text-sm bg-white text-teal-600 hover:bg-lime-50 rounded-lg transition whitespace-nowrap font-medium">
+          Get Started
+        </Link>
+      </div>
+
+      {/* Mobile: Get Started + hamburger */}
+      <div className="flex md:hidden items-center gap-2">
+        <Link href="/register" className="px-3 py-2 text-sm bg-white text-teal-600 hover:bg-lime-50 rounded-lg transition whitespace-nowrap font-medium">
+          Get Started
+        </Link>
+        <button
+          onClick={() => setOpen(true)}
+          className="p-2 text-white hover:bg-white/10 rounded-lg transition"
+          aria-label="Open menu"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Mobile drawer */}
+      {open && (
+        <>
+          <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setOpen(false)} />
+          <div className="fixed top-0 right-0 h-full w-64 bg-white z-50 flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <span className="font-semibold text-slate-800">Menu</span>
+              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600 p-1">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <nav className="flex-1 px-3 py-4 space-y-1">
+              {navLinks.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
+                >
+                  {l.label}
+                </Link>
+              ))}
+              <div className="border-t border-slate-100 mt-3 pt-3">
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition"
+                >
+                  Log In
+                </Link>
+              </div>
+            </nav>
+          </div>
+        </>
+      )}
+    </nav>
+  );
+}
