@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { MarketingNav } from "@/components/MarketingNav";
 
 export default function SupportPage() {
   const [name, setName] = useState("");
@@ -39,25 +40,7 @@ export default function SupportPage() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       <header className="sticky top-0 z-50 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
-        <nav className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
-          <Link href="/">
-            <Logo className="h-10 sm:h-14 w-auto" />
-          </Link>
-          <div className="hidden md:flex items-center gap-6 text-sm text-white/90">
-            <Link href="/plans" className="hover:text-white transition">Pricing</Link>
-            <Link href="/sample-letters" className="hover:text-white transition">Sample Letters</Link>
-            <Link href="/faq" className="hover:text-white transition">FAQ</Link>
-            <Link href="/support" className="text-white font-medium">Support</Link>
-          </div>
-          <div className="flex gap-2 sm:gap-4">
-            <Link href="/login" className="px-3 sm:px-4 py-2 text-sm text-white/90 hover:text-white transition whitespace-nowrap">
-              Log In
-            </Link>
-            <Link href="/register" className="px-3 sm:px-4 py-2 text-sm bg-white text-teal-600 hover:bg-lime-50 rounded-lg transition whitespace-nowrap font-medium">
-              Get Started
-            </Link>
-          </div>
-        </nav>
+        <MarketingNav />
       </header>
 
       <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
