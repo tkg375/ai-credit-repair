@@ -19,9 +19,9 @@ export function MarketingNav() {
       <Logo className="h-10 sm:h-14 w-auto" />
 
       {/* Desktop links */}
-      <div className="hidden md:flex items-center gap-6 text-sm text-white/90">
+      <div className="hidden md:flex items-center gap-1 bg-white/10 border border-white/20 rounded-full px-2 py-1 backdrop-blur-sm text-sm text-white/90">
         {navLinks.map((l) => (
-          <Link key={l.href} href={l.href} className="hover:text-white transition">{l.label}</Link>
+          <Link key={l.href} href={l.href} className="px-4 py-1.5 rounded-full hover:bg-white/15 hover:text-white transition">{l.label}</Link>
         ))}
       </div>
 
