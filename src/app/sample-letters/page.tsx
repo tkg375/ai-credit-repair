@@ -6,6 +6,21 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Sample Dispute Letters — FCRA-Compliant Templates",
   description: "See real examples of AI-generated FCRA dispute letters used to remove inaccurate collections, charge-offs, and late payments from credit reports.",
+  openGraph: {
+    title: "Free Sample Credit Dispute Letters — FCRA-Compliant Templates",
+    description: "Real AI-generated dispute letters for removing collections, charge-offs, and late payments. Section 609, 611, goodwill, pay-for-delete, and more.",
+    url: "https://credit-800.com/sample-letters",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Sample FCRA Dispute Letters" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Free Sample Credit Dispute Letters — FCRA-Compliant Templates",
+    description: "Real AI-generated dispute letters for removing collections, charge-offs, and late payments.",
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: "https://credit-800.com/sample-letters",
+  },
 };
 
 const BUREAU_LETTER = `[Your Name]
@@ -169,9 +184,29 @@ const letterTypes = [
   },
 ];
 
+const sampleLettersJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "FCRA & FDCPA Credit Dispute Letter Templates",
+  description:
+    "AI-generated, FCRA & FDCPA-compliant credit dispute letter templates for removing inaccurate items from your credit report.",
+  url: "https://credit-800.com/sample-letters",
+  numberOfItems: letterTypes.length,
+  itemListElement: letterTypes.map((letter, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: letter.title,
+    description: letter.desc,
+  })),
+};
+
 export default function SampleLettersPage() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(sampleLettersJsonLd) }}
+      />
       <header className="sticky top-0 z-50 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
         <MarketingNav />
       </header>

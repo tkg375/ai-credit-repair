@@ -6,6 +6,21 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "FAQ — Frequently Asked Questions",
   description: "Get answers to common questions about Credit 800, FCRA dispute letters, credit repair, and how our AI-powered platform works.",
+  openGraph: {
+    title: "FAQ — Credit 800 Frequently Asked Questions",
+    description: "Get answers to common questions about Credit 800, FCRA dispute letters, credit repair, and how our AI-powered platform works.",
+    url: "https://credit-800.com/faq",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Credit 800 FAQ" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FAQ — Credit 800 Frequently Asked Questions",
+    description: "Get answers to common questions about Credit 800, FCRA dispute letters, credit repair, and how our AI-powered platform works.",
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: "https://credit-800.com/faq",
+  },
 };
 
 const sections = [
@@ -103,9 +118,28 @@ const sections = [
   },
 ];
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: sections.flatMap((section) =>
+    section.faqs.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.a,
+      },
+    }))
+  ),
+};
+
 export default function FAQPage() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <header className="sticky top-0 z-50 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
         <MarketingNav />
       </header>

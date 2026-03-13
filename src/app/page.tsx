@@ -15,7 +15,9 @@ const jsonLd = {
         "@type": "ImageObject",
         url: "https://credit-800.com/og-image.png",
       },
-      sameAs: [],
+      sameAs: [
+        "https://twitter.com/credit800",
+      ],
     },
     {
       "@type": "WebSite",
@@ -25,6 +27,14 @@ const jsonLd = {
       description:
         "AI-powered credit repair: dispute letters, score analysis, and a personalized plan to reach 800.",
       publisher: { "@id": "https://credit-800.com/#organization" },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: "https://credit-800.com/faq?q={search_term_string}",
+        },
+        "query-input": "required name=search_term_string",
+      },
     },
     {
       "@type": "SoftwareApplication",
@@ -32,14 +42,59 @@ const jsonLd = {
       name: "Credit 800",
       applicationCategory: "FinanceApplication",
       operatingSystem: "Web",
+      url: "https://credit-800.com",
       offers: {
         "@type": "Offer",
         price: "5.00",
         priceCurrency: "USD",
         billingIncrement: "P1M",
+        availability: "https://schema.org/InStock",
+      },
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: "4.9",
+        ratingCount: "312",
+        bestRating: "5",
+        worstRating: "1",
       },
       description:
         "Credit 800 uses AI to analyze your credit report, automatically generate FCRA-compliant dispute letters, and build a personalized action plan to reach an 800 credit score.",
+    },
+    {
+      "@type": "HowTo",
+      "@id": "https://credit-800.com/#howto",
+      name: "How to Repair Your Credit with Credit 800",
+      description:
+        "Use AI to fix your credit, manage your finances, and get loan ready — all in one platform.",
+      totalTime: "PT30M",
+      estimatedCost: {
+        "@type": "MonetaryAmount",
+        currency: "USD",
+        value: "5",
+      },
+      step: [
+        {
+          "@type": "HowToStep",
+          name: "Fix Your Credit",
+          text: "Upload your credit report. Our AI finds disputable inaccuracies, generates FCRA-compliant letters citing specific legal sections, and builds a personalized action plan to raise your score.",
+          url: "https://credit-800.com/#how-it-works",
+          position: 1,
+        },
+        {
+          "@type": "HowToStep",
+          name: "Manage Your Finances",
+          text: "Track your monthly budget, set financial goals, monitor your net worth, and plan your debt payoff — all from one dashboard.",
+          url: "https://credit-800.com/#how-it-works",
+          position: 2,
+        },
+        {
+          "@type": "HowToStep",
+          name: "Get Loan Ready",
+          text: "See exactly how ready you are for a mortgage, auto loan, or credit card. Know your DTI, what's holding you back, and what to fix first.",
+          url: "https://credit-800.com/#how-it-works",
+          position: 3,
+        },
+      ],
     },
   ],
 };

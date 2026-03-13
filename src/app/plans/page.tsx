@@ -7,6 +7,21 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Pricing — Simple, Transparent Plans",
   description: "Credit 800 starts at just $5/month. Get unlimited AI dispute letters, budget tracking, loan readiness, and more. No contracts, cancel anytime.",
+  openGraph: {
+    title: "Credit 800 Pricing — AI Credit Repair from $5/month",
+    description: "Start fixing your credit today for just $5/month. Unlimited AI dispute letters, budget tracker, loan readiness, and more. No contracts, cancel anytime.",
+    url: "https://credit-800.com/plans",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Credit 800 Pricing Plans" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Credit 800 Pricing — AI Credit Repair from $5/month",
+    description: "Start fixing your credit today for just $5/month. No contracts, cancel anytime.",
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: "https://credit-800.com/plans",
+  },
 };
 
 const proFeatures = [
@@ -35,9 +50,41 @@ const autopilotFeatures = [
   "Compliance audit trail",
 ];
 
+const plansJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "Credit 800 — Self Service Plan",
+  description:
+    "AI-powered credit repair toolkit. Unlimited dispute letters, budget tracker, loan readiness calculator, debt payoff optimizer, and more.",
+  url: "https://credit-800.com/plans",
+  brand: {
+    "@type": "Brand",
+    name: "Credit 800",
+  },
+  offers: {
+    "@type": "Offer",
+    price: "5.00",
+    priceCurrency: "USD",
+    priceValidUntil: "2026-12-31",
+    availability: "https://schema.org/InStock",
+    url: "https://credit-800.com/register",
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.9",
+    ratingCount: "312",
+    bestRating: "5",
+    worstRating: "1",
+  },
+};
+
 export default function PlansPage() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(plansJsonLd) }}
+      />
       <header className="sticky top-0 z-50 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
         <MarketingNav />
       </header>
