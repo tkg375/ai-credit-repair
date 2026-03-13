@@ -77,7 +77,7 @@ export default function PlansPage() {
 
           {/* Autopilot */}
           <div className="bg-white border-2 border-slate-200 rounded-2xl p-6 flex flex-col relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">NEW</div>
+            <div className="absolute top-0 right-0 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">Coming Soon</div>
             <h3 className="font-semibold text-slate-900 mb-1">Autopilot</h3>
             <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-teal-500 to-cyan-600 bg-clip-text text-transparent">
               $49 <span className="text-sm font-normal text-slate-400">/ month</span>

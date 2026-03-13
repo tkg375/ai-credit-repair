@@ -267,7 +267,7 @@ export default function SubscriptionPage() {
           {/* Autopilot */}
           <div className={`bg-white rounded-2xl border-2 p-6 flex flex-col relative overflow-hidden ${isAutopilot ? "border-cyan-400 ring-1 ring-cyan-400" : "border-slate-200"}`}>
             <div className="absolute top-0 right-0 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">
-              NEW
+              Coming Soon
             </div>
             <div className="flex items-center justify-between mb-1">
               <h3 className="font-semibold text-slate-900">Autopilot</h3>
