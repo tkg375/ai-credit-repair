@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { MarketingNav } from "@/components/MarketingNav";
+import { AutopilotNotify } from "@/components/AutopilotNotify";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -92,9 +93,7 @@ export default function PlansPage() {
                 </li>
               ))}
             </ul>
-            <button disabled className="w-full text-center px-4 py-2.5 bg-slate-200 text-slate-400 rounded-xl font-medium cursor-not-allowed text-sm">
-              Coming Soon
-            </button>
+            <AutopilotNotify />
           </div>
         </div>
 
