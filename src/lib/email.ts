@@ -44,6 +44,32 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
   }
 }
 
+export async function sendAutopilotNotifyEmail(to: string) {
+  await sendEmail(
+    to,
+    "You're on the Autopilot waitlist — we'll notify you when it's live",
+    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+      <div style="background:linear-gradient(135deg,#14b8a6,#06b6d4);padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:24px">You're on the list! 🚀</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Credit 800 Autopilot — coming soon</p>
+      </div>
+      <p>Hey there,</p>
+      <p>Thanks for your interest in <strong>Credit 800 Autopilot</strong>! We'll send you a personal notification the moment it goes live.</p>
+      <div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;padding:16px;margin:16px 0">
+        <p style="margin:0;font-size:15px;font-weight:bold;color:#0f172a">What Autopilot does for you:</p>
+        <ul style="margin:8px 0 0;padding-left:20px;color:#334155;font-size:14px;line-height:1.8">
+          <li>Monthly soft-pull credit report — no hard inquiry</li>
+          <li>Auto-generated FCRA dispute letters</li>
+          <li>Automatic USPS mailing (up to 10/mo)</li>
+          <li>VantageScore tracking — fully hands-free</li>
+        </ul>
+      </div>
+      <p style="color:#64748b;font-size:14px">We'll only email you when Autopilot is ready. No spam, ever.</p>
+      <p style="color:#64748b;font-size:14px">— The Credit 800 Team</p>
+    </body></html>`
+  );
+}
+
 export async function sendAnalysisCompleteEmail(to: string, name: string, itemCount: number, bureau: string) {
   await sendEmail(
     to,

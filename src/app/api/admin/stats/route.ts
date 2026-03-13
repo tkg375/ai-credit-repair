@@ -12,10 +12,11 @@ export async function GET() {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    const [users, disputes, reportItems] = await Promise.all([
+    const [users, disputes, reportItems, waitlist] = await Promise.all([
       firestore.query(COLLECTIONS.users, []),
       firestore.query(COLLECTIONS.disputes, [], "createdAt", "DESCENDING", 200),
       firestore.query(COLLECTIONS.creditReports, [], "createdAt", "DESCENDING", 50),
+      firestore.query(COLLECTIONS.autopilotWaitlist, []),
     ]);
 
     const totalUsers = users.length;
@@ -62,12 +63,14 @@ export async function GET() {
     }));
 
     const mrrCents = (proSubscribers * 500) + (autopilotSubscribers * 4900);
+    const autopilotWaitlistCount = waitlist.length;
 
     return NextResponse.json({
       totalUsers,
       notSubscribed,
       proSubscribers,
       autopilotSubscribers,
+      autopilotWaitlistCount,
       mrrCents,
       disputesLast7,
       disputesLast30,

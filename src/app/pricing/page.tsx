@@ -69,6 +69,8 @@ export default function SubscriptionPage() {
   const [upgradingPro, setUpgradingPro] = useState(false);
   const [upgradingAutopilot, setUpgradingAutopilot] = useState(false);
   const [openingPortal, setOpeningPortal] = useState(false);
+  const [notifyEmail, setNotifyEmail] = useState("");
+  const [notifyState, setNotifyState] = useState<"idle" | "loading" | "done" | "duplicate">("idle");
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/login");
@@ -93,6 +95,22 @@ export default function SubscriptionPage() {
       else alert("Could not open billing portal.");
     } catch { alert("Failed to open billing portal."); }
     finally { setOpeningPortal(false); }
+  };
+
+  const handleNotify = async () => {
+    if (!notifyEmail.includes("@")) return;
+    setNotifyState("loading");
+    try {
+      const res = await fetch("/api/autopilot/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: notifyEmail }),
+      });
+      const data = await res.json();
+      setNotifyState(data.duplicate ? "duplicate" : "done");
+    } catch {
+      setNotifyState("idle");
+    }
   };
 
   const handleUpgrade = async (tier: "pro" | "autopilot") => {
@@ -269,10 +287,31 @@ export default function SubscriptionPage() {
             </ul>
             {isAutopilot ? (
               <div className="text-center text-sm text-cyan-600 font-medium py-2">Active</div>
+            ) : notifyState === "done" ? (
+              <div className="text-center text-sm text-teal-600 font-medium py-2">✓ We'll notify you when it's live!</div>
+            ) : notifyState === "duplicate" ? (
+              <div className="text-center text-sm text-slate-500 py-2">You're already on the list!</div>
             ) : (
-              <button disabled className="w-full py-2.5 bg-slate-200 text-slate-400 rounded-xl font-medium cursor-not-allowed text-sm">
-                Coming Soon
-              </button>
+              <div className="space-y-2">
+                <p className="text-xs text-slate-400 text-center">Get notified when Autopilot launches</p>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={notifyEmail}
+                    onChange={(e) => setNotifyEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleNotify()}
+                    className="flex-1 min-w-0 px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  />
+                  <button
+                    onClick={handleNotify}
+                    disabled={notifyState === "loading" || !notifyEmail.includes("@")}
+                    className="px-3 py-2 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-xl text-sm font-medium hover:opacity-90 transition disabled:opacity-50 shrink-0"
+                  >
+                    {notifyState === "loading" ? "..." : "Notify Me"}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>

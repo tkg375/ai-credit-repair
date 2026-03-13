@@ -20,4 +20,5 @@ export const COLLECTIONS = {
   autopilotRuns: "autopilotRuns",
   fcraConsents: "fcraConsents",
   auditLogs: "auditLogs",
+  autopilotWaitlist: "autopilotWaitlist",
 } as const;

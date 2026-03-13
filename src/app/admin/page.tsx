@@ -11,6 +11,7 @@ interface AdminStats {
   notSubscribed: number;
   proSubscribers: number;
   autopilotSubscribers: number;
+  autopilotWaitlistCount: number;
   mrrCents: number;
   disputesLast7: number;
   disputesLast30: number;
@@ -103,13 +104,16 @@ export default function AdminPage() {
         </div>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
           <StatCard label="Total Users" value={stats.totalUsers} />
           <StatCard label="Not Subscribed" value={stats.notSubscribed} />
           <StatCard label="Self Service" value={stats.proSubscribers} sub="$5/mo" />
           <StatCard label="Autopilot" value={stats.autopilotSubscribers} sub="$49/mo" />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           <StatCard label="MRR (est.)" value={mrrDisplay} sub="Based on active subs" />
           <StatCard label="Disputes This Week" value={stats.disputesLast7} sub={`${stats.disputesLast30} last 30 days`} />
+          <StatCard label="Autopilot Waitlist" value={stats.autopilotWaitlistCount} sub="Waiting for launch" />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
