@@ -216,6 +216,58 @@ export default function Home() {
                 title: "Smart Notifications",
                 description: "Get alerted when your score changes, a goal is reached, or a dispute deadline is approaching.",
               },
+              {
+                title: "Education Hub",
+                description: "Searchable, categorized credit education modules with progress tracking to help you understand every aspect of your credit.",
+              },
+              {
+                title: "CFPB Complaint Generator",
+                description: "Generate and mail FCRA-compliant CFPB complaints against bureaus and creditors when disputes aren't resolved.",
+              },
+              {
+                title: "Dispute Calendar",
+                description: "Track all dispute timelines, deadlines, and round-2 readiness in one place so nothing slips through the cracks.",
+              },
+              {
+                title: "Credit Builder",
+                description: "Browse recommended secured cards, credit-builder loans, and store cards filtered to your current credit score range.",
+              },
+              {
+                title: "Credit Monitoring",
+                description: "Stay on top of changes to your credit profile with real-time monitoring and instant alerts.",
+              },
+              {
+                title: "Investment Tools",
+                description: "Explore investment funds, strategies, and asset allocation calculators to start building wealth alongside your credit.",
+              },
+              {
+                title: "Portfolio Tracker",
+                description: "Track your net worth and asset allocation across bank and investment accounts via Plaid integration.",
+              },
+              {
+                title: "Secure Document Vault",
+                description: "Upload and organize credit reports, dispute letters, bureau responses, and identity documents by category.",
+              },
+              {
+                title: "Legal Letter Analyzer",
+                description: "Paste any demand or collection letter and get an instant AI breakdown of claims, deadlines, your rights, and a response draft.",
+              },
+              {
+                title: "Autopilot Disputes",
+                description: "Fully automate your dispute workflow — AI runs scheduled dispute rounds and bulk-generates mailing-ready letters for you.",
+              },
+              {
+                title: "Bureau Report Viewer",
+                description: "See all accounts across all three bureaus with balances, statuses, and one-click dispute flagging.",
+              },
+              {
+                title: "Credit Score Tracker",
+                description: "Log and visualize your score trends over time from multiple sources and bureaus, with CSV export.",
+              },
+              {
+                title: "Sample Letter Library",
+                description: "Browse FCRA-compliant example letters for collections, charge-offs, late payments, and a dozen other dispute strategies.",
+              },
             ].map((feature) => (
               <div
                 key={feature.title}
