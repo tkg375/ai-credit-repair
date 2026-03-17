@@ -167,15 +167,15 @@ export default function Home() {
       </div>
 
       {/* Features */}
-      <section id="how-it-works" className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 py-12 sm:py-20">
+      <section id="how-it-works" className="py-12 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 text-white">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 text-slate-900">
             A Full Financial Toolkit
           </h2>
-          <p className="text-lime-100 text-center mb-4 max-w-2xl mx-auto text-sm sm:text-base">
+          <p className="text-slate-500 text-center mb-4 max-w-2xl mx-auto text-sm sm:text-base">
             Every tool you need to improve your credit, manage your money, and build toward your goals.
           </p>
-          <p className="text-lime-100 text-center mb-8 sm:mb-16 max-w-2xl mx-auto text-sm sm:text-base">
+          <p className="text-slate-500 text-center mb-8 sm:mb-16 max-w-2xl mx-auto text-sm sm:text-base">
             From fixing your credit to tracking your budget to preparing for a loan — Credit 800 handles your full financial picture.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -219,10 +219,10 @@ export default function Home() {
             ].map((feature) => (
               <div
                 key={feature.title}
-                className="bg-white/15 backdrop-blur-sm border border-white/30 rounded-xl p-5 hover:bg-white/25 transition"
+                className="border border-slate-200 rounded-xl p-5 hover:border-slate-300 hover:shadow-lg transition"
               >
-                <h3 className="font-semibold mb-2 text-white">{feature.title}</h3>
-                <p className="text-sm text-lime-100 leading-relaxed">
+                <h3 className="font-semibold mb-2 text-slate-900">{feature.title}</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
                   {feature.description}
                 </p>
               </div>
