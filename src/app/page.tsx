@@ -271,32 +271,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Tools CTA */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
-        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
-            Financial Tools Built for Your Situation
-          </h2>
-          <p className="text-slate-300 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
-            Debt validation letters, pay-for-delete templates, statute of limitations calculator, goodwill letters, and more — all included with your subscription.
-          </p>
-          <Link
-            href="/register"
-            className="inline-block px-6 sm:px-8 py-3 bg-gradient-to-r from-lime-500 to-teal-600 hover:from-lime-400 hover:to-teal-500 text-white rounded-lg font-medium transition"
-          >
-            Get Started
-          </Link>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 py-12 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-white">
             Take Control of Your Entire Financial Life
           </h2>
-          <p className="text-lime-100 mb-6 sm:mb-8 max-w-xl mx-auto text-sm sm:text-base">
+          <p className="text-lime-100 mb-2 max-w-xl mx-auto text-sm sm:text-base">
             Credit repair, budgeting, goals, loan readiness — one platform, one login. Get started in minutes.
+          </p>
+          <p className="text-lime-100 mb-6 sm:mb-8 max-w-2xl mx-auto text-sm sm:text-base">
+            Debt validation letters, pay-for-delete templates, statute of limitations calculator, goodwill letters, and more — all included with your subscription.
           </p>
           <Link
             href="/register"
