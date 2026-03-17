@@ -166,57 +166,17 @@ export default function Home() {
         </section>
       </div>
 
-      {/* How It Works */}
-      <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3">Everything You Need in One Place</h2>
-        <p className="text-slate-500 text-center mb-8 sm:mb-16 max-w-2xl mx-auto text-sm sm:text-base">
-          From fixing your credit to tracking your budget to preparing for a loan — Credit 800 handles your full financial picture.
-        </p>
-        <div className="grid md:grid-cols-3 gap-8">
-          {[
-            {
-              step: "01",
-              title: "Fix Your Credit",
-              description:
-                "Upload your credit report. Our AI finds disputable inaccuracies, generates FCRA-compliant letters, and builds a personalized action plan to raise your score.",
-            },
-            {
-              step: "02",
-              title: "Manage Your Finances",
-              description:
-                "Track your monthly budget, set financial goals, monitor your net worth, and plan your debt payoff — all from one dashboard.",
-            },
-            {
-              step: "03",
-              title: "Get Loan Ready",
-              description:
-                "See exactly how ready you are for a mortgage, auto loan, or credit card. Know your DTI, what's holding you back, and what to fix first.",
-            },
-          ].map((item) => (
-            <div
-              key={item.step}
-              className="border border-slate-200 rounded-xl p-6 hover:border-slate-300 hover:shadow-lg transition"
-            >
-              <span className="text-sm font-mono bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent font-bold">
-                {item.step}
-              </span>
-              <h3 className="text-xl font-semibold mt-3 mb-2">{item.title}</h3>
-              <p className="text-slate-600 leading-relaxed">
-                {item.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Features */}
-      <section className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 py-12 sm:py-20">
+      <section id="how-it-works" className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 py-12 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 text-white">
             A Full Financial Toolkit
           </h2>
-          <p className="text-lime-100 text-center mb-8 sm:mb-16 max-w-2xl mx-auto text-sm sm:text-base">
+          <p className="text-lime-100 text-center mb-4 max-w-2xl mx-auto text-sm sm:text-base">
             Every tool you need to improve your credit, manage your money, and build toward your goals.
+          </p>
+          <p className="text-lime-100 text-center mb-8 sm:mb-16 max-w-2xl mx-auto text-sm sm:text-base">
+            From fixing your credit to tracking your budget to preparing for a loan — Credit 800 handles your full financial picture.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
