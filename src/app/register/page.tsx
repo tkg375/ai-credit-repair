@@ -118,8 +118,13 @@ function RegisterForm() {
 
       // Self Service is free — go straight to dashboard
       window.location.href = "/dashboard?welcome=1";
-    } catch {
-      setError("Could not create account. Email may already be in use.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("EMAIL_EXISTS")) {
+        setError("An account with this email already exists. Please log in.");
+      } else {
+        setError(msg || "Could not create account. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
