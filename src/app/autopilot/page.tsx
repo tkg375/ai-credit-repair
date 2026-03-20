@@ -73,7 +73,7 @@ export default function AutopilotPage() {
 
   useEffect(() => {
     if (!authLoading && !user) { router.push("/login"); return; }
-    if (!subLoading && !isAutopilot) { router.replace("/pricing"); return; }
+    if (!subLoading && !isAutopilot) { router.replace("/plans"); return; }
     if (user && isAutopilot) fetchStatus();
   }, [user, authLoading, isAutopilot, subLoading, router, fetchStatus]);
 

@@ -25,11 +25,11 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-semibold mb-3">2. Description of Service</h2>
             <p className="text-slate-600 leading-relaxed mb-3">
-              Credit 800 is an AI-powered financial platform offering two subscription tiers:
+              Credit 800 is an AI-powered financial platform offering two tiers:
             </p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4 mb-3">
               <li>
-                <strong>Self Service ($5/month):</strong> A DIY credit repair toolkit including AI-powered credit report analysis,
+                <strong>Self Service (Free):</strong> A DIY credit repair toolkit including AI-powered credit report analysis,
                 FCRA-compliant dispute letter generation, credit score tracking, debt payoff planning, budget management,
                 credit score simulator, CFPB complaint generator, document vault, identity monitoring, credit builder
                 product recommendations, and optional physical USPS mailing of dispute letters ($2/letter).
@@ -42,7 +42,7 @@ export default function TermsOfService() {
               </li>
             </ul>
             <p className="text-slate-600 leading-relaxed">
-              A paid subscription is required to access the platform. Subscriptions are initiated at the time of account creation.
+              Self Service is free and available to all registered users. Autopilot is a paid upgrade.
             </p>
           </section>
 
@@ -85,17 +85,16 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-semibold mb-3">5. Subscription and Billing</h2>
             <p className="text-slate-600 leading-relaxed mb-3">
-              Credit 800 offers two monthly subscription plans: Self Service at $5/month and Autopilot at $49/month.
-              A subscription is required to access the platform and is initiated during account creation.
+              Self Service is free for all registered users. Autopilot is a paid plan at $49/month.
             </p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
-              <li>Subscriptions automatically renew each month unless cancelled</li>
-              <li>You may cancel at any time; access continues through the end of the current billing period</li>
-              <li>No refunds are issued for partial billing periods</li>
-              <li>USPS physical mailing of dispute letters under the Self Service plan incurs an additional $2 per letter charged at time of mailing</li>
+              <li>Autopilot subscriptions automatically renew each month unless cancelled</li>
+              <li>You may cancel Autopilot at any time; access continues through the end of the current billing period</li>
+              <li>No refunds are issued for partial Autopilot billing periods</li>
+              <li>USPS physical mailing of dispute letters incurs an additional $2 per letter charged at time of mailing</li>
               <li>Autopilot includes up to 10 mailed letters per month; additional letters are $2 each, charged to your payment method on file</li>
               <li>Payments are processed securely by Stripe. Credit 800 does not store your payment card information</li>
-              <li>We reserve the right to change subscription pricing with 30 days&apos; notice</li>
+              <li>We reserve the right to change Autopilot pricing with 30 days&apos; notice</li>
             </ul>
           </section>
 

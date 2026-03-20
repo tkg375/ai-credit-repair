@@ -92,7 +92,7 @@ export default function MonitoringPage() {
             Identity Monitoring will be part of the Autopilot plan — 24/7 protection working in the background so you never have to worry.
           </p>
           <a
-            href="/pricing"
+            href="/plans"
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-teal-700 rounded-xl font-semibold text-sm hover:bg-teal-50 transition"
           >
             View Plans

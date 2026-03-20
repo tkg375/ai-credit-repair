@@ -30,7 +30,7 @@ export default function robots(): MetadataRoute.Robots {
           "/readiness",
           "/profile",
           "/tools",
-          "/pricing",
+          "/plans",
           "/admin",
           "/api/",
         ],
