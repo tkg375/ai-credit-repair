@@ -19,7 +19,7 @@ let fetchPromise: Promise<void> | null = null;
 export function useSubscription(): SubscriptionState {
   const { user, loading: authLoading } = useAuth();
   const [state, setState] = useState<SubscriptionState>(
-    cachedState ?? { plan: "none", isPro: false, isAutopilot: false, loading: true, status: "none" }
+    cachedState ?? { plan: "pro", isPro: true, isAutopilot: false, loading: true, status: "active" }
   );
 
   useEffect(() => {
@@ -43,17 +43,21 @@ export function useSubscription(): SubscriptionState {
         .then((r) => r.json())
         .then((d) => {
           const plan = (d.plan as PlanTier) || "none";
+          const isAutopilot = plan === "autopilot";
+          // Self-service is free — all authenticated users have pro access
+          const effectivePlan: PlanTier = plan === "none" ? "pro" : plan;
           cachedState = {
-            plan,
-            isPro: plan === "pro" || plan === "autopilot",
-            isAutopilot: plan === "autopilot",
+            plan: effectivePlan,
+            isPro: true,
+            isAutopilot,
             loading: false,
-            status: d.status ?? "none",
+            status: d.status ?? "active",
           };
           setState(cachedState);
         })
         .catch(() => {
-          cachedState = { plan: "none", isPro: false, isAutopilot: false, loading: false, status: "error" };
+          // On error, still grant free self-service access
+          cachedState = { plan: "pro", isPro: true, isAutopilot: false, loading: false, status: "active" };
           setState(cachedState);
         })
         .finally(() => {

@@ -352,15 +352,7 @@ export function AuthenticatedLayout({
       )
     : sections;
 
-  // Redirect unsubscribed users
-  useEffect(() => {
-    if (subLoading) return;
-    const hasAccess = isPro || isAutopilot;
-    const allowedPaths = ["/plans", "/autopilot", "/profile"];
-    if (!hasAccess && !allowedPaths.includes(pathname)) {
-      router.replace("/plans");
-    }
-  }, [isPro, isAutopilot, subLoading, pathname, router]);
+  // Self-service is free — no redirect needed for unsubscribed users
 
   useEffect(() => {
     if (!user) return;
@@ -374,9 +366,7 @@ export function AuthenticatedLayout({
       .catch(() => {});
   }, [user]);
 
-  const hasAccess = isPro || isAutopilot;
-  const allowedPaths = ["/plans", "/autopilot", "/profile"];
-  if (subLoading || (!hasAccess && !allowedPaths.includes(pathname))) {
+  if (subLoading) {
     return (
       <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-white items-center justify-center">
         <div className="w-10 h-10 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />
