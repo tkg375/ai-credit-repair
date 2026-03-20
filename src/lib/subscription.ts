@@ -27,14 +27,17 @@ export async function getUserSubscription(userId: string): Promise<SubscriptionI
     // Fall back to "pro" for legacy active subscriptions without a planTier.
     const planTier = (userDoc.data.planTier as PlanTier) || (isActive ? "pro" : "none");
     const isAutopilot = isActive && planTier === "autopilot";
-    const isPro = isActive && (planTier === "pro" || planTier === "autopilot");
 
-    // Check if period has ended
+    // Self-service is free — all authenticated users have pro access.
+    // Only autopilot requires a paid subscription.
+    const isPro = true;
+
+    // Check if autopilot period has ended (falls back to free self-service)
     const periodEnd = userDoc.data.currentPeriodEnd as string | null;
-    if (isPro && periodEnd && new Date(periodEnd) < new Date()) {
+    if (isAutopilot && periodEnd && new Date(periodEnd) < new Date()) {
       return {
-        plan: "none",
-        isPro: false,
+        plan: "pro",
+        isPro: true,
         isAutopilot: false,
         stripeCustomerId: userDoc.data.stripeCustomerId as string | null,
         stripeSubscriptionId: userDoc.data.stripeSubscriptionId as string | null,
@@ -44,13 +47,13 @@ export async function getUserSubscription(userId: string): Promise<SubscriptionI
     }
 
     return {
-      plan: isPro ? planTier : "none",
+      plan: isAutopilot ? "autopilot" : "pro",
       isPro,
       isAutopilot,
       stripeCustomerId: (userDoc.data.stripeCustomerId as string) || null,
       stripeSubscriptionId: (userDoc.data.stripeSubscriptionId as string) || null,
       currentPeriodEnd: periodEnd || null,
-      status,
+      status: isActive ? status : "active",
     };
   } catch {
     return { plan: "none", isPro: false, isAutopilot: false, stripeCustomerId: null, stripeSubscriptionId: null, currentPeriodEnd: null, status: "error" };

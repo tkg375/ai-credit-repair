@@ -41,10 +41,10 @@ export function ProGate({ children, feature }: { children: ReactNode; feature?: 
         </div>
 
         <h2 className="text-2xl font-bold text-slate-900 mb-2">
-          {feature ? `${feature} Requires a Subscription` : "Subscription Required"}
+          {feature ? `${feature} Requires an Account` : "Account Required"}
         </h2>
         <p className="text-slate-500 text-sm mb-8">
-          Subscribe to unlock every tool on the platform.
+          Create a free account to unlock every tool on the platform.
         </p>
 
         {/* Feature grid */}
@@ -63,17 +63,16 @@ export function ProGate({ children, feature }: { children: ReactNode; feature?: 
 
         {/* Pricing */}
         <div className="mb-6">
-          <span className="text-3xl font-bold text-slate-900">$5</span>
-          <span className="text-slate-400 text-sm"> / month</span>
+          <span className="text-3xl font-bold text-slate-900">Free</span>
         </div>
 
         <Link
-          href="/pricing"
+          href="/register"
           className="block w-full py-3 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 hover:from-lime-400 hover:via-teal-400 hover:to-cyan-500 text-white rounded-xl font-medium transition text-sm"
         >
-          Subscribe Now
+          Get Started — Free
         </Link>
-        <p className="text-xs text-slate-400 mt-3">Cancel anytime. No long-term commitment.</p>
+        <p className="text-xs text-slate-400 mt-3">Already have an account? <a href="/login" className="text-teal-600 hover:underline">Sign in</a></p>
       </div>
     </div>
   );

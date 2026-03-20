@@ -13,11 +13,9 @@ const proFeatures = [
   "Credit score simulator",
   "Document vault (unlimited)",
   "Debt payoff optimizer",
-  "Priority AI analysis",
   "Score tracking & charts",
   "Smart notifications",
   "Card recommendations",
-  "Referral rewards",
   "Mail disputes via USPS ($2/letter)",
 ];
 
@@ -143,8 +141,7 @@ export default function SubscriptionPage() {
 
   const isPro = plan === "pro";
   const isAutopilot = plan === "autopilot";
-  const isSubscribed = isPro || isAutopilot;
-  const badge = statusBadge(sub?.status ?? "none", sub?.cancelAtPeriodEnd);
+  const badge = statusBadge(sub?.status ?? "active", sub?.cancelAtPeriodEnd);
 
   return (
     <AuthenticatedLayout activeNav="pricing">
@@ -171,9 +168,9 @@ export default function SubscriptionPage() {
           </div>
         )}
 
-        {/* Current plan card */}
-        {isSubscribed && (
-          <div className={`bg-white rounded-2xl border-2 p-6 mb-8 ${isAutopilot ? "border-cyan-400" : "border-teal-400"}`}>
+        {/* Current plan card — only shown for autopilot (paid) subscribers */}
+        {isAutopilot && (
+          <div className={`bg-white rounded-2xl border-2 p-6 mb-8 border-cyan-400`}>
             <div className="flex items-start justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -183,7 +180,7 @@ export default function SubscriptionPage() {
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                 </div>
                 <p className="text-slate-500 text-sm">
-                  ${((sub?.amount ?? 500) / 100).toFixed(2)} / month
+                  ${((sub?.amount ?? 4900) / 100).toFixed(2)} / month
                 </p>
               </div>
               {sub?.currentPeriodEnd && (
@@ -243,7 +240,7 @@ export default function SubscriptionPage() {
               <h3 className="font-semibold text-slate-900">Self Service</h3>
               {isPro && <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">Your Plan</span>}
             </div>
-            <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">$5 <span className="text-sm font-normal text-slate-400">/ month</span></p>
+            <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">Free</p>
             <p className="text-xs text-slate-500 mb-5">DIY credit repair toolkit</p>
             <ul className="space-y-2 flex-1 mb-6">
               {proFeatures.map((f) => (
@@ -253,25 +250,24 @@ export default function SubscriptionPage() {
                 </li>
               ))}
             </ul>
-            {!isSubscribed ? (
-              <button onClick={() => handleUpgrade("pro")} disabled={upgradingPro} className="w-full py-2.5 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl font-medium hover:opacity-90 transition disabled:opacity-50 text-sm">
-                {upgradingPro ? "Loading..." : "Subscribe — Self Service $5/mo"}
-              </button>
-            ) : isPro ? (
-              <div className="text-center text-sm text-teal-600 font-medium py-2">Active</div>
-            ) : (
+            {isAutopilot ? (
               <div className="text-center text-sm text-slate-400 py-2">Included in Autopilot</div>
+            ) : (
+              <div className="text-center text-sm text-teal-600 font-medium py-2">Active — Free</div>
             )}
           </div>
 
           {/* Autopilot */}
           <div className={`bg-white rounded-2xl border-2 p-6 flex flex-col relative overflow-hidden ${isAutopilot ? "border-cyan-400 ring-1 ring-cyan-400" : "border-slate-200"}`}>
-            <div className="absolute top-0 right-0 bg-gradient-to-r from-lime-500 to-teal-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">
-              Coming Soon
-            </div>
+            {!isAutopilot && (
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Coming Soon</span>
+                <p className="text-sm text-slate-400">We're working on something great</p>
+              </div>
+            )}
             <div className="flex items-center justify-between mb-1">
               <h3 className="font-semibold text-slate-900">Autopilot</h3>
-              {isAutopilot && <span className="text-xs bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded-full font-medium">Your Plan</span>}
+              {isAutopilot && <span className="text-xs bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded-full font-medium z-20 relative">Your Plan</span>}
             </div>
             <p className="text-3xl font-bold mb-1 bg-gradient-to-r from-teal-500 to-cyan-600 bg-clip-text text-transparent">
               $49 <span className="text-sm font-normal text-slate-400">/ month</span>
@@ -317,7 +313,7 @@ export default function SubscriptionPage() {
         </div>
 
         <p className="text-xs text-slate-400 text-center mt-6">
-          Cancel anytime. You keep access until the end of your billing period. Autopilot mailing fee included for up to 10 letters/month.
+          Self Service is free. USPS mailing charged at $2/letter. Autopilot mailing included for up to 10 letters/month.
         </p>
       </main>
     </AuthenticatedLayout>
