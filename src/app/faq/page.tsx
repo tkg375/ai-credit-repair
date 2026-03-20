@@ -28,12 +28,12 @@ const sections = [
     title: "Plans & Pricing",
     faqs: [
       {
-        q: "Why do we charge?",
-        a: "We wish we could offer Credit 800 completely free — and honestly, we'd love to. But the AI that powers your dispute letter generation, credit analysis, and smart recommendations isn't free for us to run. Every letter generated, every report analyzed, and every recommendation made costs us in AI processing fees. On top of that, there's hosting, infrastructure, security, and ongoing development to keep everything fast, private, and up to date. Our Self Service plan starts at $5/month, covering those real costs while keeping the price as low as humanly possible. For those who want us to handle everything automatically, our Autopilot plan is $49/month — comparable to a traditional credit repair service but with full transparency and no long-term contracts. We believe everyone deserves access to these tools — not just people who can afford $100/month credit repair companies.",
+        q: "Why is Self Service free?",
+        a: "We believe everyone deserves access to the tools that credit repair companies charge $100/month for. Self Service is completely free — create an account and start generating FCRA-compliant dispute letters instantly. The only charge on Self Service is if you choose to mail a dispute via USPS ($2/letter) — and that's entirely optional. For those who want us to handle everything automatically, our Autopilot plan is $49/month — comparable to a traditional credit repair service but with full transparency and no long-term contracts.",
       },
       {
-        q: "What's included in the Self Service plan ($5/month)?",
-        a: "Everything you need to run your own credit repair — unlimited AI dispute letters, budget tracker, debt payoff optimizer, credit score simulator, loan readiness calculator, goals tracker, document vault, CFPB complaint generator, letter templates library (goodwill, pay-for-delete, cease & desist, debt validation, and more), creditor letter analyzer, and smart notifications. No feature gates, no usage limits. You can also mail disputes via USPS for $2/letter.",
+        q: "What's included in the Self Service plan?",
+        a: "Everything you need to run your own credit repair — completely free. Unlimited AI dispute letters, budget tracker, debt payoff optimizer, credit score simulator, loan readiness calculator, goals tracker, document vault, CFPB complaint generator, letter templates library (goodwill, pay-for-delete, cease & desist, debt validation, and more), creditor letter analyzer, and smart notifications. No feature gates, no usage limits. You can also mail disputes via USPS for $2/letter.",
       },
       {
         q: "What is the Autopilot plan?",
@@ -41,7 +41,7 @@ const sections = [
       },
       {
         q: "What's the difference between Self Service and Autopilot?",
-        a: "Self Service ($5/mo) gives you all the AI tools to run your own credit repair — you upload your report, generate letters, and send them yourself. Autopilot ($49/mo) is fully automated — we pull your credit report monthly, generate the dispute letters, and mail them to the bureaus on your behalf. You just sit back. Self Service is best if you want full control and a low cost. Autopilot is best if you want a true set-it-and-forget-it experience.",
+        a: "Self Service (Free) gives you all the AI tools to run your own credit repair — you upload your report, generate letters, and send them yourself. Autopilot ($49/mo) is fully automated — we pull your credit report monthly, generate the dispute letters, and mail them to the bureaus on your behalf. You just sit back. Self Service is best if you want full control at no cost. Autopilot is best if you want a true set-it-and-forget-it experience.",
       },
       {
         q: "When will Autopilot be available?",
@@ -53,11 +53,11 @@ const sections = [
       },
       {
         q: "How is Credit 800 different from hiring a credit repair company?",
-        a: "Traditional credit repair companies charge $79–$149/month and do the same thing you can do yourself — disputing items under the FCRA. Many also require long-term contracts. Credit 800's Self Service plan gives you the same AI-powered tools for $5/month. Our Autopilot plan ($49/mo) offers full automation comparable to a credit repair service — at a fraction of the cost and with full transparency into every letter sent.",
+        a: "Traditional credit repair companies charge $79–$149/month and do the same thing you can do yourself — disputing items under the FCRA. Many also require long-term contracts. Credit 800's Self Service plan gives you the same AI-powered tools for free. Our Autopilot plan ($49/mo) offers full automation comparable to a credit repair service — at a fraction of the cost and with full transparency into every letter sent.",
       },
       {
-        q: "Can I cancel anytime?",
-        a: "Yes. No contracts, no cancellation fees, no questions asked. Cancel from your account settings at any time. You keep full access until the end of your current billing period.",
+        q: "Can I cancel Autopilot anytime?",
+        a: "Yes. No contracts, no cancellation fees, no questions asked. Cancel from your account settings at any time. You keep full Autopilot access until the end of your current billing period. Self Service is free and always available.",
       },
     ],
   },
@@ -184,7 +184,7 @@ export default function FAQPage() {
               Contact Support
             </Link>
             <Link href="/register" className="px-6 py-2.5 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-lg font-medium hover:opacity-90 transition text-sm">
-              Get Started — $5/mo
+              Get Started — Free
             </Link>
           </div>
         </div>

@@ -116,29 +116,8 @@ function RegisterForm() {
         }),
       });
 
-      // Start Stripe checkout
-      const endpoint =
-        selectedPlan === "pro" ? "/api/stripe/checkout" : "/api/stripe/checkout/autopilot";
-      const appUrl =
-        typeof window !== "undefined" ? window.location.origin : "https://credit-800.com";
-      const successUrl =
-        selectedPlan === "pro"
-          ? `${appUrl}/dashboard?welcome=1`
-          : `${appUrl}/autopilot?welcome=1`;
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.idToken}`,
-        },
-        body: JSON.stringify({ successUrl }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setError(data.error || "Failed to start checkout. Please try again.");
-      }
+      // Self Service is free — go straight to dashboard
+      window.location.href = "/dashboard?welcome=1";
     } catch {
       setError("Could not create account. Email may already be in use.");
     } finally {
@@ -325,7 +304,7 @@ function RegisterForm() {
           <div>
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl mb-4">
               <h1 className="text-xl font-bold mb-1 text-center">Choose Your Plan</h1>
-              <p className="text-slate-500 text-sm text-center mb-6">You can upgrade or cancel anytime</p>
+              <p className="text-slate-500 text-sm text-center mb-6">Self Service is free. Autopilot coming soon.</p>
 
               {error && (
                 <p className="text-red-500 text-sm text-center mb-4 bg-red-50 py-2 px-4 rounded-lg">{error}</p>
@@ -346,7 +325,7 @@ function RegisterForm() {
                     <div>
                       <p className="font-semibold text-slate-900">Self Service</p>
                       <p className="text-2xl font-bold bg-gradient-to-r from-lime-500 to-teal-600 bg-clip-text text-transparent">
-                        $5 <span className="text-sm font-normal text-slate-400">/ month</span>
+                        Free
                       </p>
                       <p className="text-xs text-slate-500 mt-0.5">DIY credit repair toolkit</p>
                     </div>
@@ -408,7 +387,7 @@ function RegisterForm() {
               disabled={loading}
               className="w-full py-3.5 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 hover:from-lime-400 hover:via-teal-400 hover:to-cyan-500 text-white rounded-xl font-medium transition disabled:opacity-50 text-sm"
             >
-              {loading ? "Setting up your account..." : "Create Account & Subscribe — $5/mo"}
+              {loading ? "Setting up your account..." : "Create Account — Free"}
             </button>
 
             <button
