@@ -125,7 +125,7 @@ export default function Home() {
                 <br />
                 <span className="text-white/90">One Platform.</span>
                 <br />
-                <span className="text-white/90">Start from $5/month.</span>
+                <span className="text-white/90">Start for Free.</span>
               </h1>
 
               <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
