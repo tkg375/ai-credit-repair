@@ -291,7 +291,7 @@ function ProfileDropdown({
             Profile Settings
           </Link>
           <Link
-            href="/plans"
+            href="/pricing"
             onClick={() => setOpen(false)}
             className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
               activeNav === "pricing"
@@ -490,7 +490,7 @@ export function AuthenticatedLayout({
                   Profile
                 </Link>
                 <Link
-                  href="/plans"
+                  href="/pricing"
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 mx-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     activeNav === "pricing"
