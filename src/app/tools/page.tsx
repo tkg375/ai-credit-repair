@@ -8,67 +8,14 @@ import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import {
   STATUTE_OF_LIMITATIONS,
   STATE_NAMES,
-  generateLetter,
   isDebtExpired,
   getCreditReportRemovalDate,
-  type LetterType,
 } from "@/lib/credit-tools";
-
-const LETTER_TYPES: { value: LetterType; label: string; description: string }[] = [
-  {
-    value: "debt_validation",
-    label: "Debt Validation Letter",
-    description: "Force collectors to prove they own the debt. They have 30 days to respond or must stop collecting.",
-  },
-  {
-    value: "pay_for_delete",
-    label: "Pay-for-Delete Offer",
-    description: "Negotiate to pay a reduced amount in exchange for complete removal from credit reports.",
-  },
-  {
-    value: "goodwill",
-    label: "Goodwill Letter",
-    description: "Request removal of a late payment based on your positive history with the creditor.",
-  },
-  {
-    value: "method_of_verification",
-    label: "Method of Verification",
-    description: "After a dispute, demand proof of HOW the bureau verified the debt. Often leads to deletion.",
-  },
-  {
-    value: "original_creditor_request",
-    label: "Original Creditor Request",
-    description: "Demand the original signed contract. Debt buyers often can't produce this documentation.",
-  },
-  {
-    value: "cease_and_desist",
-    label: "Cease & Desist",
-    description: "Legally stop all collection calls and letters. They can only contact you about legal action.",
-  },
-  {
-    value: "debt_dispute",
-    label: "Bureau Dispute Letter",
-    description: "Standard dispute letter to credit bureaus for inaccurate information.",
-  },
-];
 
 export default function ToolsPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"letters" | "sol" | "calculator">("letters");
   const [menuOpen, setMenuOpen] = useState(false);
-
-  // Letter generator state
-  const [letterType, setLetterType] = useState<LetterType>("debt_validation");
-  const [creditorName, setCreditorName] = useState("");
-  const [accountNumber, setAccountNumber] = useState("");
-  const [balance, setBalance] = useState("");
-  const [offerPercent, setOfferPercent] = useState(40);
-  const [bureau, setBureau] = useState("EQUIFAX");
-  const [reason, setReason] = useState("");
-  const [latePaymentDate, setLatePaymentDate] = useState("");
-  const [circumstance, setCircumstance] = useState("");
-  const [generatedLetter, setGeneratedLetter] = useState("");
 
   // SOL calculator state
   const [solState, setSolState] = useState("CA");
@@ -93,22 +40,6 @@ export default function ToolsPage() {
     );
   }
 
-  const handleGenerateLetter = () => {
-    const balanceNum = parseFloat(balance) || 0;
-    const letter = generateLetter(letterType, {
-      userName: user?.email?.split("@")[0] || "Consumer",
-      creditorName: creditorName || "[Creditor Name]",
-      accountNumber: accountNumber || "[Account Number]",
-      balance: balanceNum,
-      offerAmount: Math.round(balanceNum * (offerPercent / 100)),
-      bureau,
-      reason,
-      latePaymentDate,
-      circumstance,
-    });
-    setGeneratedLetter(letter);
-  };
-
   const handleCalculateSOL = () => {
     if (!lastActivityDate) return;
     const result = isDebtExpired(solState, debtType, new Date(lastActivityDate));
@@ -121,12 +52,6 @@ export default function ToolsPage() {
     setRemovalDate(date);
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedLetter);
-  };
-
-  const selectedLetterInfo = LETTER_TYPES.find((l) => l.value === letterType);
-
   return (
     <AuthenticatedLayout activeNav="tools">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
@@ -135,226 +60,12 @@ export default function ToolsPage() {
           Powerful tools to help you dispute debts, negotiate settlements, and understand your rights.
         </p>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-8 border-b border-slate-200">
-          <button
-            onClick={() => setActiveTab("letters")}
-            className={`px-4 py-3 font-medium transition ${
-              activeTab === "letters"
-                ? "text-teal-600 border-b-2 border-teal-600"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            Letter Generator
-          </button>
-          <button
-            onClick={() => setActiveTab("sol")}
-            className={`px-4 py-3 font-medium transition ${
-              activeTab === "sol"
-                ? "text-teal-600 border-b-2 border-teal-600"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            Statute of Limitations
-          </button>
-          <button
-            onClick={() => setActiveTab("calculator")}
-            className={`px-4 py-3 font-medium transition ${
-              activeTab === "calculator"
-                ? "text-teal-600 border-b-2 border-teal-600"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            Removal Date Calculator
-          </button>
-        </div>
+        {/* Side-by-side calculators */}
+        <div className="grid lg:grid-cols-2 gap-8">
 
-        {/* Letter Generator Tab */}
-        {activeTab === "letters" && (
-          <div className="grid lg:grid-cols-2 gap-8">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Generate Letter</h2>
-
-              {/* Letter Type Selection */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium mb-2">Letter Type</label>
-                <div className="space-y-2">
-                  {LETTER_TYPES.map((type) => (
-                    <label
-                      key={type.value}
-                      className={`block p-4 rounded-xl border-2 cursor-pointer transition ${
-                        letterType === type.value
-                          ? "border-teal-500 bg-teal-50"
-                          : "border-slate-200 hover:border-slate-300"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="letterType"
-                        value={type.value}
-                        checked={letterType === type.value}
-                        onChange={(e) => setLetterType(e.target.value as LetterType)}
-                        className="sr-only"
-                      />
-                      <span className="font-medium">{type.label}</span>
-                      <p className="text-sm text-slate-500 mt-1">{type.description}</p>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Form Fields */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Creditor/Collection Agency Name</label>
-                  <input
-                    type="text"
-                    value={creditorName}
-                    onChange={(e) => setCreditorName(e.target.value)}
-                    placeholder="e.g., Midland Credit Management"
-                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Account Number</label>
-                  <input
-                    type="text"
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                    placeholder="e.g., ****1234"
-                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Balance Owed</label>
-                  <input
-                    type="number"
-                    value={balance}
-                    onChange={(e) => setBalance(e.target.value)}
-                    placeholder="e.g., 1500"
-                    className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
-                  />
-                </div>
-
-                {letterType === "pay_for_delete" && (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Offer Percentage: {offerPercent}%
-                    </label>
-                    <input
-                      type="range"
-                      min="20"
-                      max="80"
-                      value={offerPercent}
-                      onChange={(e) => setOfferPercent(parseInt(e.target.value))}
-                      className="w-full"
-                    />
-                    <p className="text-sm text-slate-500">
-                      Offer amount: ${balance ? Math.round(parseFloat(balance) * (offerPercent / 100)).toLocaleString() : "0"}
-                    </p>
-                  </div>
-                )}
-
-                {(letterType === "method_of_verification" || letterType === "debt_dispute") && (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Credit Bureau</label>
-                    <select
-                      value={bureau}
-                      onChange={(e) => setBureau(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
-                    >
-                      <option value="EQUIFAX">Equifax</option>
-                      <option value="EXPERIAN">Experian</option>
-                      <option value="TRANSUNION">TransUnion</option>
-                    </select>
-                  </div>
-                )}
-
-                {letterType === "debt_dispute" && (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Reason for Dispute</label>
-                    <textarea
-                      value={reason}
-                      onChange={(e) => setReason(e.target.value)}
-                      placeholder="Explain why this information is inaccurate..."
-                      rows={3}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
-                    />
-                  </div>
-                )}
-
-                {letterType === "goodwill" && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Late Payment Date</label>
-                      <input
-                        type="date"
-                        value={latePaymentDate}
-                        onChange={(e) => setLatePaymentDate(e.target.value)}
-                        className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Circumstances (optional)</label>
-                      <textarea
-                        value={circumstance}
-                        onChange={(e) => setCircumstance(e.target.value)}
-                        placeholder="e.g., I was hospitalized and unable to make the payment on time..."
-                        rows={2}
-                        className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none"
-                      />
-                    </div>
-                  </>
-                )}
-
-                <button
-                  onClick={handleGenerateLetter}
-                  className="w-full py-3 bg-gradient-to-r from-lime-500 to-teal-600 text-white rounded-xl font-medium hover:from-lime-400 hover:to-teal-500 transition"
-                >
-                  Generate Letter
-                </button>
-              </div>
-            </div>
-
-            {/* Generated Letter Preview */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Preview</h2>
-                {generatedLetter && (
-                  <button
-                    onClick={copyToClipboard}
-                    className="px-4 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition"
-                  >
-                    Copy to Clipboard
-                  </button>
-                )}
-              </div>
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 min-h-[600px] shadow-sm">
-                {generatedLetter ? (
-                  <pre className="whitespace-pre-wrap font-mono text-sm text-slate-700">
-                    {generatedLetter}
-                  </pre>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-slate-400">
-                    <div className="text-center">
-                      <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <p>Fill out the form and click Generate</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Statute of Limitations Tab */}
-        {activeTab === "sol" && (
-          <div className="max-w-2xl">
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-8">
+          {/* Statute of Limitations */}
+          <div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-6">
               <h2 className="text-xl font-semibold mb-4">Check Statute of Limitations</h2>
               <p className="text-slate-600 mb-6">
                 If a debt is past the statute of limitations, collectors cannot sue you to collect it.
@@ -480,11 +191,9 @@ export default function ToolsPage() {
               </div>
             </div>
           </div>
-        )}
 
-        {/* Removal Date Calculator Tab */}
-        {activeTab === "calculator" && (
-          <div className="max-w-2xl">
+          {/* Removal Date Calculator */}
+          <div>
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <h2 className="text-xl font-semibold mb-4">Credit Report Removal Date</h2>
               <p className="text-slate-600 mb-6">
@@ -558,7 +267,8 @@ export default function ToolsPage() {
               </div>
             </div>
           </div>
-        )}
+
+        </div>
       </main>
     </AuthenticatedLayout>
   );
