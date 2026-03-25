@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
       confirm: true,
       off_session: true,
       description: "USPS mailing fee — CFPB complaint letter",
-      metadata: { firebaseUid: user.uid },
+      metadata: { userId: user.uid },
     });
 
     if (pi.status !== "succeeded") {

@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email || undefined,
-        metadata: { firebaseUid: user.uid },
+        metadata: { userId: user.uid },
       });
       customerId = customer.id;
       await firestore.updateDoc("users", user.uid, { stripeCustomerId: customerId });
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: bodySuccessUrl || `${appUrl}/autopilot?subscribed=1`,
       cancel_url: `${appUrl}/pricing`,
-      metadata: { firebaseUid: user.uid, planTier: "autopilot" },
+      metadata: { userId: user.uid, planTier: "autopilot" },
     });
 
     await logAuditEvent({

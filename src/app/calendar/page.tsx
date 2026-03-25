@@ -6,9 +6,6 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 
-const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
-const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
-
 interface DisputeEvent {
   id: string;
   creditorName: string;
@@ -23,42 +20,6 @@ interface DisputeEvent {
   isRound2Ready: boolean;
   daysSinceMailed: number | null;
   daysUntilDeadline: number | null;
-}
-
-function firestoreValueToJs(val: Record<string, unknown>): unknown {
-  if ("stringValue" in val) return val.stringValue;
-  if ("integerValue" in val) return parseInt(val.integerValue as string, 10);
-  if ("doubleValue" in val) return val.doubleValue;
-  if ("booleanValue" in val) return val.booleanValue;
-  if ("nullValue" in val) return null;
-  if ("timestampValue" in val) return new Date(val.timestampValue as string);
-  if ("arrayValue" in val) {
-    const arr = val.arrayValue as { values?: Record<string, unknown>[] };
-    return (arr.values || []).map(firestoreValueToJs);
-  }
-  if ("mapValue" in val) {
-    const map = val.mapValue as { fields?: Record<string, Record<string, unknown>> };
-    const result: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(map.fields || {})) {
-      result[k] = firestoreValueToJs(v);
-    }
-    return result;
-  }
-  return null;
-}
-
-function parseDocument(doc: {
-  name: string;
-  fields?: Record<string, Record<string, unknown>>;
-}): Record<string, unknown> & { id: string } {
-  const id = doc.name.split("/").pop()!;
-  const result: Record<string, unknown> = { id };
-  if (doc.fields) {
-    for (const [k, v] of Object.entries(doc.fields)) {
-      result[k] = firestoreValueToJs(v);
-    }
-  }
-  return result as Record<string, unknown> & { id: string };
 }
 
 function statusColor(status: string) {
@@ -111,33 +72,19 @@ export default function CalendarPage() {
 
     async function loadDisputes() {
       try {
-        const res = await fetch(`${FIRESTORE_BASE}:runQuery`, {
+        const res = await fetch("/api/data/disputes", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${user!.idToken}`,
           },
-          body: JSON.stringify({
-            structuredQuery: {
-              from: [{ collectionId: "disputes" }],
-              where: {
-                fieldFilter: {
-                  field: { fieldPath: "userId" },
-                  op: "EQUAL",
-                  value: { stringValue: user!.uid },
-                },
-              },
-            },
-          }),
+          body: JSON.stringify({}),
         });
 
-        const data = await res.json();
+        const data = await res.json() as { documents?: Record<string, unknown>[] };
         const now = new Date();
 
-        const parsed: DisputeEvent[] = data
-          .filter((r: Record<string, unknown>) => r.document)
-          .map((r: Record<string, unknown>) => {
-            const doc = parseDocument(r.document as { name: string; fields?: Record<string, Record<string, unknown>> });
+        const parsed: DisputeEvent[] = (data.documents || []).map((doc: Record<string, unknown>) => {
             const createdAt = doc.createdAt instanceof Date ? doc.createdAt : new Date(doc.createdAt as string || Date.now());
             const mailedAt = doc.mailedAt ? (doc.mailedAt instanceof Date ? doc.mailedAt : new Date(doc.mailedAt as string)) : null;
             const resolvedAt = doc.resolvedAt ? (doc.resolvedAt instanceof Date ? doc.resolvedAt : new Date(doc.resolvedAt as string)) : null;
@@ -158,7 +105,7 @@ export default function CalendarPage() {
               !String(doc.reason || "").includes("[Round 2]");
 
             return {
-              id: doc.id,
+              id: doc.id as string,
               creditorName: (doc.creditorName as string) || "Unknown",
               bureau: (doc.bureau as string) || "",
               reason: (doc.reason as string) || "",

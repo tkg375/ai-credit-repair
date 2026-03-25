@@ -8,9 +8,6 @@ import { useSubscription } from "@/lib/use-subscription";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import { downloadCSV } from "@/lib/export-csv";
 
-const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
-const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
-
 interface RemovalStrategy {
   method: string;
   description: string;
@@ -81,88 +78,6 @@ function getDeadlineChip(dispute: Dispute): { label: string; color: string } | n
   if (daysLeft <= 5) return { label: `${daysLeft}d left`, color: "bg-orange-100 text-orange-700" };
   if (daysLeft <= 10) return { label: `${daysLeft}d left`, color: "bg-amber-100 text-amber-700" };
   return { label: `${daysLeft}d left`, color: "bg-slate-100 text-slate-600" };
-}
-
-function firestoreValueToJs(val: Record<string, unknown>): unknown {
-  if ("stringValue" in val) return val.stringValue;
-  if ("integerValue" in val) return parseInt(val.integerValue as string, 10);
-  if ("doubleValue" in val) return val.doubleValue;
-  if ("booleanValue" in val) return val.booleanValue;
-  if ("nullValue" in val) return null;
-  if ("timestampValue" in val) return new Date(val.timestampValue as string);
-  if ("arrayValue" in val) {
-    const arr = val.arrayValue as { values?: Record<string, unknown>[] };
-    return (arr.values || []).map(firestoreValueToJs);
-  }
-  if ("mapValue" in val) {
-    const map = val.mapValue as { fields?: Record<string, Record<string, unknown>> };
-    const result: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(map.fields || {})) {
-      result[k] = firestoreValueToJs(v);
-    }
-    return result;
-  }
-  return null;
-}
-
-function parseDocument(doc: { name: string; fields?: Record<string, Record<string, unknown>> }): Record<string, unknown> & { id: string } {
-  const id = doc.name.split("/").pop()!;
-  const result: Record<string, unknown> = { id };
-  if (doc.fields) {
-    for (const [k, v] of Object.entries(doc.fields)) {
-      result[k] = firestoreValueToJs(v);
-    }
-  }
-  return result as Record<string, unknown> & { id: string };
-}
-
-async function queryCollection(
-  idToken: string,
-  collection: string,
-  userId: string,
-  additionalFilters?: { field: string; op: string; value: unknown }[]
-) {
-  const filters = [
-    {
-      fieldFilter: {
-        field: { fieldPath: "userId" },
-        op: "EQUAL",
-        value: { stringValue: userId },
-      },
-    },
-    ...(additionalFilters || []).map((f) => ({
-      fieldFilter: {
-        field: { fieldPath: f.field },
-        op: f.op,
-        value: typeof f.value === "boolean" ? { booleanValue: f.value } : { stringValue: f.value },
-      },
-    })),
-  ];
-
-  const query: Record<string, unknown> = {
-    structuredQuery: {
-      from: [{ collectionId: collection }],
-      where: filters.length === 1
-        ? filters[0]
-        : { compositeFilter: { op: "AND", filters } },
-    },
-  };
-
-  const res = await fetch(`${FIRESTORE_BASE}:runQuery`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${idToken}`,
-    },
-    body: JSON.stringify(query),
-  });
-
-  if (!res.ok) return [];
-
-  const data = await res.json();
-  return data
-    .filter((item: { document?: unknown }) => item.document)
-    .map((item: { document: { name: string; fields?: Record<string, Record<string, unknown>> } }) => parseDocument(item.document));
 }
 
 export default function DisputesPage() {
@@ -237,7 +152,13 @@ export default function DisputesPage() {
         } catch { /* non-blocking */ }
 
         // Load ALL report items to analyze for removal
-        const items = await queryCollection(user!.idToken, "reportItems", user!.uid, []);
+        const itemsRes = await fetch("/api/data/reportItems", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${user!.idToken}` },
+          body: JSON.stringify({}),
+        });
+        const itemsData = await itemsRes.json() as { documents?: (Record<string, unknown> & { id: string })[] };
+        const items = itemsData.documents || [];
         setDisputableItems(
           items
             .filter((item: Record<string, unknown>) => item.isDisputable === true)
@@ -260,7 +181,13 @@ export default function DisputesPage() {
         );
 
         // Load existing disputes
-        const disputeDocs = await queryCollection(user!.idToken, "disputes", user!.uid);
+        const disputesRes = await fetch("/api/data/disputes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${user!.idToken}` },
+          body: JSON.stringify({}),
+        });
+        const disputesData = await disputesRes.json() as { documents?: Record<string, unknown>[] };
+        const disputeDocs = (disputesData.documents || []) as (Record<string, unknown> & { id: string })[];
         setDisputes(
           disputeDocs.map((d: Record<string, unknown> & { id: string }) => {
             const addrData = d.creditorAddress as Record<string, unknown> | null;
@@ -480,12 +407,9 @@ export default function DisputesPage() {
     setDeleting(disputeId);
 
     try {
-      // Delete from Firestore
-      const res = await fetch(`${FIRESTORE_BASE}/disputes/${disputeId}`, {
+      const res = await fetch(`/api/data/disputes/${disputeId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${user.idToken}`,
-        },
+        headers: { Authorization: `Bearer ${user.idToken}` },
       });
 
       if (!res.ok) {
@@ -509,11 +433,9 @@ export default function DisputesPage() {
     setDeletingItem(itemId);
 
     try {
-      const res = await fetch(`${FIRESTORE_BASE}/reportItems/${itemId}`, {
+      const res = await fetch(`/api/data/reportItems/${itemId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${user.idToken}`,
-        },
+        headers: { Authorization: `Bearer ${user.idToken}` },
       });
 
       if (!res.ok) {
@@ -537,19 +459,10 @@ export default function DisputesPage() {
 
     try {
       const now = new Date().toISOString();
-      const docUrl = `${FIRESTORE_BASE}/disputes/${disputeId}?updateMask.fieldPaths=status&updateMask.fieldPaths=resolvedAt`;
-      const res = await fetch(docUrl, {
+      const res = await fetch(`/api/data/disputes/${disputeId}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.idToken}`,
-        },
-        body: JSON.stringify({
-          fields: {
-            status: { stringValue: "RESOLVED" },
-            resolvedAt: { timestampValue: now },
-          },
-        }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
+        body: JSON.stringify({ status: "RESOLVED", resolvedAt: now }),
       });
 
       if (!res.ok) throw new Error("Failed to resolve dispute");
@@ -577,15 +490,10 @@ export default function DisputesPage() {
 
     setSettingOutcome(disputeId);
     try {
-      const docUrl = `${FIRESTORE_BASE}/disputes/${disputeId}?updateMask.fieldPaths=outcome`;
-      await fetch(docUrl, {
+        await fetch(`/api/data/disputes/${disputeId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
-        body: JSON.stringify({
-          fields: newOutcome
-            ? { outcome: { stringValue: newOutcome } }
-            : { outcome: { nullValue: null } },
-        }),
+        body: JSON.stringify({ outcome: newOutcome }),
       });
       setDisputes(prev => prev.map(d => d.id === disputeId ? { ...d, outcome: newOutcome } : d));
     } catch (err) {
@@ -760,19 +668,10 @@ export default function DisputesPage() {
     if (!user) return;
 
     try {
-      // Clear the mail error fields in Firestore so the user can retry
-      const docUrl = `${FIRESTORE_BASE}/disputes/${disputeId}?updateMask.fieldPaths=mailJobId&updateMask.fieldPaths=mailStatus&updateMask.fieldPaths=mailError&updateMask.fieldPaths=mailDocumentId&updateMask.fieldPaths=mailAddressId&updateMask.fieldPaths=status`;
-      await fetch(docUrl, {
+      await fetch(`/api/data/disputes/${disputeId}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.idToken}`,
-        },
-        body: JSON.stringify({
-          fields: {
-            status: { stringValue: "DRAFT" },
-          },
-        }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
+        body: JSON.stringify({ status: "DRAFT", mailJobId: null, mailStatus: null, mailError: null, mailDocumentId: null, mailAddressId: null }),
       });
 
       // Update local state

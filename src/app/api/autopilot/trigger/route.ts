@@ -377,7 +377,7 @@ ${senderAddress}${profile?.dateOfBirth ? "\nDOB: " + profile.dateOfBirth : ""}
           confirm: true,
           off_session: true,
           description: `Autopilot mailing — ${creditorName}`,
-          metadata: { firebaseUid: user.uid, disputeId, autopilotRunId: runId },
+          metadata: { userId: user.uid, disputeId, autopilotRunId: runId },
         });
 
         if (pi.status !== "succeeded") {

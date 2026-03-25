@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const uid = session.metadata?.firebaseUid;
+        const uid = session.metadata?.userId || session.metadata?.firebaseUid;
         let planTier: "pro" | "autopilot" = "pro";
         if (uid && session.subscription) {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
         const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
-        const uid = customer.metadata?.firebaseUid;
+        const uid = customer.metadata?.userId || customer.metadata?.firebaseUid;
         if (uid) {
           const periodEnd = subscription.items.data[0]?.current_period_end;
           const priceId = subscription.items.data[0]?.price?.id;
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
         const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
-        const uid = customer.metadata?.firebaseUid;
+        const uid = customer.metadata?.userId || customer.metadata?.firebaseUid;
         if (uid) {
           await firestore.updateDoc("users", uid, {
             subscriptionStatus: "canceled",
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         const customer = await stripe.customers.retrieve(invoice.customer as string) as Stripe.Customer;
-        const uid = customer.metadata?.firebaseUid;
+        const uid = customer.metadata?.userId || customer.metadata?.firebaseUid;
         if (uid) {
           // Get current plan tier before marking past_due so we can label the email correctly
           const userDoc = await firestore.getDoc("users", uid);

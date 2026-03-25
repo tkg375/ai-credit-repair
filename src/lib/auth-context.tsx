@@ -8,12 +8,11 @@ import {
   type ReactNode,
 } from "react";
 
-const API_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY!;
-
 interface User {
   uid: string;
   email: string | null;
   displayName: string | null;
+  /** Our custom HMAC-SHA256 JWT — used in Authorization: Bearer headers throughout the app */
   idToken: string;
   refreshToken: string;
 }
@@ -29,105 +28,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Firebase Auth REST API endpoints
-const AUTH_BASE = "https://identitytoolkit.googleapis.com/v1/accounts";
-
-async function signInWithPassword(email: string, password: string): Promise<User> {
-  const res = await fetch(`${AUTH_BASE}:signInWithPassword?key=${API_KEY}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, returnSecureToken: true }),
-  });
-
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error?.message || "Sign in failed");
-  }
-
-  const data = await res.json();
-  return {
-    uid: data.localId,
-    email: data.email,
-    displayName: data.displayName || null,
-    idToken: data.idToken,
-    refreshToken: data.refreshToken,
-  };
-}
-
-async function signUpWithPassword(email: string, password: string): Promise<User> {
-  const res = await fetch(`${AUTH_BASE}:signUp?key=${API_KEY}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, returnSecureToken: true }),
-  });
-
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error?.message || "Sign up failed");
-  }
-
-  const data = await res.json();
-  return {
-    uid: data.localId,
-    email: data.email,
-    displayName: data.displayName || null,
-    idToken: data.idToken,
-    refreshToken: data.refreshToken,
-  };
-}
-
-async function refreshIdToken(refreshToken: string): Promise<{ idToken: string; refreshToken: string }> {
-  const res = await fetch(`https://securetoken.googleapis.com/v1/token?key=${API_KEY}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ grant_type: "refresh_token", refresh_token: refreshToken }),
-  });
-
-  if (!res.ok) {
-    throw new Error("Token refresh failed");
-  }
-
-  const data = await res.json();
-  return {
-    idToken: data.id_token,
-    refreshToken: data.refresh_token,
-  };
-}
-
-async function getUserData(idToken: string): Promise<{ uid: string; email: string; displayName: string | null }> {
-  const res = await fetch(`${AUTH_BASE}:lookup?key=${API_KEY}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ idToken }),
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to get user data");
-  }
-
-  const data = await res.json();
-  const user = data.users?.[0];
-  if (!user) throw new Error("User not found");
-
-  return {
-    uid: user.localId,
-    email: user.email,
-    displayName: user.displayName || null,
-  };
-}
-
-async function syncSession(user: User | null) {
-  if (user) {
-    await fetch("/api/auth/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: user.idToken }),
-    });
-  } else {
-    await fetch("/api/auth/session", { method: "DELETE" });
-  }
-}
-
 const STORAGE_KEY = "creditai_auth";
 
 function saveUser(user: User) {
@@ -139,7 +39,7 @@ function loadUser(): User | null {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) return null;
   try {
-    return JSON.parse(stored);
+    return JSON.parse(stored) as User;
   } catch {
     return null;
   }
@@ -153,29 +53,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore session on mount
+  // Restore session on mount — verify stored token is still valid
   useEffect(() => {
     async function restoreSession() {
       const stored = loadUser();
-      if (!stored) {
+      if (!stored?.idToken) {
         setLoading(false);
         return;
       }
 
       try {
-        // Try to refresh the token
-        const tokens = await refreshIdToken(stored.refreshToken);
-        const userData = await getUserData(tokens.idToken);
-        const refreshedUser: User = {
-          ...userData,
-          idToken: tokens.idToken,
-          refreshToken: tokens.refreshToken,
+        const res = await fetch("/api/auth/me", {
+          headers: { Authorization: `Bearer ${stored.idToken}` },
+        });
+        if (!res.ok) {
+          clearUser();
+          setLoading(false);
+          return;
+        }
+        const data = await res.json() as { uid: string; email: string; token: string };
+        // Use possibly-refreshed token
+        const refreshed: User = {
+          uid: data.uid,
+          email: data.email,
+          displayName: stored.displayName,
+          idToken: data.token,
+          refreshToken: "",
         };
-        saveUser(refreshedUser);
-        setUser(refreshedUser);
-        await syncSession(refreshedUser);
+        saveUser(refreshed);
+        setUser(refreshed);
       } catch {
-        // Token expired or invalid, clear storage
         clearUser();
       } finally {
         setLoading(false);
@@ -186,31 +93,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const user = await signInWithPassword(email, password);
-    saveUser(user);
-    setUser(user);
-    await syncSession(user);
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json() as { error?: string };
+      const code = data.error || "Sign in failed";
+      if (code === "INVALID_LOGIN_CREDENTIALS") throw new Error("INVALID_LOGIN_CREDENTIALS");
+      throw new Error(code);
+    }
+
+    const data = await res.json() as { uid: string; email: string; token: string };
+    const newUser: User = {
+      uid: data.uid,
+      email: data.email,
+      displayName: null,
+      idToken: data.token,
+      refreshToken: "",
+    };
+    saveUser(newUser);
+    setUser(newUser);
   };
 
   const signUp = async (email: string, password: string): Promise<User> => {
-    const user = await signUpWithPassword(email, password);
-    saveUser(user);
-    setUser(user);
-    await syncSession(user);
-    return user;
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json() as { error?: string };
+      const code = data.error || "Sign up failed";
+      if (code === "EMAIL_EXISTS") throw new Error("EMAIL_EXISTS");
+      if (code === "WEAK_PASSWORD") throw new Error("WEAK_PASSWORD : Password should be at least 6 characters");
+      throw new Error(code);
+    }
+
+    const data = await res.json() as { uid: string; email: string; token: string };
+    const newUser: User = {
+      uid: data.uid,
+      email: data.email,
+      displayName: null,
+      idToken: data.token,
+      refreshToken: "",
+    };
+    saveUser(newUser);
+    setUser(newUser);
+    return newUser;
   };
 
   const signInWithGoogle = async () => {
-    // Google Sign-In requires the Firebase SDK or a popup/redirect flow
-    // For REST API only, we'd need to implement OAuth manually
-    // For now, throw an error directing users to email/password
-    throw new Error("Google sign-in requires email/password. Please use email registration.");
+    throw new Error("Google sign-in is not supported. Please use email and password.");
   };
 
   const signOut = async () => {
     clearUser();
     setUser(null);
-    await syncSession(null);
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
   };
 
   return (

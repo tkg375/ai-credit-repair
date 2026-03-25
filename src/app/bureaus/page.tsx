@@ -6,8 +6,6 @@ import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import { ProGate } from "@/components/ProGate";
 
-const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
-const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
 interface ReportItem {
   id: string;
@@ -35,39 +33,24 @@ export default function BureausPage() {
 
   useEffect(() => {
     if (!user) return;
-    fetch(`${FIRESTORE_BASE}:runQuery`, {
+    fetch("/api/data/reportItems", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
-      body: JSON.stringify({
-        structuredQuery: {
-          from: [{ collectionId: "reportItems" }],
-          where: { fieldFilter: { field: { fieldPath: "userId" }, op: "EQUAL", value: { stringValue: user.uid } } },
-        },
-      }),
+      body: JSON.stringify({}),
     })
       .then(r => r.json())
-      .then(data => {
-        const parsed = (data as Record<string, unknown>[])
-          .filter(r => (r as Record<string, unknown>).document)
-          .map(r => {
-            const doc = (r as Record<string, unknown>).document as Record<string, unknown>;
-            const fields = doc.fields as Record<string, Record<string, unknown>>;
-            const str = (f: string) => (fields?.[f]?.stringValue as string) || "";
-            const num = (f: string) => Number(fields?.[f]?.integerValue || fields?.[f]?.doubleValue || 0);
-            const bool = (f: string) => (fields?.[f]?.booleanValue as boolean) ?? false;
-            const docName = doc.name as string;
-            return {
-              id: docName.split("/").pop()!,
-              creditorName: str("creditorName"),
-              accountNumber: str("accountNumber"),
-              accountType: str("accountType"),
-              balance: num("balance"),
-              status: str("status"),
-              bureau: str("bureau"),
-              dateOpened: str("dateOpened") || null,
-              isDisputable: bool("isDisputable"),
-            } as ReportItem;
-          });
+      .then((data: { documents?: Record<string, unknown>[] }) => {
+        const parsed = (data.documents || []).map(doc => ({
+          id: doc.id as string,
+          creditorName: (doc.creditorName as string) || "",
+          accountNumber: (doc.accountNumber as string) || "",
+          accountType: (doc.accountType as string) || "",
+          balance: Number(doc.balance) || 0,
+          status: (doc.status as string) || "",
+          bureau: (doc.bureau as string) || "",
+          dateOpened: (doc.dateOpened as string) || null,
+          isDisputable: (doc.isDisputable as boolean) ?? false,
+        } as ReportItem));
         setItems(parsed);
       })
       .catch(console.error)

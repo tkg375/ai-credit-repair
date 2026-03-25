@@ -6,60 +6,6 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 
-const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
-const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
-
-function jsToFirestoreValue(val: unknown): Record<string, unknown> {
-  if (val === null || val === undefined) return { nullValue: null };
-  if (typeof val === "string") return { stringValue: val };
-  if (typeof val === "number") {
-    if (Number.isInteger(val)) return { integerValue: val.toString() };
-    return { doubleValue: val };
-  }
-  if (typeof val === "boolean") return { booleanValue: val };
-  if (val instanceof Date) return { timestampValue: val.toISOString() };
-  if (Array.isArray(val)) {
-    return { arrayValue: { values: val.map(jsToFirestoreValue) } };
-  }
-  if (typeof val === "object") {
-    const fields: Record<string, Record<string, unknown>> = {};
-    for (const [k, v] of Object.entries(val as Record<string, unknown>)) {
-      fields[k] = jsToFirestoreValue(v);
-    }
-    return { mapValue: { fields } };
-  }
-  return { stringValue: String(val) };
-}
-
-async function addDocument(
-  idToken: string,
-  collection: string,
-  data: Record<string, unknown>
-) {
-  const fields: Record<string, Record<string, unknown>> = {};
-  for (const [k, v] of Object.entries(data)) {
-    fields[k] = jsToFirestoreValue(v);
-  }
-
-  const res = await fetch(`${FIRESTORE_BASE}/${collection}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${idToken}`,
-    },
-    body: JSON.stringify({ fields }),
-  });
-
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    const message = errorData.error?.message || errorData.error?.status || `HTTP ${res.status}`;
-    throw new Error(`Failed to create document: ${message}`);
-  }
-
-  const doc = await res.json();
-  return doc.name.split("/").pop();
-}
-
 export default function UploadPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();

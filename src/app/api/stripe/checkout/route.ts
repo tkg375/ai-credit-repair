@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email || undefined,
-        metadata: { firebaseUid: user.uid },
+        metadata: { userId: user.uid },
       });
       customerId = customer.id;
       await firestore.updateDoc("users", user.uid, {
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       ...(applyDiscount && { discounts: [{ coupon: referralCouponId! }] }),
       success_url: bodySuccessUrl || `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/pricing`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://credit-800.com"}/pricing`,
-      metadata: { firebaseUid: user.uid },
+      metadata: { userId: user.uid },
     });
 
     return NextResponse.json({ url: session.url });

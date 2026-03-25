@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
       confirm: true,
       off_session: true,
       description: `USPS mailing fee — dispute letter (${creditorName})`,
-      metadata: { firebaseUid: user.uid, disputeId },
+      metadata: { userId: user.uid, disputeId },
     });
 
     if (pi.status !== "succeeded") {

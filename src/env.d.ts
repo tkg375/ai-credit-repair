@@ -2,8 +2,6 @@
 
 interface CloudflareEnv {
   ASSETS: Fetcher;
-  FIREBASE_PROJECT_ID: string;
-  FIREBASE_CLIENT_EMAIL: string;
   CREDIT_REPORTS_BUCKET: R2Bucket;
   GEMINI_API_KEY: string;
 }

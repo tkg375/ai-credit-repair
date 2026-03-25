@@ -3,7 +3,7 @@
  *
  * This module provides a single interface for pulling consumer credit reports
  * from any supported provider. Swap the implementation by setting:
- *   CREDIT_PULL_PROVIDER=crs|bloom|softpull|stub
+ *   CREDIT_PULL_PROVIDER=crs|bloom|softpull|equifax|stub
  *
  * All implementations must:
  * - Use soft inquiries only (no hard pulls)
@@ -59,7 +59,7 @@ export interface CreditPullResult {
   provider: string;
 }
 
-export type CreditPullProvider = "crs" | "bloom" | "softpull" | "stub";
+export type CreditPullProvider = "crs" | "bloom" | "softpull" | "equifax" | "stub";
 
 // ---------------------------------------------------------------------------
 // Stub provider — returns mock data for development/testing
@@ -191,6 +191,151 @@ async function pullSoftPullSolutions(
 }
 
 // ---------------------------------------------------------------------------
+// Equifax OneView (Consumer Credit Report) provider
+// Docs: https://developer.equifax.com/products/apiproducts/oneview-consumer-credit-report
+// Sandbox scope: https://api.equifax.com/business/oneview/consumer-credit/v1
+// Env vars: EQUIFAX_CLIENT_ID, EQUIFAX_CLIENT_SECRET
+// ---------------------------------------------------------------------------
+
+/** In-memory token cache to avoid redundant OAuth2 calls */
+let equifaxTokenCache: { token: string; expiresAt: number } | null = null;
+
+async function getEquifaxToken(clientId: string, clientSecret: string): Promise<string> {
+  const now = Date.now();
+  if (equifaxTokenCache && equifaxTokenCache.expiresAt > now + 30_000) {
+    return equifaxTokenCache.token;
+  }
+
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+  const res = await fetch("https://api.equifax.com/v2/oauth/token", {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${credentials}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      grant_type: "client_credentials",
+      scope: "https://api.equifax.com/business/oneview/consumer-credit/v1",
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`[equifax] OAuth2 token exchange failed (${res.status}): ${err}`);
+  }
+
+  const data = await res.json();
+  equifaxTokenCache = {
+    token: data.access_token,
+    expiresAt: now + (data.expires_in ?? 1800) * 1000,
+  };
+  return equifaxTokenCache.token;
+}
+
+async function pullEquifax(
+  identity: CreditPullIdentity
+): Promise<CreditPullResult> {
+  const clientId = process.env.EQUIFAX_CLIENT_ID;
+  const clientSecret = process.env.EQUIFAX_CLIENT_SECRET;
+  if (!clientId || !clientSecret)
+    throw new Error("EQUIFAX_CLIENT_ID and EQUIFAX_CLIENT_SECRET are not configured");
+
+  const token = await getEquifaxToken(clientId, clientSecret);
+
+  // TODO: Confirm exact request body field names once test credentials are approved
+  // and API reference is accessible at developer.equifax.com
+  //
+  // Expected request shape (update field names from API reference as needed):
+  //   POST https://api.equifax.com/business/oneview/consumer-credit/v1
+  //   Headers: { Authorization: "Bearer <token>", Content-Type: "application/json" }
+  //   Body: {
+  //     consumers: [{
+  //       name: [{ firstName, lastName }],
+  //       socialNum: identity.ssn,           // confirm field name
+  //       dateOfBirth: identity.dateOfBirth, // confirm format (YYYY-MM-DD or MM/DD/YYYY)
+  //       addresses: [{
+  //         line1: identity.address,
+  //         city: identity.city,
+  //         state: identity.state,
+  //         zip: identity.zip,
+  //       }],
+  //     }],
+  //     featuresTog: ["softInquiry"],        // confirm soft-pull toggle field
+  //   }
+  //
+  // Expected response shape (update paths from API reference):
+  //   response.consumers[0].equifaxUSConsumerCreditReport[0]
+  //     .scores[]           → find VantageScore (modelIndicator === "VS4" or similar)
+  //     .tradelines[]       → account/tradeline array
+  //     .reportDate         → report date
+  //     .identifier         → external report ID
+
+  const res = await fetch("https://api.equifax.com/business/oneview/consumer-credit/v1", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      consumers: [
+        {
+          name: [{ firstName: identity.firstName, lastName: identity.lastName }],
+          socialNum: identity.ssn,
+          dateOfBirth: identity.dateOfBirth,
+          addresses: [
+            {
+              line1: identity.address,
+              city: identity.city,
+              state: identity.state,
+              zip: identity.zip,
+            },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`[equifax] Credit report request failed (${res.status}): ${err}`);
+  }
+
+  const data = await res.json();
+
+  // TODO: Update these paths once the API reference is confirmed
+  const report = data?.consumers?.[0]?.equifaxUSConsumerCreditReport?.[0];
+  if (!report) throw new Error("[equifax] Unexpected response shape — missing report data");
+
+  const scores: Array<{ score: number; modelIndicator: string }> = report.scores ?? [];
+  const vantageEntry = scores.find((s) =>
+    s.modelIndicator?.toUpperCase().startsWith("VS")
+  );
+
+  const tradelines: CreditTradeline[] = (report.tradelines ?? []).map((t: any) => ({
+    creditorName: t.creditorName ?? t.subscriberName ?? "",
+    accountNumber: t.accountNumber ?? "",
+    accountType: t.portfolioTypeCode ?? t.accountType ?? "",
+    balance: t.currentBalance ?? null,
+    creditLimit: t.creditLimit ?? t.highCreditAmount ?? null,
+    status: t.accountStatusCode ?? t.status ?? "",
+    dateOpened: t.dateOpened ?? null,
+    dateOfFirstDelinquency: t.dateFirstDelinquency ?? null,
+    lastActivityDate: t.dateLastActivity ?? null,
+    isNegative: !!(t.derogatory || t.collections || t.chargeOff),
+    bureau: "EQUIFAX" as const,
+  }));
+
+  return {
+    externalReportId: report.identifier ?? report.reportDate ?? `equifax_${Date.now()}`,
+    vantageScore: vantageEntry?.score ?? null,
+    bureau: "EQUIFAX",
+    tradelines,
+    pulledAt: new Date().toISOString(),
+    provider: "equifax",
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Main entry point
 // ---------------------------------------------------------------------------
 
@@ -209,7 +354,7 @@ export async function pullCreditReport(
   identity: CreditPullIdentity,
   consentId: string
 ): Promise<CreditPullResult> {
-  const provider = (process.env.CREDIT_PULL_PROVIDER || "stub") as CreditPullProvider;
+  const provider = (process.env.CREDIT_PULL_PROVIDER ?? "stub") as CreditPullProvider;
 
   // Log the pull attempt (without any PII or SSN)
   console.log(
@@ -223,6 +368,8 @@ export async function pullCreditReport(
       return pullBloom(identity);
     case "softpull":
       return pullSoftPullSolutions(identity);
+    case "equifax":
+      return pullEquifax(identity);
     case "stub":
     default:
       return pullStub(identity);

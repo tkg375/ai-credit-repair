@@ -16,8 +16,6 @@ const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: 
 const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), { ssr: false });
 const Legend = dynamic(() => import("recharts").then((m) => m.Legend), { ssr: false });
 
-const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
-const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
 export default function PayoffPage() {
   const { user, loading: authLoading } = useAuth();
@@ -38,25 +36,19 @@ export default function PayoffPage() {
     if (!user) return;
     setLoadingReport(true);
     try {
-      const res = await fetch(`${FIRESTORE_BASE}:runQuery`, {
+      const res = await fetch("/api/data/reportItems", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.idToken}` },
-        body: JSON.stringify({
-          structuredQuery: {
-            from: [{ collectionId: "reportItems" }],
-            where: { fieldFilter: { field: { fieldPath: "userId" }, op: "EQUAL", value: { stringValue: user.uid } } },
-          },
-        }),
+        body: JSON.stringify({}),
       });
-      const data = await res.json();
-      const items = data.filter((r: Record<string, unknown>) => r.document).map((r: Record<string, unknown>) => {
-        const doc = r.document as Record<string, unknown>;
-        const fields = doc.fields as Record<string, Record<string, unknown>>;
-        const get = (f: string) => fields?.[f];
-        const str = (f: string) => (get(f)?.stringValue as string) || "";
-        const num = (f: string) => Number(get(f)?.integerValue || get(f)?.doubleValue || 0);
-        return { creditorName: str("creditorName"), accountType: str("accountType"), balance: num("balance") };
-      }).filter((i: { balance: number }) => i.balance > 0);
+      const data = await res.json() as { documents?: Record<string, unknown>[] };
+      const items = (data.documents || [])
+        .map((doc: Record<string, unknown>) => ({
+          creditorName: (doc.creditorName as string) || "",
+          accountType: (doc.accountType as string) || "",
+          balance: Number(doc.balance) || 0,
+        }))
+        .filter((i: { balance: number }) => i.balance > 0);
 
       if (items.length === 0) {
         alert("No debts with balances found in your credit report. Upload a report first.");

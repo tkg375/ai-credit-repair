@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 
-const API_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY!;
-
 export default function ProfilePage() {
   const { user, loading: authLoading, signOut } = useAuth();
   const router = useRouter();
@@ -88,27 +86,11 @@ export default function ProfilePage() {
     setDeleting(true);
     setError("");
     try {
-      // 1. Delete Firebase Auth account first (requires valid idToken)
-      const authRes = await fetch(
-        `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${API_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken: user.idToken }),
-        }
-      );
-      if (!authRes.ok) {
-        const d = await authRes.json();
-        throw new Error(d.error?.message || "Failed to delete auth account");
-      }
-
-      // 2. Delete all Firestore data server-side
       await fetch("/api/users/delete", {
         method: "DELETE",
         headers: { Authorization: `Bearer ${user.idToken}` },
       });
 
-      // 3. Sign out and redirect
       await signOut();
       router.push("/login");
     } catch (err) {

@@ -15,9 +15,6 @@ const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), { ssr: fals
 const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
 const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), { ssr: false });
 
-const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!;
-const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
-
 interface Dispute {
   id: string;
   bureau: string;
@@ -42,93 +39,6 @@ interface ReportChanges {
   statusChanges: { creditorName: string; oldStatus: string; newStatus: string }[];
   totalBalanceDelta: number;
   createdAt: string;
-}
-
-// Firestore REST API helpers
-function firestoreValueToJs(val: Record<string, unknown>): unknown {
-  if ("stringValue" in val) return val.stringValue;
-  if ("integerValue" in val) return parseInt(val.integerValue as string, 10);
-  if ("doubleValue" in val) return val.doubleValue;
-  if ("booleanValue" in val) return val.booleanValue;
-  if ("nullValue" in val) return null;
-  if ("timestampValue" in val) return new Date(val.timestampValue as string);
-  if ("arrayValue" in val) {
-    const arr = val.arrayValue as { values?: Record<string, unknown>[] };
-    return (arr.values || []).map(firestoreValueToJs);
-  }
-  if ("mapValue" in val) {
-    const map = val.mapValue as { fields?: Record<string, Record<string, unknown>> };
-    const result: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(map.fields || {})) {
-      result[k] = firestoreValueToJs(v);
-    }
-    return result;
-  }
-  return null;
-}
-
-function parseDocument(doc: { name: string; fields?: Record<string, Record<string, unknown>> }): Record<string, unknown> & { id: string } {
-  const id = doc.name.split("/").pop()!;
-  const result: Record<string, unknown> = { id };
-  if (doc.fields) {
-    for (const [k, v] of Object.entries(doc.fields)) {
-      result[k] = firestoreValueToJs(v);
-    }
-  }
-  return result as Record<string, unknown> & { id: string };
-}
-
-async function queryCollection(
-  idToken: string,
-  collection: string,
-  userId: string,
-  orderByField?: string,
-  limitCount?: number,
-  additionalFilters?: { field: string; op: string; value: unknown }[]
-) {
-  const filters = [
-    {
-      fieldFilter: {
-        field: { fieldPath: "userId" },
-        op: "EQUAL",
-        value: { stringValue: userId },
-      },
-    },
-    ...(additionalFilters || []).map((f) => ({
-      fieldFilter: {
-        field: { fieldPath: f.field },
-        op: f.op,
-        value: typeof f.value === "boolean" ? { booleanValue: f.value } : { stringValue: f.value },
-      },
-    })),
-  ];
-
-  // Simplified query without orderBy to avoid composite index requirement
-  const query: Record<string, unknown> = {
-    structuredQuery: {
-      from: [{ collectionId: collection }],
-      where: filters.length === 1
-        ? filters[0]
-        : { compositeFilter: { op: "AND", filters } },
-      ...(limitCount ? { limit: limitCount } : {}),
-    },
-  };
-
-  const res = await fetch(`${FIRESTORE_BASE}:runQuery`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${idToken}`,
-    },
-    body: JSON.stringify(query),
-  });
-
-  if (!res.ok) return [];
-
-  const data = await res.json();
-  return data
-    .filter((item: { document?: unknown }) => item.document)
-    .map((item: { document: { name: string; fields?: Record<string, Record<string, unknown>> } }) => parseDocument(item.document));
 }
 
 async function checkDeadlines(
@@ -212,9 +122,20 @@ function DashboardContent() {
     }
 
     async function loadDashboard() {
+      const fetchDocs = async (collection: string, body: Record<string, unknown> = {}) => {
+        const res = await fetch(`/api/data/${collection}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${user!.idToken}` },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) return [];
+        const data = await res.json() as { documents?: (Record<string, unknown> & { id: string })[] };
+        return data.documents || [];
+      };
+
       try {
         // Load score history (up to 10 entries for chart)
-        const scores = await queryCollection(user!.idToken, "creditScores", user!.uid, "recordedAt", 10);
+        const scores = await fetchDocs("creditScores", { limit: 10 });
         if (scores.length > 0) {
           const sorted = [...scores].sort(
             (a, b) => new Date(a.recordedAt as string).getTime() - new Date(b.recordedAt as string).getTime()
@@ -229,13 +150,13 @@ function DashboardContent() {
         }
 
         // Load disputable items count
-        const items = await queryCollection(user!.idToken, "reportItems", user!.uid, undefined, undefined, [
-          { field: "isDisputable", op: "EQUAL", value: true },
-        ]);
+        const items = await fetchDocs("reportItems", {
+          extraFilters: [{ field: "isDisputable", op: "EQUAL", value: true }],
+        });
         setDisputableCount(items.length);
 
         // Load recent disputes (with outcome and mailedAt)
-        const disputeDocs = await queryCollection(user!.idToken, "disputes", user!.uid, "createdAt", 10);
+        const disputeDocs = await fetchDocs("disputes", { limit: 10 });
         const mappedDisputes: Dispute[] = disputeDocs.map((d: Record<string, unknown> & { id: string }) => ({
           id: d.id,
           bureau: d.bureau as string,
@@ -247,7 +168,7 @@ function DashboardContent() {
         setDisputes(mappedDisputes);
 
         // Load most recent report changes (skip first-report entries)
-        const changesDocs = await queryCollection(user!.idToken, "reportChanges", user!.uid);
+        const changesDocs = await fetchDocs("reportChanges");
         const meaningfulChanges = changesDocs
           .filter((c: Record<string, unknown>) => !c.isFirstReport)
           .sort((a: Record<string, unknown>, b: Record<string, unknown>) =>

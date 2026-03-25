@@ -26,9 +26,11 @@ export async function getAuthUser(): Promise<{
     return null;
   }
 
-  // Fall back to cookie
+  // Fall back to cookie (check new auth-token first, then legacy firebase-token)
   const cookieStore = await cookies();
-  const token = cookieStore.get("firebase-token")?.value;
+  const token =
+    cookieStore.get("auth-token")?.value ||
+    cookieStore.get("firebase-token")?.value;
 
   if (!token) {
     lastAuthError = "no token in header or cookie";

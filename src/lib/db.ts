@@ -21,4 +21,8 @@ export const COLLECTIONS = {
   fcraConsents: "fcraConsents",
   auditLogs: "auditLogs",
   autopilotWaitlist: "autopilotWaitlist",
+  // Vault
+  documents: "documents",
+  // Referrals
+  referrals: "referrals",
 } as const;
