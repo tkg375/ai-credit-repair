@@ -112,29 +112,29 @@ function Icon({ d }: { d: string }) {
 
 const sections: { label: string; items: NavEntry[] }[] = [
   {
-    label: "Main",
+    label: "Dashboard",
     items: [
       { href: "/dashboard", label: "Dashboard", key: "dashboard", icon: <Icon d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /> },
-      { href: "/disputes", label: "Disputes", key: "disputes", icon: <Icon d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> },
-      { href: "/analyze-letter", label: "Analyze Letter", key: "analyze-letter", icon: <Icon d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /> },
-      { href: "/calendar", label: "Timeline", key: "calendar", icon: <Icon d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /> },
-      { href: "/goals", label: "Goals", key: "goals", icon: <Icon d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /> },
-      { href: "/scores", label: "Scores", key: "scores", icon: <Icon d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /> },
-      { href: "/upload", label: "Upload Report", key: "upload", icon: <Icon d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /> },
     ],
   },
   {
     label: "Analysis",
     items: [
-      { href: "/simulator", label: "Score Simulator", key: "simulator", icon: <Icon d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /> },
-      { href: "/bureaus", label: "Bureau Comparison", key: "bureaus", icon: <Icon d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /> },
+      { href: "/upload", label: "Upload Credit Report", key: "upload", icon: <Icon d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /> },
+      { href: "/analyze-letter", label: "Analyze Letter", key: "analyze-letter", icon: <Icon d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /> },
     ],
   },
   {
     label: "Monitoring",
     items: [
+      { href: "/scores", label: "Scores", key: "scores", icon: <Icon d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /> },
+      { href: "/disputes", label: "Disputes", key: "disputes", icon: <Icon d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> },
+      { href: "/goals", label: "Goals", key: "goals", icon: <Icon d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /> },
+      { href: "/calendar", label: "Timeline", key: "calendar", icon: <Icon d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /> },
       { href: "/credit-monitoring", label: "Credit Monitoring", key: "credit-monitoring", icon: <Icon d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /> },
       { href: "/monitoring", label: "Identity Monitor", key: "monitoring", icon: <Icon d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /> },
+      { href: "/simulator", label: "Score Simulator", key: "simulator", icon: <Icon d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /> },
+      { href: "/bureaus", label: "Bureau Comparison", key: "bureaus", icon: <Icon d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /> },
     ],
   },
   {
@@ -339,13 +339,12 @@ export function AuthenticatedLayout({
   // Inject Autopilot nav item for autopilot subscribers
   const effectiveSections = isAutopilot
     ? sections.map((s) =>
-        s.label === "Main"
+        s.label === "Dashboard"
           ? {
               ...s,
               items: [
                 s.items[0],
                 { href: "/autopilot", label: "Autopilot", key: "autopilot" as NavItem, icon: <Icon d="M13 10V3L4 14h7v7l9-11h-7z" /> },
-                ...s.items.slice(1),
               ],
             }
           : s
@@ -386,14 +385,28 @@ export function AuthenticatedLayout({
 
         {/* Desktop nav dropdowns */}
         <nav className="hidden md:flex items-center gap-1 flex-1">
-          {effectiveSections.map((section) => (
-            <NavDropdown
-              key={section.label}
-              label={section.label}
-              items={section.items}
-              activeNav={activeNav}
-            />
-          ))}
+          {effectiveSections.map((section) =>
+            section.items.length === 1 ? (
+              <Link
+                key={section.label}
+                href={section.items[0].href}
+                className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeNav === section.items[0].key
+                    ? "text-teal-700 bg-teal-50"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                {section.label}
+              </Link>
+            ) : (
+              <NavDropdown
+                key={section.label}
+                label={section.label}
+                items={section.items}
+                activeNav={activeNav}
+              />
+            )
+          )}
         </nav>
 
         {/* Right side: notifications + profile */}
