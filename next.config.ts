@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
     S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID ?? "",
     S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY ?? "",
     LAMBDA_FUNCTION_NAME: process.env.LAMBDA_FUNCTION_NAME ?? "",
+    JWT_SECRET: process.env.JWT_SECRET ?? "",
     POSTGRID_API_KEY: process.env.POSTGRID_API_KEY ?? "",
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? "",
     STRIPE_PRO_PRICE_ID: process.env.STRIPE_PRO_PRICE_ID ?? "",
