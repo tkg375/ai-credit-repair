@@ -8,30 +8,94 @@
  * Event payload: { reportId, userId, s3Key, bureau }
  *
  * Required env vars:
- *   FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY
  *   GEMINI_API_KEY
  *   ANTHROPIC_API_KEY (optional fallback)
  *   AWS_S3_BUCKET
+ *   S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY (or Lambda execution role with DynamoDB access)
+ *   DYNAMODB_TABLE_PREFIX (default: credit800)
  */
 
 const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
-const admin = require('firebase-admin');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBDocumentClient, UpdateCommand, PutCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
+const { randomUUID } = require('crypto');
 
-// ── Firebase init ─────────────────────────────────────────────────────────────
-if (!admin.apps.length) {
-  const privateKey = (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey,
-    }),
-  });
+// ── DynamoDB client ───────────────────────────────────────────────────────────
+
+const TABLE_PREFIX = process.env.DYNAMODB_TABLE_PREFIX || 'credit800';
+
+function tbl(collection) {
+  return `${TABLE_PREFIX}-${collection}`;
 }
-const db = admin.firestore();
 
-// ── S3 client (credentials come from Lambda execution role) ───────────────────
-const s3 = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
+function getDynamoClient() {
+  const config = { region: process.env.AWS_REGION || 'us-east-1' };
+  if (process.env.S3_ACCESS_KEY_ID) {
+    config.credentials = {
+      accessKeyId: process.env.S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+    };
+  }
+  const raw = new DynamoDBClient(config);
+  return DynamoDBDocumentClient.from(raw, { marshallOptions: { removeUndefinedValues: true } });
+}
+
+let _dynamo = null;
+function dynamo() {
+  if (!_dynamo) _dynamo = getDynamoClient();
+  return _dynamo;
+}
+
+async function updateDoc(collection, id, data) {
+  const entries = Object.entries(data).filter(([, v]) => v !== undefined);
+  if (!entries.length) return;
+  const names = {};
+  const values = {};
+  const parts = [];
+  entries.forEach(([k, v], i) => {
+    names[`#u${i}`] = k;
+    values[`:uv${i}`] = v;
+    parts.push(`#u${i} = :uv${i}`);
+  });
+  await dynamo().send(new UpdateCommand({
+    TableName: tbl(collection),
+    Key: { id },
+    UpdateExpression: `SET ${parts.join(', ')}`,
+    ExpressionAttributeNames: names,
+    ExpressionAttributeValues: values,
+  }));
+}
+
+async function addDoc(collection, data) {
+  const id = randomUUID();
+  await dynamo().send(new PutCommand({
+    TableName: tbl(collection),
+    Item: { ...data, id },
+  }));
+  return id;
+}
+
+async function queryByUserId(collection, userId) {
+  const result = await dynamo().send(new QueryCommand({
+    TableName: tbl(collection),
+    IndexName: 'by-userId',
+    KeyConditionExpression: '#uid = :uid',
+    ExpressionAttributeNames: { '#uid': 'userId' },
+    ExpressionAttributeValues: { ':uid': userId },
+  }));
+  return result.Items || [];
+}
+
+// ── S3 client (uses execution role or explicit creds) ─────────────────────────
+const s3 = new S3Client({
+  region: process.env.AWS_REGION || 'us-east-1',
+  ...(process.env.S3_ACCESS_KEY_ID ? {
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+    },
+  } : {}),
+});
 
 // ── Gemini analysis ───────────────────────────────────────────────────────────
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
@@ -298,10 +362,7 @@ function generateRemovalStrategies(status, accountType, balance) {
 
 // ── Plan generation ───────────────────────────────────────────────────────────
 async function generateActionPlan(userId, reportId) {
-  const itemsSnap = await db.collection('reportItems')
-    .where('userId', '==', userId)
-    .get();
-  const items = itemsSnap.docs.map(d => d.data());
+  const items = await queryByUserId('reportItems', userId);
 
   const collections = items.filter(i => String(i.status).includes('COLLECTION') || String(i.accountType).toLowerCase().includes('collection'));
   const chargeOffs = items.filter(i => String(i.status).includes('CHARGE') || String(i.status).includes('WRITTEN'));
@@ -313,8 +374,8 @@ async function generateActionPlan(userId, reportId) {
   });
   const collectionDebt = collections.reduce((s, i) => s + (Number(i.balance) || 0), 0);
 
-  const scoresSnap = await db.collection('creditScores').where('userId', '==', userId).limit(1).get();
-  const currentScore = scoresSnap.empty ? null : Number(scoresSnap.docs[0].data().score);
+  const scoreItems = await queryByUserId('creditScores', userId);
+  const currentScore = scoreItems.length > 0 ? Number(scoreItems[0].score) : null;
 
   const steps = [];
   let order = 1;
@@ -355,7 +416,7 @@ async function generateActionPlan(userId, reportId) {
   const title = currentScore ? `Your Path from ${currentScore} to 800` : 'Your Path to 800';
   const summary = summaryParts.join(' ');
 
-  await db.collection('actionPlans').add({ userId, reportId, title, summary, steps, createdAt: new Date().toISOString() });
+  await addDoc('actionPlans', { userId, reportId, title, summary, steps, createdAt: new Date().toISOString() });
   console.log(`Plan generated with ${steps.length} steps for user ${userId}`);
 }
 
@@ -363,8 +424,6 @@ async function generateActionPlan(userId, reportId) {
 exports.handler = async (event) => {
   const { reportId, userId, s3Key, bureau = 'UNKNOWN' } = event;
   console.log('analyze-report Lambda started', { reportId, userId, s3Key, bureau });
-
-  const reportRef = db.collection('creditReports').doc(reportId);
 
   try {
     // 1. Download PDF from S3
@@ -383,7 +442,7 @@ exports.handler = async (event) => {
     console.log(`PDF size: ${fileSizeMB.toFixed(2)} MB`);
 
     if (fileSizeMB > 20) {
-      await reportRef.update({ status: 'ERROR', errorMessage: `PDF too large (${fileSizeMB.toFixed(1)}MB). Max 20MB supported.` });
+      await updateDoc('creditReports', reportId, { status: 'ERROR', errorMessage: `PDF too large (${fileSizeMB.toFixed(1)}MB). Max 20MB supported.` });
       return;
     }
 
@@ -394,7 +453,7 @@ exports.handler = async (event) => {
     // 3. Run AI analysis
     const geminiKey = process.env.GEMINI_API_KEY;
     if (!geminiKey) {
-      await reportRef.update({ status: 'ERROR', errorMessage: 'GEMINI_API_KEY not configured' });
+      await updateDoc('creditReports', reportId, { status: 'ERROR', errorMessage: 'GEMINI_API_KEY not configured' });
       return;
     }
 
@@ -407,7 +466,7 @@ exports.handler = async (event) => {
       console.error('Gemini failed:', geminiErr.message);
       const claudeKey = process.env.ANTHROPIC_API_KEY;
       if (!claudeKey) {
-        await reportRef.update({ status: 'ERROR', errorMessage: `AI analysis failed: ${geminiErr.message}` });
+        await updateDoc('creditReports', reportId, { status: 'ERROR', errorMessage: `AI analysis failed: ${geminiErr.message}` });
         return;
       }
       try {
@@ -416,42 +475,40 @@ exports.handler = async (event) => {
         console.log(`Claude complete. Found ${analysis.items.length} items.`);
       } catch (claudeErr) {
         console.error('Claude also failed:', claudeErr.message);
-        await reportRef.update({ status: 'ERROR', errorMessage: `All AI providers failed. Gemini: ${geminiErr.message}. Claude: ${claudeErr.message}` });
+        await updateDoc('creditReports', reportId, { status: 'ERROR', errorMessage: `All AI providers failed. Gemini: ${geminiErr.message}. Claude: ${claudeErr.message}` });
         return;
       }
     }
 
     // 4. Check for duplicate analysis
-    const existingSnap = await db.collection('reportItems')
-      .where('userId', '==', userId)
-      .where('creditReportId', '==', reportId)
-      .limit(1)
-      .get();
+    const existingItems = await queryByUserId('reportItems', userId);
+    const reportItems = existingItems.filter(i => i.creditReportId === reportId);
 
-    if (!existingSnap.empty) {
-      await reportRef.update({ status: 'ANALYZED', analyzedAt: new Date().toISOString() });
+    if (reportItems.length > 0) {
+      await updateDoc('creditReports', reportId, { status: 'ANALYZED', analyzedAt: new Date().toISOString() });
       console.log('Report already had items — skipping write, marking ANALYZED');
       return;
     }
 
-    // 5. Save report items (batch write, max 30 to stay within Firestore limits)
+    // 5. Save report items (max 30)
     const itemsToSave = analysis.items.slice(0, 30);
-    const batch = db.batch();
     for (const item of itemsToSave) {
-      const ref = db.collection('reportItems').doc();
-      batch.set(ref, { userId, creditReportId: reportId, ...item });
+      await addDoc('reportItems', { userId, creditReportId: reportId, ...item });
     }
-    await batch.commit();
     console.log(`Saved ${itemsToSave.length} report items`);
 
     // 6. Save credit score if found
     if (analysis.creditScore) {
-      await db.collection('creditScores').add({ userId, score: analysis.creditScore, bureau, recordedAt: new Date().toISOString() });
+      await addDoc('creditScores', { userId, score: analysis.creditScore, bureau, recordedAt: new Date().toISOString() });
       console.log(`Saved credit score: ${analysis.creditScore}`);
     }
 
     // 7. Mark report as ANALYZED with summary
-    await reportRef.update({ status: 'ANALYZED', analyzedAt: new Date().toISOString(), summary: analysis.summary });
+    await updateDoc('creditReports', reportId, {
+      status: 'ANALYZED',
+      analyzedAt: new Date().toISOString(),
+      summary: analysis.summary,
+    });
 
     // 8. Generate action plan
     await generateActionPlan(userId, reportId);
@@ -460,7 +517,7 @@ exports.handler = async (event) => {
   } catch (err) {
     console.error('Unhandled error in analyze-report Lambda:', err);
     try {
-      await reportRef.update({ status: 'ERROR', errorMessage: String(err.message || err) });
+      await updateDoc('creditReports', reportId, { status: 'ERROR', errorMessage: String(err.message || err) });
     } catch (updateErr) {
       console.error('Failed to update error status:', updateErr);
     }
