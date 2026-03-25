@@ -7,6 +7,7 @@ frontend:
     build:
       commands:
         - echo "DEBUG price id starts with= ${STRIPE_PRO_PRICE_ID:0:8}"
+        - echo "DEBUG JWT_SECRET length= ${#JWT_SECRET}"
         - echo "JWT_SECRET=$JWT_SECRET" >> .env.production.local
         - echo "S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID" >> .env.production.local
         - echo "S3_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY" >> .env.production.local
