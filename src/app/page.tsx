@@ -123,9 +123,9 @@ export default function Home() {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-white">
                 Your Credit &amp; Finances.
                 <br />
-                <span className="text-white/90">One Platform.</span>
+                <span className="text-slate-900">One Platform.</span>
                 <br />
-                <span className="text-white/90">Start for Free.</span>
+                <span className="text-slate-900">Start for Free.</span>
               </h1>
 
               <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
