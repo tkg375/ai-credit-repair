@@ -135,7 +135,7 @@ export function Logo({ className = "" }: { className?: string }) {
           fontFamily="system-ui, -apple-system, sans-serif"
           fontSize="28"
           fontWeight="800"
-          fill="#ffffff"
+          fill="#0f172a"
           letterSpacing="-0.5"
         >
           CREDIT
