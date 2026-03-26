@@ -210,7 +210,7 @@ export default function SampleLettersPage() {
       <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
         <MarketingNav />
       </header>
-      <div className="bg-white border-b border-slate-200">
+      <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-14 text-center">
           <h1 className="text-3xl sm:text-5xl font-bold text-white mb-3">Sample Dispute Letters</h1>
           <p className="text-lime-100 max-w-2xl mx-auto text-sm sm:text-base">
@@ -274,7 +274,7 @@ export default function SampleLettersPage() {
         </div>
 
         {/* CTA */}
-        <div className="bg-white border-b border-slate-200 rounded-2xl p-8 text-center">
+        <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-bold text-white mb-2">Get Your Personalized Letters</h2>
           <p className="text-lime-100 text-sm mb-6 max-w-lg mx-auto">
             Your letters include specific account numbers, exact legal citations, and bureau/collector mailing addresses — AI-generated and ready to send.
