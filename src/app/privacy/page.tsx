@@ -5,7 +5,7 @@ import { MarketingNav } from "@/components/MarketingNav";
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      <header className="sticky top-0 z-50 bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600">
+      <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
         <MarketingNav />
       </header>
 
