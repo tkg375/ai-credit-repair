@@ -18,8 +18,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const existing = await firestore.getDoc(COLLECTIONS.users, user.uid);
-  const profileData = {
+  await firestore.updateDoc(COLLECTIONS.users, user.uid, {
     fullName,
     dateOfBirth,
     address,
@@ -30,12 +29,7 @@ export async function POST(request: NextRequest) {
     phone: phone || "",
     email: user.email || "",
     updatedAt: new Date().toISOString(),
-    // Preserve existing createdAt, or set it for new accounts
-    createdAt: (existing?.data?.createdAt as string) || new Date().toISOString(),
-  };
-
-  // Use setDoc (upsert) — creates or overwrites the user document
-  await firestore.setDoc(COLLECTIONS.users, user.uid, profileData);
+  });
 
   return NextResponse.json({ success: true });
 }
