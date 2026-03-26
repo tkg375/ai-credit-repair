@@ -116,11 +116,7 @@ export default function Home() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-16 pb-12 sm:pb-16">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 bg-white/20 border border-white/30 rounded-full px-3 py-1 mb-4 sm:mb-6">
-                <span className="w-2 h-2 bg-lime-300 rounded-full animate-pulse" />
-                <span className="text-white text-xs font-medium">All-in-One Financial Hub</span>
-              </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-white">
+<h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-white">
                 Your Credit &amp; Finances.
                 <br />
                 <span className="text-slate-900">One Platform.</span>
