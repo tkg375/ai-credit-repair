@@ -570,3 +570,20 @@ export async function sendIssueReport(params: {
   );
 }
 
+export async function sendPasswordResetEmail(to: string, resetUrl: string) {
+  await sendEmail(
+    to,
+    "Reset your Credit 800 password",
+    `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1e293b">
+      <div style="background:linear-gradient(135deg,#84cc16,#14b8a6);padding:24px;border-radius:12px;margin-bottom:24px">
+        <h1 style="color:white;margin:0;font-size:24px">Password Reset</h1>
+        <p style="color:rgba(255,255,255,0.9);margin:8px 0 0">Credit 800</p>
+      </div>
+      <p>We received a request to reset your password. Click the button below to choose a new one.</p>
+      <p>This link expires in <strong>1 hour</strong>.</p>
+      <a href="${resetUrl}" style="display:inline-block;background:linear-gradient(135deg,#84cc16,#14b8a6);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:16px 0">Reset My Password →</a>
+      <p style="color:#64748b;font-size:13px;margin-top:24px">If you didn't request this, you can safely ignore this email. Your password won't change.</p>
+      <p style="color:#94a3b8;font-size:12px;margin-top:32px">Credit 800 · Not a credit repair organization. Educational tool only.</p>
+    </body></html>`
+  );
+}
