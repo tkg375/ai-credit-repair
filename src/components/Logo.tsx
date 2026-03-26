@@ -58,9 +58,10 @@ export function Logo({ className = "" }: { className?: string }) {
           </filter>
 
           {/* Background for pill */}
-          <linearGradient id={ids.pillBg} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="100%" stopColor="#ffffff" />
+          <linearGradient id={ids.pillBg} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#84cc16" />
+            <stop offset="50%" stopColor="#14b8a6" />
+            <stop offset="100%" stopColor="#06b6d4" />
           </linearGradient>
 
           {/* Border gradient */}
@@ -127,29 +128,28 @@ export function Logo({ className = "" }: { className?: string }) {
           />
         </rect>
 
-        {/* CREDIT text in black */}
+        {/* CREDIT text in white */}
         <text
           x="24"
           y="38"
           fontFamily="system-ui, -apple-system, sans-serif"
           fontSize="28"
           fontWeight="800"
-          fill="#0f172a"
+          fill="#ffffff"
           letterSpacing="-0.5"
         >
           CREDIT
         </text>
 
-        {/* 800 text with animated gradient and glow */}
+        {/* 800 text in white */}
         <text
           x="168"
           y="38"
           fontFamily="system-ui, -apple-system, sans-serif"
           fontSize="30"
           fontWeight="900"
-          fill={`url(#${ids.gradient})`}
+          fill="#ffffff"
           textAnchor="middle"
-          filter={`url(#${ids.glow})`}
         >
           800
         </text>

@@ -19,9 +19,9 @@ export function MarketingNav() {
       <Link href="/"><Logo className="h-10 sm:h-14 w-auto" /></Link>
 
       {/* Desktop links */}
-      <div className="hidden md:flex items-center gap-1 text-sm text-slate-600">
+      <div className="hidden md:flex items-center gap-1 bg-teal-50 border border-teal-200 rounded-full px-2 py-1 text-sm text-slate-700">
         {navLinks.map((l) => (
-          <Link key={l.href} href={l.href} className="px-4 py-1.5 rounded-full hover:bg-slate-100 hover:text-slate-900 transition">{l.label}</Link>
+          <Link key={l.href} href={l.href} className="px-4 py-1.5 rounded-full hover:bg-teal-100 hover:text-teal-800 transition">{l.label}</Link>
         ))}
       </div>
 
