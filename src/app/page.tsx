@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Logo } from "@/components/Logo";
 import { ScoreChart } from "@/components/ScoreChart";
 import { MarketingNav } from "@/components/MarketingNav";
+import { MarketingFooter } from "@/components/MarketingFooter";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -300,35 +300,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-            <Logo className="h-6 w-auto" />
-            <div className="flex flex-wrap items-center gap-4">
-              <Link href="/learn" className="hover:text-slate-700 transition">Learn</Link>
-              <Link href="/glossary" className="hover:text-slate-700 transition">Glossary</Link>
-              <Link href="/about" className="hover:text-slate-700 transition">About</Link>
-              <Link href="/terms" className="hover:text-slate-700 transition">Terms</Link>
-              <Link href="/privacy" className="hover:text-slate-700 transition">Privacy</Link>
-              <Link href="/support" className="hover:text-slate-700 transition">Support</Link>
-            </div>
-          </div>
-          <p className="text-center text-xs text-slate-400 mt-4">
-            &copy; {new Date().getFullYear()} Credit 800. All rights reserved.
-          </p>
-          <p className="text-center text-xs text-slate-400 mt-1">
-            Not a credit repair organization. Educational tool only.
-          </p>
-          <div className="mt-6 pt-6 border-t border-slate-100 text-center">
-            <a href="https://theweekendweb.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-400 transition no-underline">
-              <span>Built by</span>
-              <span className="font-mono text-sm"><span className="text-gray-600">&lt;</span><span className="text-violet-400">tww</span><span className="text-cyan-400">/</span><span className="text-gray-600">&gt;</span></span>
-              <span className="text-gray-400">The Weekend Web</span>
-            </a>
-          </div>
-        </div>
-      </footer>
+      <MarketingFooter />
     </div>
   );
 }
