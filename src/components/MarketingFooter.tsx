@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import { learnArticles } from "@/lib/learn-articles";
 
 const resources = [
   { href: "/sample-letters", label: "Sample Dispute Letters" },
@@ -20,10 +19,10 @@ export function MarketingFooter() {
   return (
     <footer className="border-t border-slate-200 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-10">
 
           {/* Brand */}
-          <div className="col-span-2 sm:col-span-2 lg:col-span-1">
+          <div className="col-span-2 lg:col-span-1">
             <Link href="/"><Logo className="h-10 w-auto mb-3" /></Link>
             <p className="text-xs text-slate-500 leading-relaxed max-w-xs">
               AI-powered tools to dispute credit errors, manage your finances, and build toward an 800 credit score.
@@ -31,31 +30,6 @@ export function MarketingFooter() {
             <p className="text-xs text-slate-400 mt-3">
               Not a credit repair organization. Educational tool only.
             </p>
-          </div>
-
-          {/* Learn */}
-          <div>
-            <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-4">Learn</h3>
-            <ul className="space-y-2.5">
-              {learnArticles.map((article) => (
-                <li key={article.slug}>
-                  <Link
-                    href={`/learn/${article.slug}`}
-                    className="text-xs text-slate-500 hover:text-teal-600 transition leading-snug block"
-                  >
-                    {article.title}
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <Link
-                  href="/learn"
-                  className="text-xs text-teal-600 hover:text-teal-700 font-medium transition"
-                >
-                  View all articles →
-                </Link>
-              </li>
-            </ul>
           </div>
 
           {/* Resources */}
@@ -73,8 +47,11 @@ export function MarketingFooter() {
                 </li>
               ))}
             </ul>
+          </div>
 
-            <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mt-8 mb-4">Company</h3>
+          {/* Company */}
+          <div>
+            <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-4">Company</h3>
             <ul className="space-y-2.5">
               {company.map((c) => (
                 <li key={c.href}>
