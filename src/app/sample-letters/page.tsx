@@ -139,6 +139,266 @@ _________________________
 
 Sent via: Certified Mail — Return Receipt Requested`;
 
+const METHOD_VERIFICATION_LETTER = `[Your Name]
+[Your Address]
+[City, State ZIP]
+[Date]
+
+Equifax Information Services LLC
+P.O. Box 740256
+Atlanta, GA 30374-0256
+
+Re: Method of Verification Request — FCRA § 611(a)(6)(B)(iii)
+    Account #████-████-████-####
+
+To Whom It May Concern:
+
+On [original dispute date], I submitted a dispute regarding the above-referenced
+account. On [response date], I received notice that your investigation "verified"
+the accuracy of this information. I write now to exercise my right under the Fair
+Credit Reporting Act (FCRA), Section 611(a)(6)(B)(iii), to request the method
+by which you verified this account.
+
+Specifically, I request that you provide, in writing:
+
+  □ The name, business address, and telephone number of the party you contacted
+    to verify this information
+  □ A description of the procedure used to determine the accuracy and completeness
+    of the disputed information
+  □ All documentation used in connection with your verification
+
+Under FCRA § 611(a)(6)(B)(iii), you are required to provide this information
+within 15 days of receiving this request.
+
+I have significant reason to believe that your verification consisted solely of
+an automated e-OSCAR transmission to the furnisher without any review of source
+documentation. If so, this does not constitute a genuine investigation as required
+by FCRA § 611(a)(1) ("reasonable reinvestigation").
+
+If you cannot provide genuine documentation of your verification process, I
+request that you immediately delete this item and send me an updated credit report
+at no charge.
+
+Sincerely,
+
+_________________________
+[Your Name]
+[Phone Number]
+[Email Address]
+
+Sent via: Certified Mail — Return Receipt Requested`;
+
+const GOODWILL_LETTER = `[Your Name]
+[Your Address]
+[City, State ZIP]
+[Date]
+
+[Creditor Name] — Executive Customer Relations
+[Creditor Address]
+[City, State ZIP]
+
+Re: Goodwill Adjustment Request — Account #████-████-████-####
+
+Dear [Creditor Name] Customer Relations Team,
+
+I am writing to respectfully request a goodwill adjustment on my above-referenced
+account. I have been a customer since [year] and have maintained a consistent
+payment record, with the exception of a single late payment in [month/year].
+
+CIRCUMSTANCES OF THE LATE PAYMENT:
+The late payment occurred due to [brief, honest explanation — e.g., unexpected
+medical emergency, temporary job loss, oversight during relocation]. This was an
+isolated incident that does not reflect my overall commitment to my financial
+obligations.
+
+MY ACCOUNT HISTORY WITH YOU:
+  - Account opened:          [Date]
+  - Total payments made:     [Number] payments
+  - Payments made on time:   [Number — e.g., 47 of 48]
+  - Current account status:  Current / Paid in full
+  - Current balance:         $[Amount]
+
+I fully understand that the late payment was my responsibility and I am not
+disputing its accuracy. I am asking for your goodwill and understanding in
+recognizing that this single incident was a departure from my otherwise
+responsible account management.
+
+This late payment is currently impacting my ability to [specific impact —
+e.g., qualify for a mortgage, secure employment, refinance an auto loan]. I would
+be deeply grateful if you would consider removing this notation as a gesture of
+goodwill toward a long-standing customer.
+
+I am happy to provide any additional documentation that would support this request.
+Thank you sincerely for your time and consideration.
+
+Respectfully,
+
+_________________________
+[Your Name]
+[Phone Number]
+[Email Address]
+[Account Number]`;
+
+const PAY_FOR_DELETE_LETTER = `[Your Name]
+[Your Address]
+[City, State ZIP]
+[Date]
+
+████████ Collections, LLC
+[Collector Address]
+[City, State ZIP]
+
+Re: Settlement and Deletion Offer — Account #████-████-████-####
+    Original Creditor: ████████████ Inc.
+    Alleged Balance: $█,███.██
+
+To Whom It May Concern:
+
+I am writing regarding the above-referenced account currently appearing on my
+credit report. I am prepared to resolve this account and wish to offer a full
+and final settlement in exchange for complete deletion of this account from all
+three major credit reporting agencies (Equifax, Experian, and TransUnion).
+
+SETTLEMENT OFFER:
+  Offered Amount:     $█,███.██ (full balance / [X]% of balance)
+  Payment Method:     Certified check or money order
+  Payment Timeline:   Within 14 days of written agreement
+
+CONDITIONS OF THIS OFFER:
+This offer is contingent upon your written agreement to:
+  1. Accept the offered amount as payment in full and final settlement of this debt
+  2. Delete this account from Equifax, Experian, and TransUnion within 30 days
+     of receiving payment
+  3. Provide written confirmation that this matter is resolved and the debt is
+     satisfied in full
+  4. Instruct the original creditor to also delete or update their reporting
+
+IMPORTANT: I will not make any payment until I receive a signed written agreement
+containing the above terms. Verbal agreements will not be accepted.
+
+Please respond in writing within 20 days. If this offer is unacceptable, please
+counter in writing with an alternative. I am committed to resolving this matter
+and look forward to reaching a mutually acceptable resolution.
+
+Sincerely,
+
+_________________________
+[Your Name]
+[Phone Number]
+[Email Address]
+
+Sent via: Certified Mail — Return Receipt Requested`;
+
+const CEASE_DESIST_LETTER = `[Your Name]
+[Your Address]
+[City, State ZIP]
+[Date]
+
+████████ Collections, LLC
+[Collector Address]
+[City, State ZIP]
+
+Re: CEASE AND DESIST ALL COMMUNICATION
+    FDCPA § 805(c) — 15 U.S.C. § 1692c(c)
+    Account #████-████-████-####
+
+To Whom It May Concern:
+
+Pursuant to my rights under the Fair Debt Collection Practices Act (FDCPA),
+Section 805(c) (15 U.S.C. § 1692c(c)), I am formally demanding that you
+CEASE AND DESIST all communication with me regarding the above-referenced account,
+effective immediately upon receipt of this letter.
+
+This demand includes all forms of communication:
+  - Telephone calls (home, work, cell, or any other number)
+  - Written correspondence
+  - Email, text message, or any electronic communication
+  - Contact through third parties, including family, friends, or employers
+  - Any other form of direct or indirect communication
+
+Under the FDCPA, once you receive this written request, you may only contact me:
+  1. To confirm that collection efforts are being terminated
+  2. To notify me of a specific action you intend to take (such as filing suit)
+
+BE ADVISED: Any communication received after the date this letter is received
+will constitute a violation of the FDCPA, 15 U.S.C. § 1692c(c), and may result
+in civil liability under FDCPA § 813, including actual damages, statutory damages
+up to $1,000, court costs, and attorney fees. I will document all violations.
+
+This letter is not a refusal to acknowledge or pay any legitimately owed debt.
+It is a formal exercise of my rights under federal law.
+
+Sincerely,
+
+_________________________
+[Your Name]
+[Phone Number — for written response only]
+[Email Address]
+
+Sent via: Certified Mail — Return Receipt Requested
+CC: Consumer Financial Protection Bureau (CFPB)`;
+
+const CFPB_LETTER = `[Your Name]
+[Your Address]
+[City, State ZIP]
+[Date]
+
+Consumer Financial Protection Bureau
+P.O. Box 4503
+Iowa City, IA 52244
+
+Re: Formal Complaint Against [Bureau/Creditor Name]
+    FCRA Violation — Failure to Investigate / Remove Verified Inaccuracy
+    Account #████-████-████-####
+
+To Whom It May Concern:
+
+I am submitting this formal complaint against [Bureau/Creditor/Collector Name]
+for violations of the Fair Credit Reporting Act (FCRA) in connection with the
+above-referenced account.
+
+NATURE OF THE COMPLAINT:
+  Respondent:    [Equifax / Experian / TransUnion / Creditor Name]
+  Address:       [Respondent's Address]
+  Violation:     [Failure to investigate / Continued inaccurate reporting /
+                  Failure to delete unverifiable item / Other FCRA violation]
+
+TIMELINE OF EVENTS:
+  [Date]:  Submitted initial dispute to [Bureau] via certified mail
+           (Tracking #: ████████████████████)
+  [Date]:  Received response — item "verified" with no explanation
+  [Date]:  Submitted Method of Verification request
+  [Date]:  No response received / Unsatisfactory response received
+  [Date]:  Item continues to appear inaccurately on my credit report
+
+APPLICABLE LAW:
+Under FCRA § 611, [Bureau] was required to conduct a reasonable investigation
+of my dispute. Their failure to [investigate properly / correct the record /
+delete an unverifiable item] constitutes a potential violation of:
+  - FCRA § 611(a)(1): Duty to conduct reasonable reinvestigation
+  - FCRA § 611(a)(5): Duty to correct or delete inaccurate information
+  - FCRA § 616 / § 617: Civil liability for violations
+
+RESOLUTION REQUESTED:
+  □ Immediate deletion of the disputed item from my credit report
+  □ Issuance of a corrected credit report at no charge
+  □ Written confirmation of the correction
+  □ Investigation of [Bureau/Creditor]'s compliance practices
+
+Enclosed: Copies of all dispute correspondence, certified mail receipts,
+and credit report excerpts showing the disputed item.
+
+Thank you for your assistance in resolving this matter.
+
+Sincerely,
+
+_________________________
+[Your Name]
+[Phone Number]
+[Email Address]
+[SSN Last 4: ████]
+[Date of Birth: ██/██/████]`;
+
 const letterTypes = [
   {
     title: "FCRA § 611 Initial Dispute",
@@ -260,7 +520,7 @@ export default function SampleLettersPage() {
         </div>
 
         {/* Letter 2 — Debt Collector */}
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 mb-12">
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 mb-8">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full">Debt Collector</span>
             <div>
@@ -270,6 +530,76 @@ export default function SampleLettersPage() {
           </div>
           <pre className="whitespace-pre-wrap font-mono text-sm text-slate-700 leading-relaxed bg-white p-5 rounded-xl border border-slate-200 overflow-x-auto">
             {COLLECTOR_LETTER}
+          </pre>
+        </div>
+
+        {/* Letter 3 — Method of Verification */}
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs font-semibold px-2.5 py-1 bg-teal-100 text-teal-700 rounded-full">Credit Bureau</span>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Method of Verification Request (Round 2)</h2>
+              <p className="text-xs text-slate-500">Sent after the bureau claims they "verified" a disputed item</p>
+            </div>
+          </div>
+          <pre className="whitespace-pre-wrap font-mono text-sm text-slate-700 leading-relaxed bg-white p-5 rounded-xl border border-slate-200 overflow-x-auto">
+            {METHOD_VERIFICATION_LETTER}
+          </pre>
+        </div>
+
+        {/* Letter 4 — Goodwill */}
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs font-semibold px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full">Creditor Direct</span>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Goodwill Adjustment Letter</h2>
+              <p className="text-xs text-slate-500">Asks a creditor to remove a negative mark as a courtesy — works best for isolated late payments</p>
+            </div>
+          </div>
+          <pre className="whitespace-pre-wrap font-mono text-sm text-slate-700 leading-relaxed bg-white p-5 rounded-xl border border-slate-200 overflow-x-auto">
+            {GOODWILL_LETTER}
+          </pre>
+        </div>
+
+        {/* Letter 5 — Pay for Delete */}
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full">Debt Collector</span>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Pay-for-Delete Settlement Offer</h2>
+              <p className="text-xs text-slate-500">Offers payment in exchange for complete deletion of the collection account</p>
+            </div>
+          </div>
+          <pre className="whitespace-pre-wrap font-mono text-sm text-slate-700 leading-relaxed bg-white p-5 rounded-xl border border-slate-200 overflow-x-auto">
+            {PAY_FOR_DELETE_LETTER}
+          </pre>
+        </div>
+
+        {/* Letter 6 — Cease & Desist */}
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full">Debt Collector</span>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Cease & Desist Letter</h2>
+              <p className="text-xs text-slate-500">Orders a debt collector to stop all contact under FDCPA § 805(c)</p>
+            </div>
+          </div>
+          <pre className="whitespace-pre-wrap font-mono text-sm text-slate-700 leading-relaxed bg-white p-5 rounded-xl border border-slate-200 overflow-x-auto">
+            {CEASE_DESIST_LETTER}
+          </pre>
+        </div>
+
+        {/* Letter 7 — CFPB Complaint */}
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 mb-12">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs font-semibold px-2.5 py-1 bg-rose-100 text-rose-700 rounded-full">Regulatory</span>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">CFPB Formal Complaint Letter</h2>
+              <p className="text-xs text-slate-500">Filed with the Consumer Financial Protection Bureau when direct disputes fail</p>
+            </div>
+          </div>
+          <pre className="whitespace-pre-wrap font-mono text-sm text-slate-700 leading-relaxed bg-white p-5 rounded-xl border border-slate-200 overflow-x-auto">
+            {CFPB_LETTER}
           </pre>
         </div>
 

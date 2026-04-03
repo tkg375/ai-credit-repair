@@ -305,7 +305,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-500">
             <Logo className="h-6 w-auto" />
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <Link href="/learn" className="hover:text-slate-700 transition">Learn</Link>
+              <Link href="/glossary" className="hover:text-slate-700 transition">Glossary</Link>
+              <Link href="/about" className="hover:text-slate-700 transition">About</Link>
               <Link href="/terms" className="hover:text-slate-700 transition">Terms</Link>
               <Link href="/privacy" className="hover:text-slate-700 transition">Privacy</Link>
               <Link href="/support" className="hover:text-slate-700 transition">Support</Link>
