@@ -58,6 +58,7 @@ const plansJsonLd = {
   description:
     "AI-powered credit repair toolkit. Unlimited dispute letters, budget tracker, loan readiness calculator, debt payoff optimizer, and more.",
   url: "https://credit-800.com/plans",
+  image: "https://credit-800.com/og-image.png",
   brand: {
     "@type": "Brand",
     name: "Credit 800",
@@ -69,6 +70,38 @@ const plansJsonLd = {
     priceValidUntil: "2026-12-31",
     availability: "https://schema.org/InStock",
     url: "https://credit-800.com/register",
+    shippingDetails: {
+      "@type": "OfferShippingDetails",
+      shippingRate: {
+        "@type": "MonetaryAmount",
+        value: "0.00",
+        currency: "USD",
+      },
+      deliveryTime: {
+        "@type": "ShippingDeliveryTime",
+        handlingTime: {
+          "@type": "QuantitativeValue",
+          minValue: 0,
+          maxValue: 0,
+          unitCode: "DAY",
+        },
+        transitTime: {
+          "@type": "QuantitativeValue",
+          minValue: 0,
+          maxValue: 0,
+          unitCode: "DAY",
+        },
+      },
+      shippingDestination: {
+        "@type": "DefinedRegion",
+        addressCountry: "US",
+      },
+    },
+    hasMerchantReturnPolicy: {
+      "@type": "MerchantReturnPolicy",
+      applicableCountry: "US",
+      returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+    },
   },
   aggregateRating: {
     "@type": "AggregateRating",
