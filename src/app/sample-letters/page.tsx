@@ -5,17 +5,17 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Sample Dispute Letters — FCRA-Compliant Templates",
-  description: "See real examples of AI-generated FCRA dispute letters used to remove inaccurate collections, charge-offs, and late payments from credit reports.",
+  description: "See real examples of FCRA dispute letters used to remove inaccurate collections, charge-offs, and late payments from credit reports.",
   openGraph: {
     title: "Free Sample Credit Dispute Letters — FCRA-Compliant Templates",
-    description: "Real AI-generated dispute letters for removing collections, charge-offs, and late payments. Section 609, 611, goodwill, pay-for-delete, and more.",
+    description: "Real FCRA dispute letters for removing collections, charge-offs, and late payments. Section 609, 611, goodwill, pay-for-delete, and more.",
     url: "https://credit-800.com/sample-letters",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Sample FCRA Dispute Letters" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Free Sample Credit Dispute Letters — FCRA-Compliant Templates",
-    description: "Real AI-generated dispute letters for removing collections, charge-offs, and late payments.",
+    description: "Real FCRA dispute letters for removing collections, charge-offs, and late payments.",
     images: ["/og-image.png"],
   },
   alternates: {
@@ -449,7 +449,7 @@ const sampleLettersJsonLd = {
   "@type": "ItemList",
   name: "FCRA & FDCPA Credit Dispute Letter Templates",
   description:
-    "AI-generated, FCRA & FDCPA-compliant credit dispute letter templates for removing inaccurate items from your credit report.",
+    "FCRA & FDCPA-compliant credit dispute letter templates for removing inaccurate items from your credit report.",
   url: "https://credit-800.com/sample-letters",
   numberOfItems: letterTypes.length,
   itemListElement: letterTypes.map((letter, index) => ({
@@ -474,7 +474,7 @@ export default function SampleLettersPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-14 text-center">
           <h1 className="text-3xl sm:text-5xl font-bold text-white mb-3">Sample Dispute Letters</h1>
           <p className="text-lime-100 max-w-2xl mx-auto text-sm sm:text-base">
-            AI-generated, FCRA & FDCPA-compliant letters citing specific legal sections — tailored to your situation, not generic templates.
+            FCRA & FDCPA-compliant letters citing specific legal sections — tailored to your situation, not generic templates.
           </p>
         </div>
       </div>
@@ -484,7 +484,7 @@ export default function SampleLettersPage() {
         {/* Letter types */}
         <div className="mb-14">
           <h2 className="text-xl font-bold text-slate-900 mb-2">Every Letter Type, Included</h2>
-          <p className="text-slate-500 text-sm mb-6">All letters are AI-generated and pre-filled with your specific account details from your credit report.</p>
+          <p className="text-slate-500 text-sm mb-6">All letters are personalized and pre-filled with your specific account details from your credit report.</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {letterTypes.map((l) => (
               <div key={l.title} className="border border-slate-200 rounded-xl p-4 hover:border-slate-300 hover:shadow-sm transition">
@@ -502,7 +502,7 @@ export default function SampleLettersPage() {
           <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          Personal details are redacted in these samples. Our AI fills them in automatically from your uploaded credit report.
+          Personal details are redacted in these samples. Credit 800 fills them in automatically from your uploaded credit report.
         </div>
 
         {/* Letter 1 — Credit Bureau */}
@@ -607,7 +607,7 @@ export default function SampleLettersPage() {
         <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-bold text-white mb-2">Get Your Personalized Letters</h2>
           <p className="text-lime-100 text-sm mb-6 max-w-lg mx-auto">
-            Your letters include specific account numbers, exact legal citations, and bureau/collector mailing addresses — AI-generated and ready to send.
+            Your letters include specific account numbers, exact legal citations, and bureau/collector mailing addresses — personalized and ready to send.
           </p>
           <Link href="/register" className="inline-block px-8 py-3 bg-white text-teal-600 hover:bg-lime-50 rounded-lg font-medium transition">
             Get Started — $5/mo

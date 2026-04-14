@@ -106,7 +106,7 @@ export function SampleLetterModal() {
                 <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Personal details redacted. Our AI fills these in automatically from your credit report.
+                Personal details redacted. Credit 800 fills these in automatically from your credit report.
               </div>
               <pre className="whitespace-pre-wrap font-mono text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-200">
                 {SAMPLE_LETTER}
@@ -115,7 +115,7 @@ export function SampleLetterModal() {
 
             <div className="p-6 border-t border-slate-200 shrink-0 bg-gradient-to-r from-lime-50 to-teal-50 rounded-b-2xl">
               <p className="text-sm text-slate-600 mb-3">
-                Your personalized letters include specific account numbers, exact FCRA citations, and bureau mailing addresses — AI-generated and ready to send.
+                Your personalized letters include specific account numbers, exact FCRA citations, and bureau mailing addresses — ready to send.
               </p>
               <Link
                 href="/register"

@@ -6,13 +6,13 @@ import { useSubscription } from "@/lib/use-subscription";
 
 const features = [
   "Unlimited dispute letters",
-  "AI score simulator",
+  "Score simulator",
   "CFPB complaint generator",
   "Document vault",
   "Debt payoff optimizer",
   "Utilization tracker",
   "Bureau comparison",
-  "Priority AI analysis",
+  "Priority analysis",
   "Mail disputes via USPS ($2/letter)",
 ];
 

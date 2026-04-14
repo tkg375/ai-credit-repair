@@ -25,11 +25,11 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-semibold mb-3">2. Description of Service</h2>
             <p className="text-slate-600 leading-relaxed mb-3">
-              Credit 800 is an AI-powered financial platform offering two tiers:
+              Credit 800 is an automated financial platform offering two tiers:
             </p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4 mb-3">
               <li>
-                <strong>Self Service (Free):</strong> A DIY credit repair toolkit including AI-powered credit report analysis,
+                <strong>Self Service (Free):</strong> A DIY credit repair toolkit including automated credit report analysis,
                 FCRA-compliant dispute letter generation, credit score tracking, debt payoff planning, budget management,
                 credit score simulator, CFPB complaint generator, document vault, identity monitoring, credit builder
                 product recommendations, and optional physical USPS mailing of dispute letters ($2/letter).
@@ -114,7 +114,7 @@ export default function TermsOfService() {
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Provide accurate information when creating your account and using the Service</li>
               <li>Only upload credit reports that belong to you</li>
-              <li>Review all AI-generated content before use (Self Service plan)</li>
+              <li>Review all generated content before use (Self Service plan)</li>
               <li>Not rely solely on the Service for credit-related decisions</li>
               <li>Comply with all applicable laws when submitting disputes</li>
               <li>Not use the Service to file false or fraudulent disputes</li>
@@ -123,14 +123,14 @@ export default function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">8. AI-Generated Content Disclaimer</h2>
+            <h2 className="text-xl font-semibold mb-3">8. Automated Content Disclaimer</h2>
             <p className="text-slate-600 leading-relaxed">
-              The Service uses artificial intelligence to analyze credit reports and generate dispute letters.
-              AI-generated content may contain errors or inaccuracies and may not be appropriate for your specific
+              The Service uses automated technology to analyze credit reports and generate dispute letters.
+              Generated content may contain errors or inaccuracies and may not be appropriate for your specific
               situation. Under the Self Service plan, you should always review, verify, and customize any
-              AI-generated content before use. Under the Autopilot plan, letters are generated automatically;
+              generated content before use. Under the Autopilot plan, letters are generated automatically;
               you may review your audit trail at any time. Credit 800 is not responsible for any consequences
-              resulting from the use of AI-generated content.
+              resulting from the use of generated content.
             </p>
           </section>
 

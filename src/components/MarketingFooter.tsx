@@ -25,7 +25,7 @@ export function MarketingFooter() {
           <div className="col-span-2 lg:col-span-1">
             <Link href="/"><Logo className="h-10 w-auto mb-3" /></Link>
             <p className="text-xs text-slate-500 leading-relaxed max-w-xs">
-              AI-powered tools to dispute credit errors, manage your finances, and build toward an 800 credit score.
+              Smarter tools to dispute credit errors, manage your finances, and build toward an 800 credit score.
             </p>
             <p className="text-xs text-slate-400 mt-3">
               Not a credit repair organization. Educational tool only.
@@ -70,7 +70,7 @@ export function MarketingFooter() {
           <div>
             <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-4">Get Started</h3>
             <p className="text-xs text-slate-500 leading-relaxed mb-4">
-              Upload your credit report and get AI-generated dispute letters and a personalized action plan.
+              Upload your credit report and get personalized dispute letters and an action plan.
             </p>
             <Link
               href="/register"

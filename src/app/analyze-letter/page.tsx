@@ -305,7 +305,7 @@ export default function AnalyzeLetterPage() {
         throw new Error(`Upload failed: ${putRes.status} ${putRes.statusText}`);
       }
 
-      setProgress("Analyzing letter with AI...");
+      setProgress("Analyzing letter...");
       setAnalyzing(true);
 
       const analyzeRes = await fetch("/api/letters/analyze", {
@@ -360,7 +360,7 @@ export default function AnalyzeLetterPage() {
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold">Analyze Creditor Letter</h1>
           <p className="text-slate-500 text-sm mt-1">
-            Upload a letter from a creditor or debt collector. AI will explain your rights and draft a response.
+            Upload a letter from a creditor or debt collector. Credit 800 will explain your rights and draft a response.
           </p>
         </div>
 

@@ -125,7 +125,7 @@ export function ScoreChart({ className = "" }: { className?: string }) {
         {/* AI badge */}
         <div className="flex items-center gap-1.5 mb-3">
           <span className="w-1.5 h-1.5 bg-lime-400 rounded-full animate-pulse" />
-          <span className="text-[10px] text-slate-400 font-medium">AI actively monitoring</span>
+          <span className="text-[10px] text-slate-400 font-medium">Actively monitoring</span>
         </div>
 
         {/* ── Gauge SVG ── */}

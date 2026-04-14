@@ -25,7 +25,7 @@ const jsonLd = {
       url: "https://credit-800.com",
       name: "Credit 800",
       description:
-        "AI-powered credit repair: dispute letters, score analysis, and a personalized plan to reach 800.",
+        "Dispute letters, score analysis, and a personalized plan to reach an 800 credit score.",
       publisher: { "@id": "https://credit-800.com/#organization" },
       potentialAction: {
         "@type": "SearchAction",
@@ -58,14 +58,14 @@ const jsonLd = {
         worstRating: "1",
       },
       description:
-        "Credit 800 uses AI to analyze your credit report, automatically generate FCRA-compliant dispute letters, and build a personalized action plan to reach an 800 credit score.",
+        "Credit 800 analyzes your credit report, automatically generates FCRA-compliant dispute letters, and builds a personalized action plan to reach an 800 credit score.",
     },
     {
       "@type": "HowTo",
       "@id": "https://credit-800.com/#howto",
       name: "How to Repair Your Credit with Credit 800",
       description:
-        "Use AI to fix your credit, manage your finances, and get loan ready — all in one platform.",
+        "Fix your credit, manage your finances, and get loan ready — all in one platform.",
       totalTime: "PT30M",
       estimatedCost: {
         "@type": "MonetaryAmount",
@@ -76,7 +76,7 @@ const jsonLd = {
         {
           "@type": "HowToStep",
           name: "Fix Your Credit",
-          text: "Upload your credit report. Our AI finds disputable inaccuracies, generates FCRA-compliant letters citing specific legal sections, and builds a personalized action plan to raise your score.",
+          text: "Upload your credit report. Credit 800 finds disputable inaccuracies, generates FCRA-compliant letters citing specific legal sections, and builds a personalized action plan to raise your score.",
           url: "https://credit-800.com/#how-it-works",
           position: 1,
         },
@@ -177,7 +177,7 @@ export default function Home() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                title: "AI Credit Dispute Engine",
+                title: "Credit Dispute Engine",
                 description: "Upload your report and get FCRA-compliant dispute letters citing specific legal sections, tailored to each inaccuracy.",
               },
               {
@@ -246,11 +246,11 @@ export default function Home() {
               },
               {
                 title: "Legal Letter Analyzer",
-                description: "Paste any demand or collection letter and get an instant AI breakdown of claims, deadlines, your rights, and a response draft.",
+                description: "Paste any demand or collection letter and get an instant breakdown of claims, deadlines, your rights, and a response draft.",
               },
               {
                 title: "Autopilot Disputes",
-                description: "Fully automate your dispute workflow — AI runs scheduled dispute rounds and bulk-generates mailing-ready letters for you.",
+                description: "Fully automate your dispute workflow — scheduled dispute rounds run automatically and bulk-generate mailing-ready letters for you.",
               },
               {
                 title: "Bureau Report Viewer",

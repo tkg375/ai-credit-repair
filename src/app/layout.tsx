@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Credit 800 — AI-Powered Credit Repair",
+    default: "Credit 800 — Smarter Credit Repair",
     template: "%s | Credit 800",
   },
   icons: {
@@ -23,10 +23,10 @@ export const metadata: Metadata = {
     shortcut: "/icon.png",
   },
   description:
-    "Credit 800 uses AI to analyze your credit report, automatically generate FCRA-compliant dispute letters, and build a personalized action plan to reach an 800 credit score.",
+    "Credit 800 analyzes your credit report, automatically generates FCRA-compliant dispute letters, and builds a personalized action plan to reach an 800 credit score.",
   keywords: [
     "credit repair",
-    "AI credit repair",
+    "credit repair software",
     "dispute credit report",
     "improve credit score",
     "FCRA dispute letters",
@@ -65,23 +65,23 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://credit-800.com",
     siteName: "Credit 800",
-    title: "Credit 800 — AI-Powered Credit Repair",
+    title: "Credit 800 — Smarter Credit Repair",
     description:
-      "Analyze your credit report, dispute inaccuracies automatically, and get a personalized plan to reach an 800 credit score with AI.",
+      "Analyze your credit report, dispute inaccuracies automatically, and get a personalized plan to reach an 800 credit score.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Credit 800 — AI-Powered Credit Repair",
+        alt: "Credit 800 — Smarter Credit Repair",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Credit 800 — AI-Powered Credit Repair",
+    title: "Credit 800 — Smarter Credit Repair",
     description:
-      "AI-powered credit repair: dispute letters, score analysis, and a personalized plan to reach 800.",
+      "Dispute letters, score analysis, and a personalized plan to reach 800.",
     images: ["/og-image.png"],
     creator: "@credit800",
   },

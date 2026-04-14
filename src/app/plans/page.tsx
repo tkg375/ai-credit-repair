@@ -6,16 +6,16 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Pricing — Free Credit Repair Toolkit",
-  description: "Credit 800 Self Service is free. Get unlimited AI dispute letters, budget tracking, loan readiness, and more. Mail disputes via USPS for $2/letter.",
+  description: "Credit 800 Self Service is free. Get unlimited dispute letters, budget tracking, loan readiness, and more. Mail disputes via USPS for $2/letter.",
   openGraph: {
-    title: "Credit 800 Pricing — Free AI Credit Repair Toolkit",
-    description: "Credit 800 Self Service is free. Unlimited AI dispute letters, budget tracker, loan readiness, and more. Mail via USPS for $2/letter.",
+    title: "Credit 800 Pricing — Free Credit Repair Toolkit",
+    description: "Credit 800 Self Service is free. Unlimited dispute letters, budget tracker, loan readiness, and more. Mail via USPS for $2/letter.",
     url: "https://credit-800.com/plans",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Credit 800 Pricing Plans" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Credit 800 Pricing — Free AI Credit Repair Toolkit",
+    title: "Credit 800 Pricing — Free Credit Repair Toolkit",
     description: "Credit 800 Self Service is free. Mail disputes via USPS for $2/letter. No contracts.",
     images: ["/og-image.png"],
   },
@@ -56,7 +56,7 @@ const plansJsonLd = {
   "@type": "Product",
   name: "Credit 800 — Self Service Plan",
   description:
-    "AI-powered credit repair toolkit. Unlimited dispute letters, budget tracker, loan readiness calculator, debt payoff optimizer, and more.",
+    "Credit repair toolkit. Unlimited dispute letters, budget tracker, loan readiness calculator, debt payoff optimizer, and more.",
   url: "https://credit-800.com/plans",
   image: "https://credit-800.com/og-image.png",
   brand: {

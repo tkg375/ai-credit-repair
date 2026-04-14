@@ -4,11 +4,11 @@ import { MarketingFooter } from "@/components/MarketingFooter";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About Credit 800 — AI-Powered Credit Repair Platform",
+  title: "About Credit 800 — Credit Repair Platform",
   description:
-    "Credit 800 was built to give every American the same credit repair tools that financial professionals use — powered by AI, grounded in FCRA law, and designed to be affordable.",
+    "Credit 800 was built to give every American the same credit repair tools that financial professionals use — grounded in FCRA law and designed to be affordable.",
   openGraph: {
-    title: "About Credit 800 — AI-Powered Credit Repair Platform",
+    title: "About Credit 800 — Credit Repair Platform",
     description:
       "Learn the story behind Credit 800: why we built it, what makes it different, and our mission to make credit repair accessible to everyone.",
     url: "https://credit-800.com/about",
@@ -24,7 +24,7 @@ const aboutJsonLd = {
   "@type": "AboutPage",
   name: "About Credit 800",
   description:
-    "Credit 800 uses AI to analyze credit reports, generate FCRA-compliant dispute letters, and build personalized action plans to help people reach an 800 credit score.",
+    "Credit 800 analyzes credit reports, generates FCRA-compliant dispute letters, and builds personalized action plans to help people reach an 800 credit score.",
   url: "https://credit-800.com/about",
   publisher: {
     "@type": "Organization",
@@ -36,9 +36,9 @@ const aboutJsonLd = {
 
 const features = [
   {
-    title: "AI That Actually Understands Credit Law",
+    title: "Built Around Credit Law",
     description:
-      "Our AI analyzes your credit report against FCRA requirements and generates dispute letters that cite the specific legal sections relevant to each item — not boilerplate templates.",
+      "Credit 800 analyzes your credit report against FCRA requirements and generates dispute letters that cite the specific legal sections relevant to each item — not boilerplate templates.",
   },
   {
     title: "Everything in One Place",
@@ -53,7 +53,7 @@ const features = [
   {
     title: "Your Data, Your Control",
     description:
-      "We don't sell your data. We don't train AI models on your credit report information. You can export, delete, or revoke access at any time.",
+      "We don't sell your data. We don't use your credit report information to train models. You can export, delete, or revoke access at any time.",
   },
 ];
 
@@ -79,7 +79,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-14 text-center">
           <h1 className="text-3xl sm:text-5xl font-bold text-white mb-3">About Credit 800</h1>
           <p className="text-lime-100 max-w-2xl mx-auto text-sm sm:text-base">
-            We built the credit repair tools we wish existed — affordable, AI-powered, and grounded in actual law.
+            We built the credit repair tools we wish existed — affordable, automated, and grounded in actual law.
           </p>
         </div>
       </div>
@@ -97,7 +97,7 @@ export default function AboutPage() {
               For years, the only options for fixing your credit were: pay a credit repair company $100/month or more, navigate the bureaucracy alone with generic dispute letter templates, or simply hope your score improved on its own. None of these options worked well.
             </p>
             <p>
-              Credit 800 was built to change that. We use AI to do what professional credit counselors do — analyze your report, identify every disputable inaccuracy, generate legally-grounded letters citing the exact FCRA and FDCPA sections that apply to your situation, and build a personalized action plan. All at a price that makes sense for everyone, not just people who can afford $100/month in fees.
+              Credit 800 was built to change that. We do what professional credit counselors do — analyze your report, identify every disputable inaccuracy, generate legally-grounded letters citing the exact FCRA and FDCPA sections that apply to your situation, and build a personalized action plan. All at a price that makes sense for everyone, not just people who can afford $100/month in fees.
             </p>
           </div>
         </section>
@@ -167,7 +167,7 @@ export default function AboutPage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-5">The Technology</h2>
           <div className="space-y-4 text-slate-600 text-sm sm:text-base leading-relaxed">
             <p>
-              Credit 800 is built on a modern, secure tech stack. Credit report analysis and dispute letter generation is powered by leading AI models including Anthropic Claude and Google Gemini. Your data is stored securely with encryption at rest and in transit. We use Stripe for payment processing — we never see or store your full card number.
+              Credit 800 is built on a modern, secure tech stack. Credit report analysis and dispute letter generation runs on advanced automated processing technology. Your data is stored securely with encryption at rest and in transit. We use Stripe for payment processing — we never see or store your full card number.
             </p>
             <p>
               Our Autopilot feature performs monthly soft credit pulls (which do not affect your score) with your explicit written consent under FCRA § 604(a)(2). Every automated action is logged in an immutable audit trail that you can access at any time.
@@ -179,7 +179,7 @@ export default function AboutPage() {
         <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-bold text-white mb-2">Ready to Get Started?</h2>
           <p className="text-lime-100 text-sm mb-6 max-w-md mx-auto">
-            Upload your credit report, get your AI-generated dispute letters and action plan, and take control of your credit.
+            Upload your credit report, get your personalized dispute letters and action plan, and take control of your credit.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/register" className="px-8 py-3 bg-white text-teal-600 hover:bg-lime-50 rounded-lg font-medium transition">

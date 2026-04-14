@@ -8,13 +8,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Credit Education — Credit 800",
     description:
-      "Master credit repair with AI-guided education modules: dispute strategies, FCRA rights, debt payoff, and identity protection.",
+      "Master credit repair with in-depth education modules: dispute strategies, FCRA rights, debt payoff, and identity protection.",
     url: "https://credit-800.com/education",
   },
   twitter: {
     title: "Credit Education — Credit 800",
     description:
-      "Master credit repair with AI-guided education modules: dispute strategies, FCRA rights, debt payoff, and identity protection.",
+      "Master credit repair with in-depth education modules: dispute strategies, FCRA rights, debt payoff, and identity protection.",
   },
 };
 

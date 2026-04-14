@@ -125,7 +125,7 @@ export default function UploadPage() {
 
       const { reportId } = await createRes.json();
 
-      setProgress("Starting AI analysis...");
+      setProgress("Starting analysis...");
       setAnalyzing(true);
 
       // Trigger background Lambda analysis (returns immediately with status: "processing")
@@ -147,7 +147,7 @@ export default function UploadPage() {
       }
 
       // Poll for completion — Lambda runs in background, updates Firestore when done
-      setProgress("Analyzing credit report with AI... (this may take a few minutes for large reports)");
+      setProgress("Analyzing credit report... (this may take a few minutes for large reports)");
 
       const POLL_INTERVAL = 4000; // 4 seconds
       const MAX_WAIT = 10 * 60 * 1000; // 10 minutes
@@ -173,7 +173,7 @@ export default function UploadPage() {
             } else {
               // Still ANALYZING — update progress message with elapsed time
               const elapsed = Math.round((Date.now() - startTime) / 1000);
-              setProgress(`Analyzing credit report with AI... (${elapsed}s elapsed)`);
+              setProgress(`Analyzing credit report... (${elapsed}s elapsed)`);
               setTimeout(poll, POLL_INTERVAL);
             }
           } catch {
@@ -287,7 +287,7 @@ export default function UploadPage() {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">Upload Credit Report</h1>
         <p className="text-slate-600 mb-6 sm:mb-8 text-sm sm:text-base">
-          Upload your credit report PDF from Equifax, Experian, or TransUnion. Our AI will analyze it and identify disputable items.
+          Upload your credit report PDF from Equifax, Experian, or TransUnion. Credit 800 will analyze it and identify disputable items.
         </p>
 
         {error && (

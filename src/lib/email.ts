@@ -136,7 +136,7 @@ export async function sendProUpgradeEmail(to: string, amount: number) {
           <li>Credit score simulator</li>
           <li>Document vault</li>
           <li>Debt payoff optimizer</li>
-          <li>Priority AI analysis</li>
+          <li>Priority analysis</li>
           <li>Score tracking &amp; charts</li>
           <li>Card recommendations</li>
         </ul>
@@ -220,7 +220,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
       <p>You're all set! Here's how to get started:</p>
       <ol style="color:#334155;line-height:1.8">
         <li><strong>Upload your credit report</strong> — PDF from Equifax, Experian, or TransUnion</li>
-        <li><strong>Review AI analysis</strong> — we'll identify every disputable item</li>
+        <li><strong>Review your analysis</strong> — we'll identify every disputable item</li>
         <li><strong>Generate dispute letters</strong> — FCRA-compliant, ready to send</li>
         <li><strong>Mail via USPS</strong> — directly from the app, certified mail</li>
       </ol>
@@ -489,7 +489,7 @@ export async function sendPaymentFailedEmail(to: string, planLabel: string) {
         <p style="margin:0 0 8px;font-weight:bold;color:#b91c1c">What this means:</p>
         <ul style="margin:0;color:#7f1d1d;font-size:14px;padding-left:20px;line-height:1.8">
           <li>All dispute letter generation and mailing is paused</li>
-          <li>AI analysis and report processing is paused</li>
+          <li>Report processing is paused</li>
           <li>Your existing disputes, reports, and data are safe and untouched</li>
           <li>Everything will resume the moment your payment is updated</li>
         </ul>

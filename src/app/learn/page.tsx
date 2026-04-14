@@ -121,7 +121,7 @@ export default function LearnPage() {
         <div className="bg-gradient-to-r from-lime-500 via-teal-500 to-cyan-600 rounded-2xl p-8 text-center mt-8">
           <h2 className="text-2xl font-bold text-white mb-2">Put This Knowledge to Work</h2>
           <p className="text-lime-100 text-sm mb-6 max-w-lg mx-auto">
-            Upload your credit report and let our AI identify every disputable item, generate personalized FCRA-compliant letters, and build your action plan.
+            Upload your credit report and let Credit 800 identify every disputable item, generate personalized FCRA-compliant letters, and build your action plan.
           </p>
           <Link
             href="/register"

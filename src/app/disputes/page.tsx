@@ -1020,7 +1020,7 @@ export default function DisputesPage() {
                     </div>
                   </div>
                   <p className="mt-4 text-sm text-cyan-100">
-                    Our AI has analyzed each debt and identified the best removal strategies based on account age, debt type, and legal factors.
+                    Credit 800 has analyzed each debt and identified the best removal strategies based on account age, debt type, and legal factors.
                   </p>
                 </div>
 
@@ -1643,7 +1643,7 @@ export default function DisputesPage() {
                     <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
-                    Address found via AI search — please verify before sending
+                    Address auto-detected — please verify before sending
                   </div>
                 )}
                 {!selectedDispute.addressSource && (
@@ -1999,7 +1999,7 @@ export default function DisputesPage() {
               <button onClick={() => setParsedResult(null)} className="text-white/70 hover:text-white text-2xl leading-none">×</button>
             </div>
             <div className="p-6 space-y-3">
-              <p className="text-sm text-slate-500">AI extracted the following from the bureau letter:</p>
+              <p className="text-sm text-slate-500">Extracted the following from the bureau letter:</p>
               {parsedResult.outcome && <p className="text-sm"><strong>Outcome:</strong> {parsedResult.outcome}</p>}
               {parsedResult.creditorName && <p className="text-sm"><strong>Creditor:</strong> {parsedResult.creditorName}</p>}
               {parsedResult.bureauName && <p className="text-sm"><strong>Bureau:</strong> {parsedResult.bureauName}</p>}

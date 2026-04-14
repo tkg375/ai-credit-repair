@@ -98,7 +98,7 @@ export default function PrivacyPolicy() {
             <p className="text-slate-600 leading-relaxed mb-3">We use your information to:</p>
             <ul className="list-disc list-inside text-slate-600 space-y-2 ml-4">
               <li>Provide and maintain the Service</li>
-              <li>Analyze your credit report and identify potential disputes using AI</li>
+              <li>Analyze your credit report and identify potential disputes</li>
               <li>Generate personalized dispute letters and action plans</li>
               <li>Automatically pull your credit report and mail dispute letters on your behalf (Autopilot subscribers only, with FCRA authorization)</li>
               <li>Process subscription payments and manage billing</li>
@@ -110,12 +110,12 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-3">4. AI Processing</h2>
+            <h2 className="text-xl font-semibold mb-3">4. Automated Processing</h2>
             <p className="text-slate-600 leading-relaxed">
-              We use artificial intelligence services (including Anthropic Claude, Google Gemini, and OpenAI) to analyze your
-              credit report data, generate dispute letters, and parse bureau response documents. This processing occurs on secure servers.
-              We do not use your credit report data to train AI models. Under the Self Service plan, AI-generated content is always
-              presented for your review before any action is taken. Under the Autopilot plan, AI processing occurs automatically
+              We use automated document processing technology to analyze your credit report data, generate dispute letters,
+              and parse bureau response documents. This processing occurs on secure servers.
+              We do not use your credit report data to train models. Under the Self Service plan, generated content is always
+              presented for your review before any action is taken. Under the Autopilot plan, processing occurs automatically
               and is logged in your audit trail.
             </p>
           </section>
@@ -157,7 +157,8 @@ export default function PrivacyPolicy() {
               <li><strong>Array:</strong> For soft-pull credit bureau data access (Autopilot subscribers only, with FCRA authorization) — name, date of birth, SSN, and address are transmitted to Array solely to authenticate the credit pull request</li>
               <li><strong>PostGrid:</strong> For physical USPS mailing and mail tracking of dispute letters (name and mailing address only)</li>
               <li><strong>AWS:</strong> For cloud infrastructure, file storage, and email delivery (SES)</li>
-              <li><strong>Google Firebase / Gemini / OpenAI / Anthropic:</strong> For authentication, data storage, and AI analysis</li>
+              <li><strong>Google Firebase:</strong> For authentication and data storage</li>
+              <li><strong>Document processing services:</strong> For credit report analysis and letter generation</li>
               <li><strong>Have I Been Pwned:</strong> For identity monitoring — your email address is sent to check against known breach databases</li>
               <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
               <li><strong>Business Transfers:</strong> In connection with a merger, acquisition, or sale of assets</li>
